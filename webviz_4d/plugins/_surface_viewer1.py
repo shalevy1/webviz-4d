@@ -59,7 +59,7 @@ class SurfaceViewer1(WebvizPluginABC):
         self.selected_interval = get_selected_interval(
             self.config_file, map_name, self.dates, self.default_tag_indices
         )
-        print(self.default_tag_indices,self.dates)
+        print(self.default_tag_indices, self.dates)
 
         attributes = []
 
@@ -196,8 +196,8 @@ class SurfaceViewer1(WebvizPluginABC):
 
             for map_name in maps:
                 selected_interval = get_selected_interval(
-                self.config_file, map_name, self.dates, indices
-            )
+                    self.config_file, map_name, self.dates, indices
+                )
                 surfacepath = get_file_path(
                     self.config_file,
                     map_name,

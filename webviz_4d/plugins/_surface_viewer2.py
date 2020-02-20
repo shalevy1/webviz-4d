@@ -215,8 +215,8 @@ class SurfaceViewer2(WebvizPluginABC):
 
             for map_name in maps:
                 selected_interval = get_selected_interval(
-                self.config_file, map_name, self.dates, indices
-            )
+                    self.config_file, map_name, self.dates, indices
+                )
                 surfacepath = get_file_path(
                     self.config_file,
                     map_name,

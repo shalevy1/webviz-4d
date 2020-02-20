@@ -214,9 +214,9 @@ class SurfaceViewer3(WebvizPluginABC):
                 Output(self.ids("map1"), "layers"),
                 Output(self.ids("map2"), "layers"),
                 Output(self.ids("map3"), "layers"),
-                Output(self.ids("interval-label1"),"children"),
-                Output(self.ids("interval-label2"),"children"),
-                Output(self.ids("interval-label3"),"children"),
+                Output(self.ids("interval-label1"), "children"),
+                Output(self.ids("interval-label2"), "children"),
+                Output(self.ids("interval-label3"), "children"),
                 Output(self.ids("status-label"), "children"),
             ],
             [Input(self.ids("month-slider"), "value"),],
@@ -231,8 +231,8 @@ class SurfaceViewer3(WebvizPluginABC):
 
             for map_name in maps:
                 selected_interval = get_selected_interval(
-                self.config_file, map_name, self.dates, indices
-            )            
+                    self.config_file, map_name, self.dates, indices
+                )
                 surfacepath = get_file_path(
                     self.config_file,
                     map_name,

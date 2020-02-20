@@ -10,63 +10,63 @@ import matplotlib.pyplot as plt
 from xml.dom import minidom
 from pathlib import Path
 
-def read_clx_file(color_dir,color_name):
-    color_file = color_dir + color_name + '.clx'
+
+def read_clx_file(color_dir, color_name):
+    color_file = color_dir + color_name + ".clx"
     mydoc = minidom.parse(color_file)
-    items = mydoc.getElementsByTagName('controlPoint')
-    
+    items = mydoc.getElementsByTagName("controlPoint")
+
     points = []
     rgbs = []
-    
+
     for item in items:
-        points.append(item.attributes['index'].value)
-        red = item.attributes['red'].value
-        green = item.attributes['green'].value
-        blue = item.attributes['blue'].value
-        rgb = [red,green,blue]
+        points.append(item.attributes["index"].value)
+        red = item.attributes["red"].value
+        green = item.attributes["green"].value
+        blue = item.attributes["blue"].value
+        rgb = [red, green, blue]
         rgbs.append(rgb)
-        
+
     return points, rgbs
 
 
-def create_colormap(name,points,rgbs,mode):
+def create_colormap(name, points, rgbs, mode):
     cmap = None
     tuples = []
 
     l = len(points)
 
-    for i in range(0,l):
+    for i in range(0, l):
         rgb = rgbs[i]
-        r = int(float(rgb[0]))/255
-        g = int(float(rgb[1]))/255
-        b = int(float(rgb[2]))/255
-        t = (int(float(points[i]))/255,[r,g,b])
+        r = int(float(rgb[0])) / 255
+        g = int(float(rgb[1])) / 255
+        b = int(float(rgb[2])) / 255
+        t = (int(float(points[i])) / 255, [r, g, b])
         tuples.append(t)
 
-    cmap = mpl.colors.LinearSegmentedColormap.from_list(name, tuples, N=256,gamma=1.0)
+    cmap = mpl.colors.LinearSegmentedColormap.from_list(name, tuples, N=256, gamma=1.0)
 
     reverse = []
-    k = []   
+    k = []
 
-    for key in cmap._segmentdata:    
+    for key in cmap._segmentdata:
         k.append(key)
         channel = cmap._segmentdata[key]
         data = []
 
-        for t in channel:                    
-            data.append((1-t[0],t[2],t[1]))            
-        reverse.append(sorted(data))    
+        for t in channel:
+            data.append((1 - t[0], t[2], t[1]))
+        reverse.append(sorted(data))
 
-    LinearL = dict(zip(k,reverse))
-    cmap_r = mpl.colors.LinearSegmentedColormap(name, LinearL) 
+    LinearL = dict(zip(k, reverse))
+    cmap_r = mpl.colors.LinearSegmentedColormap(name, LinearL)
 
-    if mode == 'r':
-        #return cmap_r
-        cm.register_cmap(name,cmap_r)
+    if mode == "r":
+        # return cmap_r
+        cm.register_cmap(name, cmap_r)
 
-    cm.register_cmap(name,cmap)
-    #return cmap 
-
+    cm.register_cmap(name, cmap)
+    # return cmap
 
 
 def array_to_png(tensor, shift=True, colormap=False):
@@ -142,15 +142,15 @@ def get_colormap(colormap):
     return array_to_png(
         cm.get_cmap(colormap, 256)([np.linspace(0, 1, 256)]), colormap=True
     )
-    
+
+
 def get_new_colormap(colormap):
-    color_dir = str(Path.home()) + '/.lgcpalettes/'
-    color_name = 'spectrum'
-    
-    points, rgbs = read_clx_file(color_dir,color_name)
-    colormap = create_colormap(color_name, points, rgbs, 'r')
-    
+    color_dir = str(Path.home()) + "/.lgcpalettes/"
+    color_name = "spectrum"
+
+    points, rgbs = read_clx_file(color_dir, color_name)
+    colormap = create_colormap(color_name, points, rgbs, "r")
+
     return array_to_png(
         cm.get_cmap(color_name, 256)([np.linspace(0, 1, 256)]), colormap=True
     )
-
