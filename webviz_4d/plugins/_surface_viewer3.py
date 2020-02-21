@@ -29,6 +29,7 @@ from .._datainput._config import (
     get_colormap,
     get_slider_tags,
     get_map_info,
+    get_default_tag_indices,
     get_selected_interval,
     get_attribute,
 )
@@ -54,7 +55,8 @@ class SurfaceViewer3(WebvizPluginABC):
         self.tags, self.dates = get_slider_tags(self.config_file)
         self.maxmarks = len(self.tags)
 
-        self.default_tag_indices = [self.maxmarks - 1, self.maxmarks]
+        self.default_tag_indices = get_default_tag_indices(self.config_file)
+        
         map_name = "map1"
         self.selected_interval = get_selected_interval(
             self.config_file, map_name, self.dates, self.default_tag_indices

@@ -1,0 +1,68 @@
+field_name: Grane
+
+field_bounds: 
+    xmin: 464485.4623057752
+    ymin: 6550957.751731049
+    xmax: 479584.6002784452
+    ymax: 6570863.839832179
+    
+wells: 
+    directory: /project/grane/resmod/hstruct/2019/users/ashska/r001/r001_20200106/share/coviz/wells 
+    tvd_cutoff: 1600        
+
+map1: 
+    directory: /scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share/observations/maps
+    label: Observed 4D attribute
+    default_attribute: maxpos
+    
+map2:
+    directory: /scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share/results/maps
+    label: Simulated 4D attribute 
+    default_attribute: maxpos   
+    
+map3: 
+    directory: /scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share/results/maps
+    label: Simulated change in 
+    default_attribute: oilthickness   
+    
+map_settings:
+    default_colormap:   viridis
+maxpos:
+    colormap:   inferno_r
+    min_value:  0
+    max_value:  0.15   
+maxneg:
+    colormap:   inferno_r
+    min_value:  -0.15
+    max_value:  0    
+gasthickness:
+    colormap:   inferno_r
+    min_value:  -0.15
+    max_value:  0.15        
+oilthickness:
+    colormap:   inferno
+    min_value:  -0.15
+    max_value:  0.15  
+timeshift:
+    colormap:   seismic
+    min_value:  -0.15
+    max_value:  0.15    
+        
+date_labels:
+    PRM0:   20140915
+    PRM1:   20150515
+    PRM2:   20150915
+    PRM3:   20160515
+    PRM4:   20160915                
+    PRM5:   20170515
+    PRM6:   20170915
+    PRM7:   20180515
+    PRM8:   20180915 
+    PRM9:   20190515
+    PRM10:  20190915
+    
+default_interval: 20190915-20190515    
+    
+  
+     
+    
