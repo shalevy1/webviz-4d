@@ -29,6 +29,7 @@ from .._datainput._config import (
     get_colormap,
     get_slider_tags,
     get_map_info,
+    get_default_tag_indices,
     get_selected_interval,
     get_attribute,
 )
@@ -54,7 +55,17 @@ class SurfaceViewer3(WebvizPluginABC):
         self.tags, self.dates = get_slider_tags(self.config_file)
         self.maxmarks = len(self.tags)
 
-        self.default_tag_indices = [self.maxmarks - 1, self.maxmarks]
+        self.marks = {}
+
+        for i in range(1, self.maxmarks + 1):
+            label_dict = {
+                "label": self.tags[i],
+                "style": {"font-size": 18, "font-weight": "bold"},
+            }
+            self.marks[str(i)] = label_dict
+
+        self.default_tag_indices = get_default_tag_indices(self.config_file)
+
         map_name = "map1"
         self.selected_interval = get_selected_interval(
             self.config_file, map_name, self.dates, self.default_tag_indices
@@ -70,11 +81,11 @@ class SurfaceViewer3(WebvizPluginABC):
 
         node = "map1"
         all_attributes, all_dates, all_intervals = read_attributes(config_file, node)
-        print(all_attributes)
+        # print(all_attributes)
 
         node = "map3"
         all_attributes, all_dates, all_intervals = read_attributes(config_file, node)
-        print(all_attributes)
+        # print(all_attributes)
 
         self.wells = read_wells(self.config_file)
 
@@ -128,12 +139,15 @@ class SurfaceViewer3(WebvizPluginABC):
 
         return html.Div(
             children=[
-                html.H2("WebViz-4D " + self.field_name),
+                # html.H2("WebViz-4D " + self.field_name),
+                html.H2("WebViz-4D POC"),
                 html.Div(
                     id=self.ids("status-label"),
                     style={"textAlign": "right", "fontSize": 15, "fontWeight": "bold"},
                 ),
-                html.Label("Select 4D interval:"),
+                html.Label(
+                    "Select 4D interval:", style={"fontSize": 18, "font-weight": "bold"}
+                ),
                 html.Div(
                     [
                         dcc.RangeSlider(
@@ -144,7 +158,7 @@ class SurfaceViewer3(WebvizPluginABC):
                             max=self.maxmarks,
                             step=1,
                             value=self.default_tag_indices,
-                            marks=self.tags,
+                            marks=self.marks,
                             pushable=1,
                         )
                     ]
