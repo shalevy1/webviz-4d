@@ -46,10 +46,7 @@ def make_surface_layer(
 ):
     """Make LayeredMap surface image base layer"""
     arr = get_surface_arr(surface, unrotate=True, flip=True)
-    print(np.min(arr[0]), np.max(arr[0]))
-    print(np.min(arr[1]), np.max(arr[1]))
-    # bounds = get_field_bounds(config_file)
-    # print(bounds)
+
     bounds = [[surface.xmin, surface.ymin], [surface.xmax, surface.ymax]]
     min_val = min_val if min_val else np.min(arr[2])
     max_val = max_val if max_val else np.max(arr[2])

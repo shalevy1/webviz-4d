@@ -1,262 +1,356 @@
 #!/usr/bin/env python3
 import os
-import sys
 import glob
+import sys
+import pandas as pd
+from pandas.io.json import json_normalize
+import yaml
 import re
-import ruamel.yaml
-from ruamel import yaml
-from .._datainput._well import load_well
 import calendar
 
 
-def read_config(config_file, node, key, *args):
-    items = None
+def extract_metadata(map_file):
+    meta_data = []
+    index = map_file.find("realization")
 
-    if not os.path.isfile(config_file):
-        print("ERROR: Configuration file: " + config_file + " not found")
-        return items
+    yaml_files = glob.glob(map_file[:index] + "/**/.*.yaml", recursive=True)
 
-    with open(config_file, "r") as f:
-        common_config = yaml.load(f, Loader=ruamel.yaml.RoundTripLoader)
+    for yaml_file in yaml_files:
+        with open(yaml_file, "r") as stream:
+            data = yaml.safe_load(stream)
+            meta_data.append(data)
 
-    if not key == "*":
-        try:
-            items = common_config[node][key]
-        except:
-            print("WARNING: node or key not found: " + node + " " + key)
+    df = json_normalize(meta_data)
+    df["yaml_file"] = yaml_files
+
+    # df.to_csv('index.csv')
+    # df = pd.read_csv("index.csv")
+
+    new_df = df[
+        [
+            "fmu_id.case",
+            "fmu_id.revision_sub",
+            "fmu_id.revision_main",
+            "fmu_id.iteration",
+            "fmu_id.realization",
+            "fmu_id.user",
+            "data.name",
+            "data.unit",
+            "data.content",
+            "data.domain",
+            "data.subdomain",
+            "data.time.t1",
+            "data.time.t2",
+            "visual_settings.display_name",
+            "visual_settings.subtitle",
+            "visual_settings.colors.colormap",
+            "visual_settings.colors.display_min",
+            "visual_settings.colors.display_max",
+            "yaml_file",
+        ]
+    ].copy()
+
+    df_timelapse = new_df[new_df["data.time.t2"].notnull()]
+
+    time1 = df_timelapse["data.time.t1"].unique()
+    time2 = df_timelapse["data.time.t2"].unique()
+
+    times = list(time1)
+    times.extend(time2)
+
+    list_set = set(times)
+    unique_list = list(list_set)
+    times = sorted(unique_list)
+
+    directory = os.path.dirname(map_file)
+    name = os.path.basename(map_file)
+    yaml_file = directory + "/." + name + ".yaml"
+
+    return df_timelapse, times
+
+
+def find_number(surfacepath, txt):
+    filename = str(surfacepath)
+    number = None
+    index = str(filename).find(txt)
+
+    if index > 0:
+        i = index + len(txt) + 1
+        j = filename[i:].find("/")
+        number = filename[i : i + j]
+
+    return number
+
+
+def convert_date(date):
+    if len(date) == 8:
+        return date[0:4] + "-" + date[4:6] + "-" + date[6:8]
+
+    if "-" in date:
+        return date[0:4] + date[5:7] + date[8:10]
+
+
+def get_difference_mode(surfacepath, delimiter):
+    (
+        directory,
+        realization,
+        iteration,
+        map_type,
+        name,
+        attribute,
+        dates,
+    ) = decode_filename(surfacepath, delimiter)
+
+    if dates[0] > dates[1]:
+        difference_mode = "reverse"
     else:
-        try:
-            items = common_config[node]
-        except:
-            print("WARNING: node not found: " + node)
+        difference_mode = "normal"
 
-    return items
+    return difference_mode
 
 
-def get_field_name(config_file):
-    node = "field"
-    key = "name"
-    try:
-        name = read_config(config_file, node, key)
-    except:
-        name = ""
-
-    return name
-
-
-def read_date_labels(config_file):
-    node = "date_labels"
-    labels = read_config(config_file, node, "*")
-    labels_dict = {}
-
-    for label in labels:
-        date = read_config(config_file, node, label)
-        labels_dict[str(date)] = label
-
-    return labels_dict
-
-
-def get_filenames(config_file, node):
-    key = "directory"
-
-    directory = read_config(config_file, node, key)
-
-    return glob.glob(os.path.join(directory, "*.gri"))
-
-
-def decode_filename(surfacepath):
-    attribute_name = None
-    dates = []
-    interval = None
-
+def decode_filename(file_path, delimiter):
+    surfacepath = str(file_path)
     ind = []
+    number = None
+    directory = None
+    map_type = None
+    iteration = None
+    realization = None
+    name = None
+    attribute = None
+    dates = [None, None]
 
-    for m in re.finditer("--", surfacepath):
+    directory = os.path.dirname(surfacepath)
+
+    if "observations" in str(surfacepath):
+        map_type = "observations"
+
+    if "results" in str(surfacepath):
+        map_type = "results"
+
+        number = find_number(surfacepath, "realization")
+
+        if number:
+            realization = "realization-" + number
+            number = None
+
+            if realization:
+                number = find_number(surfacepath, "iter")
+
+                if number:
+                    iteration = "iter-" + number
+
+    for m in re.finditer(delimiter, str(surfacepath)):
         ind.append(m.start())
 
-    # print('decode_filename',surfacepath,ind)
+    k = str(surfacepath).rfind("/")
 
-    if len(ind) == 2 and len(surfacepath) > ind[1] + 19:
-        attribute_name = surfacepath[ind[0] + 2 : ind[1]]
-        dates.append(surfacepath[ind[1] + 2 : ind[1] + 10])
-        dates.append(surfacepath[ind[1] + 11 : ind[1] + 19])
-        interval = surfacepath[ind[1] + 2 : ind[1] + 19]
-    elif len(ind) == 3 and surfacepath[ind[1] + 11 : ind[1] + 12] in "123":
-        # elif len(ind) == 3:
-        # print(surfacepath, ind)
-        # print(surfacepath[ind[1]+11:ind[1]+12])
-        attribute_name = surfacepath[ind[0] + 2 : ind[1]]
-        dates.append(surfacepath[ind[1] + 2 : ind[1] + 10])
-        dates.append(surfacepath[ind[1] + 11 : ind[2]])
-        interval = surfacepath[ind[1] + 2 : ind[2]]
+    if len(ind) > 1:
+        name = str(surfacepath)[k + 1 : ind[0]]
+        attribute = str(surfacepath)[ind[0] + 2 : ind[1]]
+        # print(surfacepath,name,attribute)
 
-    # print(interval)
-    return attribute_name, dates, interval
+        if len(ind) == 2 and len(str(surfacepath)) > ind[1] + 19:
+            date = str(surfacepath)[ind[1] + 2 : ind[1] + 10]
+            dates[0] = convert_date(date)
+
+            date = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
+            dates[1] = convert_date(date)
+
+    # print('decode ', realization, iteration, map_type, name, attribute, dates)
+    return directory, realization, iteration, map_type, name, attribute, dates
 
 
-def read_attributes(config_file, node):
-    key = "directory"
-
-    cwd = os.getcwd()
-    print(cwd)
-    directory = read_config(config_file, node, key)
-    files = glob.glob(os.path.join(directory, "*.gri"))
-    print(directory,files)
+def get_metadata(file_path, delimiter):
+    surfacepath = str(file_path)
+    realizations = []
+    iterations = []
+    map_types = []
+    names = []
+    attributes = []
+    times1 = []
+    times2 = []
+    filenames = []
+    headers = [
+        "fmu_id.realization",
+        "fmu_id.iteration",
+        "map_type",
+        "data.name",
+        "data.content",
+        "data.time.t1",
+        "data.time.t2",
+        "filename",
+    ]
 
     all_dates = []
-    intervals = []
-    attributes = []
 
-    for file_name in files:
-        attribute_name, dates, interval = decode_filename(file_name)
+    index = surfacepath.find("realization")
+    directory = os.path.join(surfacepath[:index])
 
-        if attribute_name and attribute_name not in attributes:
-            attributes.append(attribute_name)
+    files = glob.glob(directory + "/**/*.gri", recursive=True)
 
-        for date in dates:
-            if date and date not in all_dates:
-                all_dates.append(date)
+    for filename in files:
+        (
+            directory,
+            realization,
+            iteration,
+            map_type,
+            name,
+            attribute,
+            dates,
+        ) = decode_filename(filename, delimiter)
 
-        if interval and interval not in intervals:
-            intervals.append(interval)
+        if dates[0] and dates[1]:
+            all_dates.append(dates[0])
+            all_dates.append(dates[1])
 
-    print("read_attributes", sorted(intervals))
+            realizations.append(realization)
+            iterations.append(iteration)
+            map_types.append(map_type)
+            names.append(name)
+            attributes.append(attribute)
+            times1.append(dates[0])
+            times2.append(dates[1])
+            filenames.append(filename)
 
-    return sorted(attributes), sorted(all_dates), sorted(intervals, reverse=True)
-
-
-def get_directory(config_file, node):
-    key = "directory"
-    directory = read_config(config_file, node, key)
-
-    return directory
-
-
-def get_intervals(config_file, node):
-    attributes, dates, intervals = read_attributes(config_file, node)
-
-    return intervals
-
-
-def get_file_path(config_file, map_id, attribute, interval):
-    start_txt = read_config(config_file, "map1", "default_prefix")
-    end_txt = read_config(config_file, "map1", "default_postfix")
-
-    if end_txt:
-        end_txt = "--" + end_txt
-    else:
-        end_txt = ""
-
-    print("get_file_path", start_txt, end_txt)
-    ext = ".gri"
-
-    return os.path.join(
-        get_directory(config_file, map_id),
-        start_txt + "--" + attribute + "--" + interval + end_txt + ext,
+    zipped_list = list(
+        zip(
+            realizations,
+            iterations,
+            map_types,
+            names,
+            attributes,
+            times1,
+            times2,
+            filenames,
+        )
     )
 
+    df = pd.DataFrame(zipped_list, columns=headers)
+    df.fillna(value=pd.np.nan, inplace=True)
 
-def read_wells(config_file):
-    node = "wells"
-    key = "directory"
-
-    wells_directory = read_config(config_file, node, key)
-    well_files = glob.glob(os.path.join(wells_directory, "*.w"))
-
-    wells = []
-
-    for well_file in well_files:
-        well = load_well(well_file)
-        wells.append(well)
-
-    return wells
+    list_set = set(all_dates)
+    unique_list = list(list_set)
+    unique_dates = sorted(unique_list)
+    return df, unique_dates
 
 
-def get_plot_label(config_file, interval):
-    labels_dict = read_date_labels(config_file)
+def unique_values(list_values):
+    clean_list = [value for value in list_values if str(value) != "nan"]
+    list_set = set(clean_list)
+    unique_list = list(list_set)
 
-    dates = interval.split("_")
-    labels = []
-
-    for date in dates:
-        if str(date) in labels_dict:
-            label = labels_dict[date]
-        else:
-            label = date[:4]
-
-        labels.append(label)
-
-    label = labels[0] + " - " + labels[1]
-
-    return label
+    return sorted(unique_list)
 
 
-def get_field_bounds(config_file):
-    node = "field_bounds"
-    keys = ["xmin", "xmax", "ymin", "ymax"]
-
-    coordinates = []
-
-    for key in keys:
-        coordinates.append(read_config(config_file, node, key))
-
-    return [[coordinates[0], coordinates[2]], [coordinates[1], coordinates[3]]]
+def get_col_values(df, col_name):
+    return unique_values(df[col_name].values)
 
 
-def get_colormap(config_file, surfacepath):
-    colormap = read_config(config_file, "map_settings", "default_colormap")
-    minval = None
-    maxval = None
+def compose_filename(
+    directory, realization, iteration, map_type, name, attribute, dates, delimiter
+):
+    surfacepath = None
 
-    attribute, dates, interval = decode_filename(surfacepath)
+    converted_dates = convert_date(dates[0]) + "_" + convert_date(dates[1])
+    filename = name + delimiter + attribute + delimiter + converted_dates + ".gri"
+
+    if map_type == "results":
+        index = directory.find("realization")
+        filename = os.path.join(
+            directory[:index],
+            realization,
+            iteration,
+            "share",
+            map_type,
+            "maps",
+            filename,
+        )
+    elif map_type == "observations":
+        index = directory.find("share")
+        filename = os.path.join(directory[:index], "share", map_type, "maps", filename)
+
+    return os.path.join(directory, filename)
+
+
+def get_selected_metadata(df, surfacepath):
+    metadata = None
 
     try:
-        colormap = read_config(config_file, attribute, "colormap")
-        minval = read_config(config_file, attribute, "min_value")
-        maxval = read_config(config_file, attribute, "max_value")
-
+        metadata = df[df["filename"] == surfacepath]
     except:
-        colormap = read_config(config_file, "map_settings", "default_colormap")
-        minval = None
-        maxval = None
+        yaml_file = None
+        metadata = None
 
-    return colormap, minval, maxval
+    return metadata
 
 
-def get_slider_tags(config_file):
-    attributes, dates, intervals = read_attributes(config_file, "map1")
+def get_surfacepath(metadata):
+    surfacepath = None
 
+    return metadata
+
+
+def get_slider_tags(dates):
     tags = {}
     i = 1
     for date in dates:
         year = date[:4]
-        month_ind = date[4:6].replace("0", "")
+        month_ind = date[5:7].replace("0", "")
         # print(date,year,month_ind)
         month = calendar.month_abbr[int(month_ind)]
         tags[i] = month + "-" + year
         i = i + 1
 
-    return tags, dates
+    return tags
 
 
-def get_map_info(config_file, map_id):
-    map_dir = read_config(config_file, map_id, "directory")
-    map_label = read_config(config_file, map_id, "label")
-    attribute = read_config(config_file, map_id, "default_attribute")
+def get_default_tag_indices(all_dates, surfacepath, delimiter):
+    (
+        directory,
+        realization,
+        iteration,
+        map_type,
+        name,
+        attribute,
+        dates,
+    ) = decode_filename(surfacepath, delimiter)
 
-    return map_dir, map_label, attribute
-
-
-def get_attribute(config_file, map_id):
-    return read_config(config_file, map_id, "default_attribute")
-
-
-def get_selected_interval(config_file, map_id, dates, indices):
-    print(dates,indices)
-    difference = read_config(config_file, map_id, "difference")
-
-    if not difference:
+    if dates[0] > dates[1]:
         difference = "reverse"
+    else:
+        difference = "normal"
+
+    time1 = dates[0]
+    time2 = dates[1]
+
+    ind = [None, None]
+
+    i = 0
+
+    for date in all_dates:
+        if date == time1 and difference == "reverse":
+            ind[1] = i + 1
+        elif date == time1 and difference == "normal":
+            ind[0] = i + 1
+
+        if date == time2 and difference == "reverse":
+            ind[0] = i + 1
+        elif date == time2 and difference == "normal":
+            ind[1] = i + 1
+
+        i = i + 1
+
+    return ind
+
+
+def get_selected_interval(dates, indices):
+
+    if indices[0] > indices[1]:
+        difference = "reverse"
+    else:
+        difference = "normal"
 
     if difference == "reverse":
         start_date = dates[indices[1] - 1]
@@ -266,3 +360,171 @@ def get_selected_interval(config_file, map_id, dates, indices):
         end_date = dates[indices[1] - 1]
 
     return start_date + "_" + end_date
+
+
+def get_map_info(surfacepath, delimiter):
+    # print('get_map_info ',surfacepath)
+    (
+        directory,
+        realization,
+        iteration,
+        map_type,
+        name,
+        attribute,
+        dates,
+    ) = decode_filename(str(surfacepath), delimiter)
+    # print(realization, iteration, map_type, name, attribute, dates)
+    map_dir = directory
+
+    if map_type == "observations":
+        map_label = "Observed 4D attribute"
+    else:
+        map_label = "Simulated 4D attribute"
+
+    return map_dir, map_label, attribute
+
+
+def get_plot_label(configuration, interval, difference_mode):
+    labels_dict = configuration["date_labels"]
+
+    dates = interval.split("_")
+    labels = []
+
+    for date in dates:
+        try:
+            date = convert_date(date)
+            label = labels_dict[int(date)]
+        except:
+            label = date[:4]
+
+        labels.append(label)
+
+    if difference_mode == "normal":
+        label = labels[0] + " - " + labels[1]
+    else:
+        label = labels[1] + " - " + labels[0]
+
+    return label
+
+
+def read_config(config_file):
+
+    config_dict = {}
+
+    with open(config_file, "r") as stream:
+        config_dict = yaml.safe_load(stream)
+
+    print(config_dict)
+    return config_dict
+
+
+def get_colormap(configuration, attribute):
+    colormap = None
+    minval = None
+    maxval = None
+
+    try:
+        attribute_dict = configuration[attribute]
+        print("attribute_dict", attribute_dict)
+        colormap = attribute_dict["colormap"]
+        minval = attribute_dict["min_value"]
+        minval = attribute_dict["max_value"]
+    except:
+        try:
+            map_settings = configuration("map_settings")
+            colormap = map_settings("default_colormap")
+        except:
+            print("No default colormaps found for ", attribute)
+
+    return colormap, minval, maxval
+
+
+def main():
+    map_file = "/scratch/johan_sverdrup2/jsorb/2020a_b006p2p0_yaml/realization-0/pred/share/maps/recoverables/total--average_pressure--20190101_20250101.gri"
+    df = extract_metadata(map_file)
+    print(df)
+
+    yaml_file = "/private/ashska/development/webviz-4d/fields/grane_mvp_config.yaml"
+    data = read_date_labels(yaml_file)
+    print(data)
+
+    delimiter = "--"
+    file_name = "/private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-0/iter-0/share/results/maps/topupperreek--amplitude_max--20030101_20000101.gri"
+    (
+        directory,
+        realization,
+        iteration,
+        map_type,
+        name,
+        attribute,
+        dates,
+    ) = decode_filename(file_name, delimiter)
+    print(file_name)
+    print(directory, realization, iteration, map_type, name, attribute, dates)
+
+    reek_df, reek_dates = get_metadata(file_name, delimiter)
+    print(reek_dates)
+    print(reek_df)
+    print("Realizations: ", get_col_values(reek_df, "fmu_id.realization"))
+    print(reek_df[reek_df["filename"] == file_name])
+
+    print(
+        "Default indices: ", get_default_tag_indices(reek_dates, file_name, delimiter)
+    )
+    default_tag_indices = get_default_tag_indices(reek_dates, file_name, delimiter)
+    print("Selected interval: ", get_selected_interval(reek_dates, default_tag_indices))
+
+    print("")
+
+    file_name = "/scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share/results/maps/all--maxpos--20190915_20190515.gri"
+    (
+        directory,
+        realization,
+        iteration,
+        map_type,
+        name,
+        attribute,
+        dates,
+    ) = decode_filename(file_name, delimiter)
+
+    grane_df, grane_dates = get_metadata(file_name, delimiter)
+    print(file_name)
+    print(grane_dates)
+    print(grane_df)
+    print(grane_df[grane_df["filename"] == file_name])
+
+    print(
+        "Default indices: ", get_default_tag_indices(grane_dates, file_name, delimiter)
+    )
+    print("")
+
+    file_name = compose_filename(
+        directory,
+        realization,
+        iteration,
+        map_type,
+        name,
+        attribute,
+        [grane_dates[-1], grane_dates[-2]],
+        delimiter,
+    )
+    print(file_name, os.path.isfile(file_name))
+    print("")
+
+    file_name = "/scratch/johan_sverdrup2/jsorb/2020a_b006p2p0_yaml/realization-0/pred/share/maps/recoverables/total--average_pressure--20190101_20250101.gri"
+    directory = os.path.dirname(file_name)
+    name = os.path.basename(file_name)
+    yaml_file = directory + "/." + name + ".yaml"
+    print(file_name)
+    print(yaml_file)
+
+    js_df, js_dates = extract_metadata(file_name)
+    print(type(js_df))
+    print(js_dates)
+    print(js_df)
+
+    print(js_df[js_df["yaml_file"] == yaml_file])
+
+
+if __name__ == "__main__":
+    main()

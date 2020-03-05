@@ -47,9 +47,9 @@ def get_field_name(config_file):
 def read_date_labels(config_file):
     node = "date_labels"
     labels_dict = {}
-    
+
     labels = read_config(config_file, node, "*")
-    
+
     if labels:
         for label in labels:
             date = read_config(config_file, node, label)
@@ -119,7 +119,7 @@ def read_attributes(config_file, node):
         if interval and interval not in intervals:
             intervals.append(interval)
 
-    print("read_attributes", sorted(intervals))
+    # print("read_attributes", sorted(intervals))
 
     return sorted(attributes), sorted(all_dates), sorted(intervals, reverse=True)
 
@@ -146,7 +146,7 @@ def get_file_path(config_file, map_id, attribute, interval):
     else:
         end_txt = ""
 
-    print("get_file_path", start_txt, end_txt)
+    # print("get_file_path", start_txt, end_txt)
     ext = ".gri"
 
     return os.path.join(
@@ -251,7 +251,7 @@ def get_attribute(config_file, map_id):
 
 
 def get_selected_interval(config_file, map_id, dates, indices):
-    print(dates,indices)
+    # print(dates, indices)
     difference = read_config(config_file, map_id, "difference")
 
     if not difference:
@@ -265,50 +265,44 @@ def get_selected_interval(config_file, map_id, dates, indices):
         end_date = dates[indices[1] - 1]
 
     return start_date + "_" + end_date
-    
-    
+
+
 def get_default_tag_indices(config_file):
     attributes, dates, intervals = read_attributes(config_file, "map1")
     difference = read_config(config_file, "map1", "difference")
-    
+
     if not difference:
         difference = "reverse"
-    
+
     time1 = read_config(config_file, "defaults", "time1")
     time2 = read_config(config_file, "defaults", "time2")
-    interval = str(time1) + '-' + str(time2)
-    print(interval)
-    
-    ind = [None,None]
-    
-    if interval:       
+    print(time1, time2)
+
+    ind = [None, None]
+
+    if time1 and time2:
+        interval = str(time1) + "-" + str(time2)
+        # print(interval)
         first_date = interval[:8]
         second_date = interval[9:]
-        
-        print('Default interval: ',first_date,second_date) 
-        
+
+        # print("Default interval: ", first_date, second_date)
+
         i = 0
-        
+
         for date in dates:
             if date == first_date and difference == "reverse":
                 ind[1] = i + 1
-            elif date == first_date and difference == "normal":   
+            elif date == first_date and difference == "normal":
                 ind[0] = i + 1
-                
+
             if date == second_date and difference == "reverse":
                 ind[0] = i + 1
-            elif date == second_date and difference == "normal":   
-                ind[1] = i + 1   
-                
-            i = i + 1  
-    else:        
-         ind = [len(dates), len(dates) + 1] 
-    
-    print(ind)        
+            elif date == second_date and difference == "normal":
+                ind[1] = i + 1
+
+            i = i + 1
+    else:
+        ind = [len(dates) - 1, len(dates)]
+
     return ind
-              
-    
-    
-    
-    
-    

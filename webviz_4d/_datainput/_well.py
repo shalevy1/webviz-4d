@@ -1,10 +1,25 @@
 import xtgeo
+import glob
+import os
+
 from webviz_config.common_cache import CACHE
 
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 def load_well(well_path):
     return xtgeo.Well(well_path)
+
+
+def read_wells(directory):
+    well_files = glob.glob(os.path.join(directory, "*.w"))
+
+    wells = []
+
+    for well_file in well_files:
+        well = load_well(well_file)
+        wells.append(well)
+
+    return wells
 
 
 def make_well_layer(well, name="well", zmin=0):
