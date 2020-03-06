@@ -387,12 +387,11 @@ def get_map_info(surfacepath, delimiter):
 def get_plot_label(configuration, interval, difference_mode):    
     labels = []
 
-    labels_dict = configuration["date_labels"]
     dates = interval.split("_")
 
     for date in dates:
-        try:
-            date = convert_date(date)
+        date = convert_date(date)
+        try:            
             label = labels_dict[int(date)]
         except:
             label = date[:4]
