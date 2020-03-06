@@ -49,6 +49,7 @@ average_swat:
     colormap:   seismic_r      
     
 defaults: 
-    interval:   20030101-20000101        
+    time1:  20030101
+    time2:  20000101        
         
    

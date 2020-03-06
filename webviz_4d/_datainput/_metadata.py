@@ -384,11 +384,11 @@ def get_map_info(surfacepath, delimiter):
     return map_dir, map_label, attribute
 
 
-def get_plot_label(configuration, interval, difference_mode):
-    labels_dict = configuration["date_labels"]
-
-    dates = interval.split("_")
+def get_plot_label(configuration, interval, difference_mode):    
     labels = []
+
+    labels_dict = configuration["date_labels"]
+    dates = interval.split("_")
 
     for date in dates:
         try:

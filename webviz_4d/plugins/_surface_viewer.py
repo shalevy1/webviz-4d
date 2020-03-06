@@ -197,16 +197,6 @@ class SurfaceViewer(WebvizPluginABC):
                     style=self.set_grid_layout(" 1fr 1fr 1fr"),
                     children=html.Label(
                         children=[
-                            html.Label("Zone:", style={"font-weight": "bold"}),
-                            dcc.Dropdown(
-                                id=self.ids("zones"),
-                                options=[
-                                    {"label": name, "value": name}
-                                    for name in self.names
-                                ],
-                                value=self.names[0],
-                                clearable=False,
-                            ),
                             html.Label("Realization:", style={"font-weight": "bold"}),
                             dcc.Dropdown(
                                 id=self.ids("realizations"),
@@ -225,6 +215,16 @@ class SurfaceViewer(WebvizPluginABC):
                                     for iteration in self.iterations
                                 ],
                                 value=self.iterations[0],
+                                clearable=False,
+                            ),
+                            html.Label("Zone:", style={"font-weight": "bold"}),
+                            dcc.Dropdown(
+                                id=self.ids("zones"),
+                                options=[
+                                    {"label": name, "value": name}
+                                    for name in self.names
+                                ],
+                                value=self.names[0],
                                 clearable=False,
                             ),
                         ]

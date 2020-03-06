@@ -15,6 +15,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     entry_points={
         "webviz_config_plugins": [
+            "SurfaceViewer = webviz_4d.plugins:SurfaceViewer",
             "SurfaceViewer1 = webviz_4d.plugins:SurfaceViewer1",
             "SurfaceViewer2 = webviz_4d.plugins:SurfaceViewer2",
             "SurfaceViewer3 = webviz_4d.plugins:SurfaceViewer3",
