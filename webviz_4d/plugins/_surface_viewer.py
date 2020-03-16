@@ -38,6 +38,7 @@ from .._datainput._metadata import (
     convert_date,
     get_difference_mode,
     read_config,
+    check_yaml_file,
 )
 
 
@@ -77,13 +78,21 @@ class SurfaceViewer(WebvizPluginABC):
 
         # print(self.well_dir)
 
+        yaml_status = check_yaml_file(eval("map1"))
+
         n_maps = 3
 
         for i in range(1, n_maps + 1):
             map_file = "map" + str(i)
             file_path = str(eval(map_file))
             self.map_dict[map_file] = file_path
-            df, self.dates = get_metadata(file_path, self.delimiter)
+
+            if yaml_status:
+                df, self.dates = extract_metadata(file_path)
+                print(self.dates)
+            else:
+                df, self.dates = get_metadata(file_path, self.delimiter)
+
             self.dataframes.append(df)
 
         self.tags = get_slider_tags(self.dates)
@@ -122,7 +131,10 @@ class SurfaceViewer(WebvizPluginABC):
 
         self.wells = read_wells(self.well_dir)
 
-        self.configuration = read_config(str(self.config_file))
+        if self.config_file:
+            self.configuration = read_config(str(self.config_file))
+        else:
+            self.configuration = None
 
         self.all_wells_layer = make_multiple_well_layer(
             self.wells, name="All wells", zmin=0

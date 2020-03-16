@@ -19,6 +19,7 @@ setup(
             "SurfaceViewer1 = webviz_4d.plugins:SurfaceViewer1",
             "SurfaceViewer2 = webviz_4d.plugins:SurfaceViewer2",
             "SurfaceViewer3 = webviz_4d.plugins:SurfaceViewer3",
+            "SurfaceViewer4D = webviz_4d.plugins:SurfaceViewer4D",
         ]
     },
     install_requires=[

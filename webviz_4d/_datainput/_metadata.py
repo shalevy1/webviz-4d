@@ -9,6 +9,49 @@ import re
 import calendar
 
 
+def get_map_defaults(configuration):
+    map_defaults = []
+    
+    defaults = {
+        "attribute": "maxpos",
+        "name": "all",
+        "interval": "20190915-20190515",
+        "map_type": "observations",
+        "ensemble": "iter-0",
+        "realization": "realization-0",
+    }
+    map_defaults.append(defaults)
+    defaults = {
+        "attribute": "maxpos",
+        "name": "all",
+        "interval": "20190915-20190515",
+        "map_type": "results",
+        "ensemble": "iter-0",
+        "realization": "realization-0",
+    }
+    map_defaults.append(defaults)
+    defaults = {
+        "attribute": "oilthickness",
+        "name": "all",
+        "interval": "20190915-20190515",
+        "map_type": "results",
+        "ensemble": "iter-0",
+        "realization": "realization-0",
+    }
+    map_defaults.append(defaults)
+    
+    return map_defaults
+
+
+def check_yaml_file(surfacepath):
+    mapfile_name = str(surfacepath)
+    
+    yaml_file = os.path.dirname(mapfile_name) + "/." + os.path.basename(mapfile_name) + ".yaml"
+    status = os.path.isfile(yaml_file)
+    
+    return status
+
+
 def extract_metadata(map_file):
     meta_data = []
     index = map_file.find("realization")
@@ -62,10 +105,6 @@ def extract_metadata(map_file):
     unique_list = list(list_set)
     times = sorted(unique_list)
 
-    directory = os.path.dirname(map_file)
-    name = os.path.basename(map_file)
-    yaml_file = directory + "/." + name + ".yaml"
-
     return df_timelapse, times
 
 
@@ -88,6 +127,22 @@ def convert_date(date):
 
     if "-" in date:
         return date[0:4] + date[5:7] + date[8:10]
+        
+        
+def get_all_intervals(df):
+    intervals = df[['data.time.t1','data.time.t2']].values
+    #print('get_all_intervals ',intervals)
+    
+    interval_list = []
+    for interval in intervals:
+        interval_list.append(interval[0] + '-' + interval[1])
+    
+    list_set = set(interval_list)
+    unique_list = list(list_set)
+    interval_list = sorted(unique_list)
+    #print(interval_list)
+
+    return interval_list 
 
 
 def get_difference_mode(surfacepath, delimiter):
@@ -162,8 +217,20 @@ def decode_filename(file_path, delimiter):
     return directory, realization, iteration, map_type, name, attribute, dates
 
 
-def get_metadata(file_path, delimiter):
-    surfacepath = str(file_path)
+def get_metadata(directory,defaults, delimiter):
+    filename = compose_filename(
+        directory,
+        defaults["realization"],
+        defaults["ensemble"],
+        defaults["map_type"],
+        defaults["name"],
+        defaults["attribute"],
+        defaults["interval"],
+        delimiter,
+    )
+    #print('filename ' ,filename)
+
+    surfacepath = str(filename)
     realizations = []
     iterations = []
     map_types = []
@@ -249,16 +316,29 @@ def get_col_values(df, col_name):
 
 
 def compose_filename(
-    directory, realization, iteration, map_type, name, attribute, dates, delimiter
+    directory, real, iteration, map_type, name, attribute, interval, delimiter
 ):
+    #print('compose_filename ',directory, real, iteration, map_type, name, attribute, interval, delimiter)
     surfacepath = None
+    
+    if type(real) == int:
+        realization = 'realization-' + str(real)
+    else:    
+        realization = real
 
-    converted_dates = convert_date(dates[0]) + "_" + convert_date(dates[1])
-    filename = name + delimiter + attribute + delimiter + converted_dates + ".gri"
-
-    if map_type == "results":
-        index = directory.find("realization")
-        filename = os.path.join(
+    #if '-' in dates[0]:
+    #    dates = convert_date(dates[0]) + "_" + convert_date(dates[1])
+        
+    interval_string = interval.replace('-','')
+    datestring = interval_string[:8] + '_' + interval_string[8:]
+    #print(directory, realization, iteration, map_type, name, attribute, datestring)    
+        
+    filename = name + delimiter + attribute + delimiter + datestring + ".gri"
+    #print(filename)
+    
+    index = directory.find("realization")
+    if map_type == "results":       
+        surfacepath = os.path.join(
             directory[:index],
             realization,
             iteration,
@@ -268,10 +348,10 @@ def compose_filename(
             filename,
         )
     elif map_type == "observations":
-        index = directory.find("share")
-        filename = os.path.join(directory[:index], "share", map_type, "maps", filename)
+        surfacepath = os.path.join(directory[:index],realization,iteration, "share", map_type, "maps", filename)
 
-    return os.path.join(directory, filename)
+    #print('surfacepath ',surfacepath)
+    return surfacepath
 
 
 def get_selected_metadata(df, surfacepath):
@@ -293,6 +373,7 @@ def get_surfacepath(metadata):
 
 
 def get_slider_tags(dates):
+    #print(dates)
     tags = {}
     i = 1
     for date in dates:
@@ -384,14 +465,15 @@ def get_map_info(surfacepath, delimiter):
     return map_dir, map_label, attribute
 
 
-def get_plot_label(configuration, interval, difference_mode):    
+def get_plot_label(configuration, interval, difference_mode):     
     labels = []
 
     dates = interval.split("_")
 
     for date in dates:
         date = convert_date(date)
-        try:            
+        try:       
+            labels_dict = configuration["date_labels"]    
             label = labels_dict[int(date)]
         except:
             label = date[:4]
@@ -413,7 +495,7 @@ def read_config(config_file):
     with open(config_file, "r") as stream:
         config_dict = yaml.safe_load(stream)
 
-    print(config_dict)
+    #print(config_dict)
     return config_dict
 
 
@@ -424,7 +506,7 @@ def get_colormap(configuration, attribute):
 
     try:
         attribute_dict = configuration[attribute]
-        print("attribute_dict", attribute_dict)
+        #print("attribute_dict", attribute_dict)
         colormap = attribute_dict["colormap"]
         minval = attribute_dict["min_value"]
         minval = attribute_dict["max_value"]
@@ -439,15 +521,19 @@ def get_colormap(configuration, attribute):
 
 
 def main():
-    map_file = "/scratch/johan_sverdrup2/jsorb/2020a_b006p2p0_yaml/realization-0/pred/share/maps/recoverables/total--average_pressure--20190101_20250101.gri"
-    df = extract_metadata(map_file)
-    print(df)
-
-    yaml_file = "/private/ashska/development/webviz-4d/fields/grane_mvp_config.yaml"
-    data = read_date_labels(yaml_file)
-    print(data)
-
     delimiter = "--"
+    file_name = "/scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share/results/maps/all--maxpos--20190915_20190515.gri"
+    config_file: "../../webviz-4d/fields/grane_mvp_config.yaml"
+    configuration = read_config(config_file)
+
+    map_file = "/scratch/johan_sverdrup2/jsorb/2020a_b006p2p0_yaml/realization-0/pred/share/maps/recoverables/total--average_pressure--20190101_20250101.gri"
+    print(check_yaml_file(map_file))
+    df ,dates = extract_metadata(map_file)
+
+    print(df)
+    print(dates)
+    df.to_csv('js.csv')
+
     file_name = "/private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-0/iter-0/share/results/maps/topupperreek--amplitude_max--20030101_20000101.gri"
     (
         directory,
