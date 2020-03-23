@@ -50,6 +50,7 @@ another_property:
         self.metadata = metadata
         self.intervals = intervals
         self.current_selections = map_defaults
+        print(self.current_selections)
         self._storage_id = f"{str(uuid4())}-surface-selector"
 
         self.set_ids()
@@ -214,7 +215,7 @@ another_property:
             ],
         )
 
-    def selector(self, wrapper_id, dropdown_id, title, btn_prev, btn_next):
+    def selector(self, wrapper_id, dropdown_id, title, default_value, btn_prev, btn_next):
         return html.Div(
             id=wrapper_id,
             style={"display": "none"},
@@ -223,7 +224,7 @@ another_property:
                 html.Div(
                     style=self.set_grid_layout("6fr 1fr"),
                     children=[
-                        dcc.Dropdown(id=dropdown_id, clearable=False),
+                        dcc.Dropdown(id=dropdown_id, value = default_value, clearable=False), 
                         self._make_buttons(btn_prev, btn_next),
                     ],
                 ),
@@ -245,6 +246,7 @@ another_property:
                             self.type_wrapper_id,
                             self.type_id,
                             "Surface type",
+                            self.current_selections["map_type"],
                             self.type_id_btn_prev,
                             self.type_id_btn_next,
                         ),
@@ -252,6 +254,7 @@ another_property:
                             self.name_wrapper_id,
                             self.name_id,
                             "Surface name",
+                            self.current_selections["name"],
                             self.name_id_btn_prev,
                             self.name_id_btn_next,
                         ),
@@ -259,6 +262,7 @@ another_property:
                             self.date_wrapper_id,
                             self.date_id,
                             "Interval",
+                            self.current_selections["interval"],
                             self.date_id_btn_prev,
                             self.date_id_btn_next,
                         ),
