@@ -19,7 +19,11 @@ from webviz_subsurface_components import LayeredMap
 
 from webviz_4d._datainput.fmu_input import get_realizations, find_surfaces
 from webviz_4d._datainput.surface import make_surface_layer, load_surface
-from webviz_4d._datainput.well import make_well_layers
+from webviz_4d._datainput.well import (
+    make_well_layers,
+    load_all_wells,
+    make_new_well_layer,
+)
 from webviz_4d._private_plugins.surface_selector import SurfaceSelector
 
 from webviz_4d._datainput._metadata import (
@@ -28,6 +32,10 @@ from webviz_4d._datainput._metadata import (
     get_col_values,
     get_all_intervals,
     get_map_defaults,
+    get_well_colors,
+    read_config,
+    sort_realizations,
+    get_plot_label,
 )
 
 
@@ -66,7 +74,7 @@ and available for instant viewing.
         attributes: list = None,
         attribute_settings: dict = None,
         wellfolder: Path = None,
-        config: Path = None,
+        configuration: Path = None,
     ):
 
         super().__init__()
@@ -83,36 +91,51 @@ and available for instant viewing.
         # print(path)
 
         self.directory = os.path.dirname(path).replace("*", "0")
+        self.fmu_info = os.path.dirname(self.directory)
         # print(directory)
 
         self.map_types = ["observations", "results"]
-        self.config = config
-        configuration = ""
-        self.map_defaults = get_map_defaults(configuration)
+        self.number_of_maps = 3
+        self.configuration = configuration
+        self.config = read_config(self.configuration)
+        print(self.config)
+        self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
         # print('self.map_defaults ',self.map_defaults
 
         self.metadata, self.dates = get_metadata(
             self.directory, self.map_defaults[0], self.delimiter
         )
-        print(self.metadata)
-        print("")
+        #print(self.metadata)
+        #print("")
 
         self.intervals = get_all_intervals(self.metadata)
-        print("self.intervals ", self.intervals)
+        #print("self.intervals ", self.intervals)
 
-        self.wellfolder = wellfolder
         wellsuffix = ".w"
-        self.wellfiles = (
-            json.load(find_files(wellfolder, wellsuffix))
-            if wellfolder is not None
-            else None
-        )
-        self.well_layer = (
-            make_well_layers([get_path(wellfile) for wellfile in self.wellfiles])
-            if self.wellfiles
-            else None
-        )
-
+     
+        all_well_df, well_info, interval_df = load_all_wells(wellfolder, wellsuffix)
+        
+        print('all_well_df')
+        print(all_well_df)
+        print("")
+        
+        print('well_info')
+        print(well_info)
+        print("")
+        
+        print('interval_df')
+        print(interval_df)
+        print("")
+        
+        colors = get_well_colors(self.config)
+        
+        self.well_layers = []
+        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df))
+        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='reservoir_section',label='Completed wells'))
+        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='production',label='Producers'))
+        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='injection',label='Injectors'))
+        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='planned',label='Planned'))
+        
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
         )
@@ -130,7 +153,10 @@ and available for instant viewing.
         return get_col_values(self.metadata, "fmu_id.iteration")
 
     def realizations(self, ensemble):
-        return get_col_values(self.metadata, "fmu_id.realization")
+        sorted_realizations = sort_realizations(
+            get_col_values(self.metadata, "fmu_id.realization")
+        )
+        return sorted_realizations
 
     @property
     def tour_steps(self):
@@ -256,6 +282,7 @@ and available for instant viewing.
         return html.Div(
             id=self.uuid("layout"),
             children=[
+                html.H3("WebViz-4D " + self.fmu_info),
                 wcc.FlexBox(
                     style={"fontSize": "1rem"},
                     children=[
@@ -321,7 +348,15 @@ and available for instant viewing.
                                     height=600,
                                     layers=[],
                                     hillShading=False,
-                                )
+                                ),
+                                html.Div(
+                                    id=self.uuid("interval-label1"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 20,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
                             ],
                         ),
                         html.Div(
@@ -333,7 +368,15 @@ and available for instant viewing.
                                     height=600,
                                     layers=[],
                                     hillShading=False,
-                                )
+                                ),
+                                html.Div(
+                                    id=self.uuid("interval-label2"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 20,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
                             ],
                         ),
                         html.Div(
@@ -345,7 +388,15 @@ and available for instant viewing.
                                     height=600,
                                     layers=[],
                                     hillShading=False,
-                                )
+                                ),
+                                html.Div(
+                                    id=self.uuid("interval-label3"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 20,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
                             ],
                         ),
                         dcc.Store(
@@ -391,6 +442,9 @@ and available for instant viewing.
                 Output(self.uuid("map"), "layers"),
                 Output(self.uuid("map2"), "layers"),
                 Output(self.uuid("map3"), "layers"),
+                Output(self.uuid("interval-label1"), "children"),
+                Output(self.uuid("interval-label2"), "children"),
+                Output(self.uuid("interval-label3"), "children"),
             ],
             [
                 Input(self.selector.storage_id, "children"),
@@ -418,7 +472,7 @@ and available for instant viewing.
             real3,
             attribute_settings,
         ):
-            # print("data ", data)
+            print("data ", data)
             data = json.loads(data)
             data2 = json.loads(data2)
             data3 = json.loads(data3)
@@ -498,12 +552,27 @@ and available for instant viewing.
                 )
             ]
 
-            if self.well_layer:
-                surface_layers.append(self.well_layer)
-                surface_layers2.append(self.well_layer)
-                surface_layers3.append(self.well_layer)
+            if self.well_layers:
+                for well_layer in self.well_layers:
+                    surface_layers.append(well_layer)
+                    surface_layers2.append(well_layer)
+                    surface_layers3.append(well_layer)
 
-            return (surface_layers, surface_layers2, surface_layers3)
+            selected_interval = data["date"]
+            label1 = get_plot_label(self.config, selected_interval)
+            selected_interval2 = data2["date"]
+            label2 = get_plot_label(self.config, selected_interval2)
+            selected_interval3 = data3["date"]
+            label3 = get_plot_label(self.config, selected_interval3)
+
+            return (
+                surface_layers,
+                surface_layers2,
+                surface_layers3,
+                label1,
+                label2,
+                label3,
+            )
 
         def _update_from_btn(_n_prev, _n_next, current_value, options):
             """Updates dropdown value if previous/next btn is clicked"""

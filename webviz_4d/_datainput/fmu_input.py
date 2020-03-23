@@ -109,7 +109,9 @@ def find_sens_type(senscase: str):
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 @webvizstore
-def find_surfaces(ensemble_paths: dict, map_type="results", suffix="*.gri", delimiter="--") -> pd.DataFrame:
+def find_surfaces(
+    ensemble_paths: dict, map_type="results", suffix="*.gri", delimiter="--"
+) -> pd.DataFrame:
     """Reads surface file names stored in standard FMU format, and returns a dictionary
     on the following format:
     surface_property:
@@ -123,7 +125,7 @@ def find_surfaces(ensemble_paths: dict, map_type="results", suffix="*.gri", deli
     # Create list of all files in all realizations in all ensembles
     files = []
     for path in ensemble_paths.values():
-        print('find_surface: ',path)
+        print("find_surface: ", path)
         path = Path(path)
         for realpath in glob.glob(str(path / "share" / map_type / "maps" / suffix)):
             stem = Path(realpath).stem.split(delimiter)

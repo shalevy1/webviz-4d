@@ -23,7 +23,7 @@ from .._datainput._well import (
     make_test_layer,
 )
 from .._datainput._decode_config import ConfigReader
-from .._datainput._metadata import (
+from .._datainput._metadata_backup import (
     extract_metadata,
     get_metadata,
     decode_filename,
