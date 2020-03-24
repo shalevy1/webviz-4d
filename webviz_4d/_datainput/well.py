@@ -132,11 +132,13 @@ def get_position_data(well_dataframe, md_start):
 def get_well_polyline(
     wellbore, well_dataframe, well_type, fluids, md_start, selection, colors
 ):
-    # selection_options = ["reservoir", "completed", "open", "production", "injection", "planned"]
-
     color = "black"
     if colors:
         color = colors["default"]
+        
+    if not well_type == "planned":
+        wellbore = wellbore.replace('_','/',1)
+        wellbore = wellbore.replace('_',' ' )   
 
     tooltip = wellbore + " : " + well_type
 
@@ -191,43 +193,42 @@ def get_well_polyline(
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 def make_new_well_layer(
-    wells_df, metadata_df, interval_df, colors=None, selection=None, label="All wells",
+    wells_df, metadata_df, interval_df, colors=None, selection=None, label="Drilled wells",
 ):
     """Make layeredmap wells layer"""
     data = []
     if not colors:
         color = "black"
-    print(selection)
-    # print(colors)
 
     wellbores = wells_df["WELLBORE_NAME"].values
     list_set = set(wellbores)
     # convert the set to the list
     unique_wellbores = list(list_set)
-    # unique_wellbores = [
+    #unique_wellbores = [
     #    "25_11-G-38_AY2T3",
     #    "25_11-G-38_AY3",
     #    "25_11-G-4_T2",
     #    "25_11-G-20_A",
     #    "25_11-G-24_A",
     #    "25_11-G-32",
-    #    "25_11-G-36",
+    #   "25_11-G-36",
     #    "25_11-G-14",
     #    "25_11-G-23_A",
-    # ]
+    #]
 
     pd.set_option("display.max_rows", None)
-    print(metadata_df)
+
     print("Number of wellbores: ", len(unique_wellbores))
 
     for wellbore in unique_wellbores:
-        print(wellbore)
+        #print('wellbore ',wellbore)
         md_start = 0
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
 
         if selection:
-            uwi = "NO " + wellbore.replace("_", "/", 1) + wellbore.replace("_", " ")
+            uwi = "NO " + wellbore.replace("_", "/", 1)
+            uwi = uwi.replace("_", " ")
             well_intervals = interval_df[interval_df["interval.wellbore"] == uwi]
             md_tops = well_intervals["interval.mdTop"].values
 
@@ -235,7 +236,6 @@ def make_new_well_layer(
                 md_start = min(md_tops)
 
         well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
-        print(well_metadata)
 
         well_type = well_metadata["wellbore.type"].values[0]
         fluids = well_metadata["wellbore.fluids"].values[0]

@@ -100,6 +100,7 @@ and available for instant viewing.
         self.config = read_config(self.configuration)
         print(self.config)
         self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
+        print(self.map_defaults)
         # print('self.map_defaults ',self.map_defaults
 
         self.metadata, self.dates = get_metadata(
@@ -134,7 +135,7 @@ and available for instant viewing.
         self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='reservoir_section',label='Completed wells'))
         self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='production',label='Producers'))
         self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='injection',label='Injectors'))
-        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='planned',label='Planned'))
+        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='planned',label='Planned wells'))
         
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
@@ -342,6 +343,22 @@ and available for instant viewing.
                         html.Div(
                             style={"margin": "10px", "flex": 4},
                             children=[
+                                html.Div(
+                                    id=self.uuid("heading1"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 20,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
+                                html.Div(
+                                    id=self.uuid("sim_info1"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 15,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
                                 LayeredMap(
                                     sync_ids=[self.uuid("map2"), self.uuid("map3")],
                                     id=self.uuid("map"),
@@ -362,6 +379,22 @@ and available for instant viewing.
                         html.Div(
                             style={"margin": "10px", "flex": 4},
                             children=[
+                                html.Div(
+                                    id=self.uuid("heading2"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 20,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
+                                html.Div(
+                                    id=self.uuid("sim_info2"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 15,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
                                 LayeredMap(
                                     sync_ids=[self.uuid("map"), self.uuid("map3")],
                                     id=self.uuid("map2"),
@@ -382,6 +415,22 @@ and available for instant viewing.
                         html.Div(
                             style={"margin": "10px", "flex": 4},
                             children=[
+                                html.Div(
+                                    id=self.uuid("heading3"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 20,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
+                                html.Div(
+                                    id=self.uuid("sim_info3"),
+                                    style={
+                                        "textAlign": "center",
+                                        "fontSize": 15,
+                                        "fontWeight": "bold",
+                                    },
+                                ),
                                 LayeredMap(
                                     sync_ids=[self.uuid("map"), self.uuid("map2")],
                                     id=self.uuid("map3"),
@@ -439,6 +488,12 @@ and available for instant viewing.
     def set_callbacks(self, app):
         @app.callback(
             [
+                Output(self.uuid("heading1"), "children"),
+                Output(self.uuid("heading2"), "children"),
+                Output(self.uuid("heading3"), "children"),
+                Output(self.uuid("sim_info1"), "children"),
+                Output(self.uuid("sim_info2"), "children"),
+                Output(self.uuid("sim_info3"), "children"),
                 Output(self.uuid("map"), "layers"),
                 Output(self.uuid("map2"), "layers"),
                 Output(self.uuid("map3"), "layers"),
@@ -481,35 +536,17 @@ and available for instant viewing.
             map_type2 = self.map_defaults[1]["map_type"]
             map_type3 = self.map_defaults[2]["map_type"]
 
-            if real in ["Mean", "StdDev", "Min", "Max"]:
-                surface = calculate_surface(
-                    self.get_ens_runpath(data, ensemble), real, map_type1
-                )
-
-            else:
-                surface = load_surface(
-                    self.get_real_runpath(data, ensemble, real, map_type1)
-                )
-
-            if real2 in ["Mean", "StdDev", "Min", "Max"]:
-                surface2 = calculate_surface(
-                    self.get_ens_runpath(data2, ensemble2), real2, map_type2
-                )
-
-            else:
-                surface2 = load_surface(
-                    self.get_real_runpath(data2, ensemble2, real2, map_type2)
-                )
-
-            if real3 in ["Mean", "StdDev", "Min", "Max"]:
-                surface3 = calculate_surface(
-                    self.get_ens_runpath(data3, ensemble3), real3, map_type3
-                )
-
-            else:
-                surface3 = load_surface(
-                    self.get_real_runpath(data3, ensemble3, real3, map_type3)
-                )
+            surface = load_surface(
+                self.get_real_runpath(data, ensemble, real, map_type1)
+            )
+           
+            surface2 = load_surface(
+                self.get_real_runpath(data2, ensemble2, real2, map_type2)
+            )
+           
+            surface3 = load_surface(
+                self.get_real_runpath(data3, ensemble3, real3, map_type3)
+            )
 
             surface_layers = [
                 make_surface_layer(
@@ -559,13 +596,51 @@ and available for instant viewing.
                     surface_layers3.append(well_layer)
 
             selected_interval = data["date"]
+            selected_name = data["name"]
+            selected_attribute = data["attr"]
+                       
+            if self.map_defaults[0]["map_type"] == "observations":
+                txt = "Observed map: "
+                sim_info1 = '-'
+            else:
+                txt = "Simulated map: "
+                sim_info1 = ensamble + ' ' + real
+            heading1 = txt + selected_attribute + " (" + selected_name + ")"
             label1 = get_plot_label(self.config, selected_interval)
+            
             selected_interval2 = data2["date"]
+            selected_name = data2["name"]
+            selected_attribute = data2["attr"]
+            
+            if self.map_defaults[1]["map_type"] == "observations":
+                txt = "Observed map: "
+                sim_info2 = '-'
+            else:
+                txt = "Simulated map: "
+                sim_info2 = ensemble2 + ' ' + real2
+            heading2 = txt + selected_attribute + " (" + selected_name + ")"
             label2 = get_plot_label(self.config, selected_interval2)
+            
             selected_interval3 = data3["date"]
+            selected_name = data3["name"]
+            selected_attribute = data3["attr"]
+            
+            if self.map_defaults[2]["map_type"] == "observations":
+                txt = "Observed map: "
+                sim_info3 = '-'
+            else:
+                txt = "Simulated map: "
+                sim_info3 = ensemble3 + ' ' + real3
+            heading3 = txt + selected_attribute + " (" + selected_name + ")"
             label3 = get_plot_label(self.config, selected_interval3)
 
             return (
+                heading1,
+                heading2,
+                heading3,
+                sim_info1,
+                sim_info2,
+                sim_info3,
                 surface_layers,
                 surface_layers2,
                 surface_layers3,
