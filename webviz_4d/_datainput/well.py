@@ -135,10 +135,10 @@ def get_well_polyline(
     color = "black"
     if colors:
         color = colors["default"]
-        
+
     if not well_type == "planned":
-        wellbore = wellbore.replace('_','/',1)
-        wellbore = wellbore.replace('_',' ' )   
+        wellbore = wellbore.replace("_", "/", 1)
+        wellbore = wellbore.replace("_", " ")
 
     tooltip = wellbore + " : " + well_type
 
@@ -193,7 +193,12 @@ def get_well_polyline(
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 def make_new_well_layer(
-    wells_df, metadata_df, interval_df, colors=None, selection=None, label="Drilled wells",
+    wells_df,
+    metadata_df,
+    interval_df,
+    colors=None,
+    selection=None,
+    label="Drilled wells",
 ):
     """Make layeredmap wells layer"""
     data = []
@@ -204,7 +209,7 @@ def make_new_well_layer(
     list_set = set(wellbores)
     # convert the set to the list
     unique_wellbores = list(list_set)
-    #unique_wellbores = [
+    # unique_wellbores = [
     #    "25_11-G-38_AY2T3",
     #    "25_11-G-38_AY3",
     #    "25_11-G-4_T2",
@@ -214,14 +219,14 @@ def make_new_well_layer(
     #   "25_11-G-36",
     #    "25_11-G-14",
     #    "25_11-G-23_A",
-    #]
+    # ]
 
     pd.set_option("display.max_rows", None)
 
     print("Number of wellbores: ", len(unique_wellbores))
 
     for wellbore in unique_wellbores:
-        #print('wellbore ',wellbore)
+        # print('wellbore ',wellbore)
         md_start = 0
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]

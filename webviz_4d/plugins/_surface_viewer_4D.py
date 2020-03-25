@@ -106,37 +106,75 @@ and available for instant viewing.
         self.metadata, self.dates = get_metadata(
             self.directory, self.map_defaults[0], self.delimiter
         )
-        #print(self.metadata)
-        #print("")
+        # print(self.metadata)
+        # print("")
 
         self.intervals = get_all_intervals(self.metadata)
-        #print("self.intervals ", self.intervals)
+        # print("self.intervals ", self.intervals)
 
         wellsuffix = ".w"
-     
+
         all_well_df, well_info, interval_df = load_all_wells(wellfolder, wellsuffix)
-        
-        print('all_well_df')
+
+        print("all_well_df")
         print(all_well_df)
         print("")
-        
-        print('well_info')
+
+        print("well_info")
         print(well_info)
         print("")
-        
-        print('interval_df')
+
+        print("interval_df")
         print(interval_df)
         print("")
-        
+
         colors = get_well_colors(self.config)
-        
+
         self.well_layers = []
-        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df))
-        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='reservoir_section',label='Completed wells'))
-        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='production',label='Producers'))
-        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='injection',label='Injectors'))
-        self.well_layers.append(make_new_well_layer(all_well_df, well_info, interval_df,colors,selection='planned',label='Planned wells'))
-        
+        self.well_layers.append(
+            make_new_well_layer(all_well_df, well_info, interval_df)
+        )
+        self.well_layers.append(
+            make_new_well_layer(
+                all_well_df,
+                well_info,
+                interval_df,
+                colors,
+                selection="reservoir_section",
+                label="Completed wells",
+            )
+        )
+        self.well_layers.append(
+            make_new_well_layer(
+                all_well_df,
+                well_info,
+                interval_df,
+                colors,
+                selection="production",
+                label="Producers",
+            )
+        )
+        self.well_layers.append(
+            make_new_well_layer(
+                all_well_df,
+                well_info,
+                interval_df,
+                colors,
+                selection="injection",
+                label="Injectors",
+            )
+        )
+        self.well_layers.append(
+            make_new_well_layer(
+                all_well_df,
+                well_info,
+                interval_df,
+                colors,
+                selection="planned",
+                label="Planned wells",
+            )
+        )
+
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
         )
@@ -203,7 +241,10 @@ and available for instant viewing.
             children=[
                 html.Div(
                     [
-                        html.Label("Ensemble/Iteration"),
+                        html.Label(
+                            "Ensemble/Iteration",
+                            style={"fontSize": 15, "fontWeight": "bold"},
+                        ),
                         html.Div(
                             style=self.set_grid_layout("12fr 1fr 1fr"),
                             children=[
@@ -215,6 +256,7 @@ and available for instant viewing.
                                     value=self.map_defaults[map_number]["ensemble"],
                                     id=ensemble_id,
                                     clearable=False,
+                                    style={"fontSize": 15, "fontWeight": "normal",},
                                 ),
                                 html.Button(
                                     style={
@@ -240,7 +282,10 @@ and available for instant viewing.
                 ),
                 html.Div(
                     children=[
-                        html.Label("Realization / Statistic"),
+                        html.Label(
+                            "Realization / Statistic",
+                            style={"fontSize": 15, "fontWeight": "bold"},
+                        ),
                         html.Div(
                             style=self.set_grid_layout("12fr 1fr 1fr"),
                             children=[
@@ -252,6 +297,7 @@ and available for instant viewing.
                                     value=self.map_defaults[map_number]["realization"],
                                     id=real_id,
                                     clearable=False,
+                                    style={"fontSize": 15, "fontWeight": "normal"},
                                 ),
                                 html.Button(
                                     style={
@@ -539,11 +585,11 @@ and available for instant viewing.
             surface = load_surface(
                 self.get_real_runpath(data, ensemble, real, map_type1)
             )
-           
+
             surface2 = load_surface(
                 self.get_real_runpath(data2, ensemble2, real2, map_type2)
             )
-           
+
             surface3 = load_surface(
                 self.get_real_runpath(data3, ensemble3, real3, map_type3)
             )
@@ -598,39 +644,39 @@ and available for instant viewing.
             selected_interval = data["date"]
             selected_name = data["name"]
             selected_attribute = data["attr"]
-                       
+
             if self.map_defaults[0]["map_type"] == "observations":
                 txt = "Observed map: "
-                sim_info1 = '-'
+                sim_info1 = "-"
             else:
                 txt = "Simulated map: "
-                sim_info1 = ensamble + ' ' + real
+                sim_info1 = ensamble + " " + real
             heading1 = txt + selected_attribute + " (" + selected_name + ")"
             label1 = get_plot_label(self.config, selected_interval)
-            
+
             selected_interval2 = data2["date"]
             selected_name = data2["name"]
             selected_attribute = data2["attr"]
-            
+
             if self.map_defaults[1]["map_type"] == "observations":
                 txt = "Observed map: "
-                sim_info2 = '-'
+                sim_info2 = "-"
             else:
                 txt = "Simulated map: "
-                sim_info2 = ensemble2 + ' ' + real2
+                sim_info2 = ensemble2 + " " + real2
             heading2 = txt + selected_attribute + " (" + selected_name + ")"
             label2 = get_plot_label(self.config, selected_interval2)
-            
+
             selected_interval3 = data3["date"]
             selected_name = data3["name"]
             selected_attribute = data3["attr"]
-            
+
             if self.map_defaults[2]["map_type"] == "observations":
                 txt = "Observed map: "
-                sim_info3 = '-'
+                sim_info3 = "-"
             else:
                 txt = "Simulated map: "
-                sim_info3 = ensemble3 + ' ' + real3
+                sim_info3 = ensemble3 + " " + real3
             heading3 = txt + selected_attribute + " (" + selected_name + ")"
             label3 = get_plot_label(self.config, selected_interval3)
 

@@ -1,4 +1,3 @@
-
 from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
@@ -27,8 +26,6 @@ setup(
         "xtgeo~=2.1",
         "pillow~=6.1",
         "webviz-subsurface-components>=0.0.3",
-
-
     ],
     tests_require=TESTS_REQUIRE,
     extras_require={"tests": TESTS_REQUIRE},

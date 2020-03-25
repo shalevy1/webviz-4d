@@ -145,7 +145,9 @@ another_property:
         return html.Div(
             style={"display": "grid"},
             children=[
-                html.Label("Surface attribute"),
+                html.Label(
+                    "Surface attribute", style={"fontSize": 15, "fontWeight": "bold"}
+                ),
                 html.Div(
                     style=self.set_grid_layout("6fr 1fr"),
                     children=[
@@ -156,34 +158,10 @@ another_property:
                             ],
                             value=self.current_selections["attribute"],
                             clearable=False,
+                            style={"fontSize": 15, "fontWeight": "normal"},
                         ),
                         self._make_buttons(
                             self.attr_id_btn_prev, self.attr_id_btn_next
-                        ),
-                    ],
-                ),
-            ],
-        )
-
-    def type_selector(self):
-        return html.Div(
-            style={"display": "grid"},
-            children=[
-                html.Label("Surface type"),
-                html.Div(
-                    style=self.set_grid_layout("6fr 1fr"),
-                    children=[
-                        dcc.Dropdown(
-                            id=self.attr_id,
-                            options=[
-                                {"label": map_type, "value": map_type}
-                                for map_types in self.map_types
-                            ],
-                            value=self.current_selections["map_type"],
-                            clearable=False,
-                        ),
-                        self._make_buttons(
-                            self.type_id_btn_prev, self.type_id_btn_next
                         ),
                     ],
                 ),
@@ -215,16 +193,23 @@ another_property:
             ],
         )
 
-    def selector(self, wrapper_id, dropdown_id, title, default_value, btn_prev, btn_next):
+    def selector(
+        self, wrapper_id, dropdown_id, title, default_value, btn_prev, btn_next
+    ):
         return html.Div(
             id=wrapper_id,
             style={"display": "none"},
             children=[
-                html.Label(title),
+                html.Label(title, style={"fontSize": 15, "fontWeight": "bold"}),
                 html.Div(
                     style=self.set_grid_layout("6fr 1fr"),
                     children=[
-                        dcc.Dropdown(id=dropdown_id, value = default_value, clearable=False), 
+                        dcc.Dropdown(
+                            id=dropdown_id,
+                            value=default_value,
+                            clearable=False,
+                            style={"fontSize": 15, "fontWeight": "normal"},
+                        ),
                         self._make_buttons(btn_prev, btn_next),
                     ],
                 ),
