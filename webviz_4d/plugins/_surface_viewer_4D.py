@@ -98,9 +98,9 @@ and available for instant viewing.
         self.number_of_maps = 3
         self.configuration = configuration
         self.config = read_config(self.configuration)
-        print(self.config)
+        # print(self.config)
         self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
-        print(self.map_defaults)
+        # print(self.map_defaults)
         # print('self.map_defaults ',self.map_defaults
 
         self.metadata, self.dates = get_metadata(
@@ -116,17 +116,17 @@ and available for instant viewing.
 
         all_well_df, well_info, interval_df = load_all_wells(wellfolder, wellsuffix)
 
-        print("all_well_df")
-        print(all_well_df)
-        print("")
+        # print("all_well_df")
+        # print(all_well_df)
+        # print("")
 
-        print("well_info")
-        print(well_info)
-        print("")
+        # print("well_info")
+        # print(well_info)
+        # print("")
 
-        print("interval_df")
-        print(interval_df)
-        print("")
+        # print("interval_df")
+        # print(interval_df)
+        # print("")
 
         colors = get_well_colors(self.config)
 
@@ -141,7 +141,7 @@ and available for instant viewing.
                 interval_df,
                 colors,
                 selection="reservoir_section",
-                label="Completed wells",
+                label="Reservoir sections",
             )
         )
         self.well_layers.append(
@@ -531,6 +531,30 @@ and available for instant viewing.
             for runpath in runpaths
         ]
 
+    def get_headings(self, map_type):
+        headings = []
+        sim_info = []
+        labels = []
+
+        i = 0
+        for map_default in self.map_defaults:
+            if map_default["map_type"] == map_type:
+                txt = "Observed map: "
+                info = "-"
+            else:
+                txt = "Simulated map: "
+                info = self.selected_ensembles[i] + " " + self.selected_realizations[i]
+
+            headings.append(
+                txt + self.selected_attributes[i] + " (" + self.selected_names[i] + ")"
+            )
+            sim_info.append(info)
+            labels.append(get_plot_label(self.config, self.selected_intervals[i]))
+
+            i = i + 1
+
+        return headings, sim_info, labels
+
     def set_callbacks(self, app):
         @app.callback(
             [
@@ -573,7 +597,7 @@ and available for instant viewing.
             real3,
             attribute_settings,
         ):
-            print("data ", data)
+            # print("data ", data)
             data = json.loads(data)
             data2 = json.loads(data2)
             data3 = json.loads(data3)
@@ -641,58 +665,27 @@ and available for instant viewing.
                     surface_layers2.append(well_layer)
                     surface_layers3.append(well_layer)
 
-            selected_interval = data["date"]
-            selected_name = data["name"]
-            selected_attribute = data["attr"]
+            self.selected_intervals = [data["date"], data2["date"], data3["date"]]
+            self.selected_names = [data["name"], data2["name"], data3["name"]]
+            self.selected_attributes = [data["attr"], data2["attr"], data3["attr"]]
+            self.selected_ensembles = [ensemble, ensemble2, ensemble3]
+            self.selected_realizations = [real, real2, real3]
 
-            if self.map_defaults[0]["map_type"] == "observations":
-                txt = "Observed map: "
-                sim_info1 = "-"
-            else:
-                txt = "Simulated map: "
-                sim_info1 = ensamble + " " + real
-            heading1 = txt + selected_attribute + " (" + selected_name + ")"
-            label1 = get_plot_label(self.config, selected_interval)
-
-            selected_interval2 = data2["date"]
-            selected_name = data2["name"]
-            selected_attribute = data2["attr"]
-
-            if self.map_defaults[1]["map_type"] == "observations":
-                txt = "Observed map: "
-                sim_info2 = "-"
-            else:
-                txt = "Simulated map: "
-                sim_info2 = ensemble2 + " " + real2
-            heading2 = txt + selected_attribute + " (" + selected_name + ")"
-            label2 = get_plot_label(self.config, selected_interval2)
-
-            selected_interval3 = data3["date"]
-            selected_name = data3["name"]
-            selected_attribute = data3["attr"]
-
-            if self.map_defaults[2]["map_type"] == "observations":
-                txt = "Observed map: "
-                sim_info3 = "-"
-            else:
-                txt = "Simulated map: "
-                sim_info3 = ensemble3 + " " + real3
-            heading3 = txt + selected_attribute + " (" + selected_name + ")"
-            label3 = get_plot_label(self.config, selected_interval3)
+            headings, sim_info, labels = self.get_headings("observations")
 
             return (
-                heading1,
-                heading2,
-                heading3,
-                sim_info1,
-                sim_info2,
-                sim_info3,
+                headings[0],
+                headings[1],
+                headings[2],
+                sim_info[0],
+                sim_info[1],
+                sim_info[2],
                 surface_layers,
                 surface_layers2,
                 surface_layers3,
-                label1,
-                label2,
-                label3,
+                labels[0],
+                labels[1],
+                labels[2],
             )
 
         def _update_from_btn(_n_prev, _n_next, current_value, options):

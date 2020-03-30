@@ -14,32 +14,12 @@ def load_well(well_path):
 
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
-def make_well_layer(well, name="well", zmin=0):
-    """Make LayeredMap well polyline"""
-    well.dataframe = well.dataframe[well.dataframe["Z_TVDSS"] > zmin]
-    positions = well.dataframe[["X_UTME", "Y_UTMN"]].values
-    return {
-        "name": name,
-        "checked": True,
-        "base_layer": False,
-        "data": [
-            {
-                "type": "polyline",
-                "color": "red",
-                "positions": positions,
-                "tooltip": name,
-            }
-        ],
-    }
-
-
-@CACHE.memoize(timeout=CACHE.TIMEOUT)
 def make_well_layers(wellfiles, zmin=0, max_points=100, color="black", checked=True):
     """Make layeredmap wells layer"""
     data = []
     for wellfile in wellfiles:
         try:
-            well = load_well(wellfile)
+            well = load_well(wellfile, mdlogname="MD")
         except ValueError:
             continue
         well.dataframe = well.dataframe[well.dataframe["Z_TVDSS"] > zmin]
@@ -104,9 +84,8 @@ def load_all_wells(wellfolder, wellsuffix):
         else None
     )
 
-    print("Loading wells ...")
+    print("Loading wells from " + str(wellfolder) + " ...")
     for wellfile in wellfiles:
-        # print(wellfile)
         try:
             well = load_well(wellfile)
         except ValueError:
@@ -130,22 +109,27 @@ def get_position_data(well_dataframe, md_start):
 
 
 def get_well_polyline(
-    wellbore, well_dataframe, well_type, fluids, md_start, selection, colors
+    wellbore, short_name, well_dataframe, well_type, fluids, md_start, selection, colors
 ):
     color = "black"
     if colors:
         color = colors["default"]
 
-    if not well_type == "planned":
-        wellbore = wellbore.replace("_", "/", 1)
-        wellbore = wellbore.replace("_", " ")
-
-    tooltip = wellbore + " : " + well_type
+    # if not well_type == "planned":
+    #    wellbore = wellbore.replace("_", "/", 1)
+    #    wellbore = wellbore.replace("_", " ")
+    print(short_name, well_type)
+    tooltip = str(short_name) + " : " + well_type
 
     status = False
 
+    if fluids == "not applicable":
+        fluids = None
+
     if fluids:
         tooltip = tooltip + " (" + fluids + ")"
+
+    print(tooltip)
 
     if selection:
         if (
@@ -230,23 +214,31 @@ def make_new_well_layer(
         md_start = 0
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
+        well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
 
         if selection:
             uwi = "NO " + wellbore.replace("_", "/", 1)
             uwi = uwi.replace("_", " ")
-            well_intervals = interval_df[interval_df["interval.wellbore"] == uwi]
-            md_tops = well_intervals["interval.mdTop"].values
+            # well_intervals = interval_df[interval_df["interval.wellbore"] == uwi]
+            # md_tops = well_intervals["interval.mdTop"].values
+            md_top_res = well_metadata["wellbore.pick_md"]
 
-            if len(md_tops) > 0:
-                md_start = min(md_tops)
-
-        well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
+            if len(md_top_res) > 0:
+                md_start = min(md_top_res)
 
         well_type = well_metadata["wellbore.type"].values[0]
         fluids = well_metadata["wellbore.fluids"].values[0]
+        short_name = well_metadata["wellbore.short_name"].values[0]
 
         polyline_data = get_well_polyline(
-            wellbore, well_dataframe, well_type, fluids, md_start, selection, colors
+            wellbore,
+            short_name,
+            well_dataframe,
+            well_type,
+            fluids,
+            md_start,
+            selection,
+            colors,
         )
 
         if polyline_data:
