@@ -94,14 +94,14 @@ and available for instant viewing.
         self.fmu_info = os.path.dirname(self.directory)
         # print(directory)
 
-        self.map_types = ["observations", "results"]
         self.number_of_maps = 3
         self.configuration = configuration
-        self.config = read_config(self.configuration)
+        self.config = read_config(self.configuration)  
+        default_interval = self.config["map_settings"]["default_interval"] 
+        self.selected_intervals = [default_interval,default_interval,default_interval]    
         # print(self.config)
         self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
-        # print(self.map_defaults)
-        # print('self.map_defaults ',self.map_defaults
+        #print('self.map_defaults ',self.map_defaults)
 
         self.metadata, self.dates = get_metadata(
             self.directory, self.map_defaults[0], self.delimiter
@@ -110,71 +110,46 @@ and available for instant viewing.
         # print("")
 
         self.intervals = get_all_intervals(self.metadata)
-        # print("self.intervals ", self.intervals)
+        #print("self.intervals ", self.intervals)
 
-        wellsuffix = ".w"
+        self.wellsuffix = ".w"
 
-        all_well_df, well_info, interval_df = load_all_wells(wellfolder, wellsuffix)
+        self.drilled_well_df, self.drilled_well_info, self.interval_df = load_all_wells(wellfolder, self.wellsuffix)
+        planned_wells_dir= [f.path for f in os.scandir(wellfolder) if f.is_dir()]
 
-        # print("all_well_df")
-        # print(all_well_df)
-        # print("")
+        self.colors = get_well_colors(self.config)
 
-        # print("well_info")
-        # print(well_info)
-        # print("")
-
-        # print("interval_df")
-        # print(interval_df)
-        # print("")
-
-        colors = get_well_colors(self.config)
-
-        self.well_layers = []
-        self.well_layers.append(
-            make_new_well_layer(all_well_df, well_info, interval_df)
+        self.well_base_layer = []
+        self.well_base_layer.append(
+            make_new_well_layer(self.selected_intervals,self.drilled_well_df, self.drilled_well_info, self.interval_df)
         )
-        self.well_layers.append(
+        self.well_base_layer.append(
             make_new_well_layer(
-                all_well_df,
-                well_info,
-                interval_df,
-                colors,
+                self.selected_intervals,
+                self.drilled_well_df,
+                self.drilled_well_info,
+                self.interval_df,
+                self.colors,
                 selection="reservoir_section",
                 label="Reservoir sections",
             )
         )
-        self.well_layers.append(
-            make_new_well_layer(
-                all_well_df,
-                well_info,
-                interval_df,
-                colors,
-                selection="production",
-                label="Producers",
-            )
-        )
-        self.well_layers.append(
-            make_new_well_layer(
-                all_well_df,
-                well_info,
-                interval_df,
-                colors,
-                selection="injection",
-                label="Injectors",
-            )
-        )
-        self.well_layers.append(
-            make_new_well_layer(
-                all_well_df,
-                well_info,
-                interval_df,
-                colors,
-                selection="planned",
-                label="Planned wells",
-            )
-        )
-
+        
+        for folder in planned_wells_dir:
+            planned_well_df, planned_well_info, dummy_df = load_all_wells(folder, self.wellsuffix)
+            self.well_base_layer.append(
+                make_new_well_layer(
+                    self.selected_intervals,
+                    planned_well_df,
+                    planned_well_info,
+                    dummy_df,
+                    self.colors,
+                    selection="planned",
+                    label= os.path.basename(folder),
+                )
+            )   
+        
+        
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
         )
@@ -658,14 +633,44 @@ and available for instant viewing.
                     hillshading=False,
                 )
             ]
-
-            if self.well_layers:
-                for well_layer in self.well_layers:
-                    surface_layers.append(well_layer)
-                    surface_layers2.append(well_layer)
-                    surface_layers3.append(well_layer)
-
             self.selected_intervals = [data["date"], data2["date"], data3["date"]]
+            
+            well_layers = [None,None,None]
+            
+            for i in range(0,self.number_of_maps):           
+                well_layers[i] = self.well_base_layer.copy()
+                well_layers[i].append(
+                    make_new_well_layer(
+                        self.selected_intervals[i],
+                        self.drilled_well_df,
+                        self.drilled_well_info,
+                        self.interval_df,
+                        self.colors,
+                        selection="production",
+                        label="Producers",
+                    )
+                )
+                well_layers[i].append(
+                    make_new_well_layer(
+                        self.selected_intervals[i],
+                        self.drilled_well_df,
+                        self.drilled_well_info,
+                        self.interval_df,
+                        self.colors,
+                        selection="injection",
+                        label="Injectors",
+                    )
+                ) 
+                  
+            for well_layer in well_layers[0]:
+                surface_layers.append(well_layer)       
+                                                      
+            for well_layer in well_layers[1]:    
+                surface_layers2.append(well_layer)    
+                              
+            for well_layer in well_layers[2]:    
+                surface_layers3.append(well_layer)
+
             self.selected_names = [data["name"], data2["name"], data3["name"]]
             self.selected_attributes = [data["attr"], data2["attr"], data3["attr"]]
             self.selected_ensembles = [ensemble, ensemble2, ensemble3]

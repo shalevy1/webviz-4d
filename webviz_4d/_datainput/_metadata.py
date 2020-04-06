@@ -31,10 +31,7 @@ def get_map_defaults(configuration, n):
 
 
 def get_well_colors(configuration):
-    well_colors = configuration["well_colors"]
-    print(well_colors)
-
-    return well_colors
+    return configuration["well_colors"]
 
 
 def check_yaml_file(surfacepath):
@@ -477,7 +474,6 @@ def get_plot_label(configuration, interval):
         interval[:4] + interval[5:7] + interval[8:10],
         interval[11:15] + interval[16:18] + interval[19:21],
     ]
-    print("interval,dates ", interval, dates)
 
     for date in dates:
         # date = convert_date(date)
