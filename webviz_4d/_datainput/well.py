@@ -194,7 +194,8 @@ def make_new_well_layer(
     label="Drilled wells",
 ):
     """Make layeredmap wells layer"""
-    
+    from timeit import default_timer as timer
+    start = timer()
     data = []
     if not colors:
         color = "black"
@@ -307,5 +308,5 @@ def make_new_well_layer(
                   
         if polyline_data:
             data.append(polyline_data)
-
+    print(f"Well function{timer()-start}")
     return {"name": label, "checked": False, "base_layer": False, "data": data}

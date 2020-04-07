@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import io
 import os
-
+from timeit import default_timer as timer
 import numpy as np
 import pandas as pd
 import xtgeo
@@ -573,18 +573,21 @@ and available for instant viewing.
             attribute_settings,
         ):
             # print("data ", data)
+            start = timer()
             data = json.loads(data)
+
             data2 = json.loads(data2)
             data3 = json.loads(data3)
             attribute_settings = json.loads(attribute_settings)
             map_type1 = self.map_defaults[0]["map_type"]
             map_type2 = self.map_defaults[1]["map_type"]
             map_type3 = self.map_defaults[2]["map_type"]
-
+            print(f"loading data {timer()-start}")
+            start = timer()
             surface = load_surface(
                 self.get_real_runpath(data, ensemble, real, map_type1)
             )
-
+            print(f"loading surface {timer()-start}")
             surface2 = load_surface(
                 self.get_real_runpath(data2, ensemble2, real2, map_type2)
             )
@@ -592,7 +595,7 @@ and available for instant viewing.
             surface3 = load_surface(
                 self.get_real_runpath(data3, ensemble3, real3, map_type3)
             )
-
+            start = timer()
             surface_layers = [
                 make_surface_layer(
                     surface,
@@ -606,6 +609,7 @@ and available for instant viewing.
                     hillshading=False,
                 )
             ]
+            print(f"make surface layer{timer()-start}")
             surface_layers2 = [
                 make_surface_layer(
                     surface2,
@@ -636,9 +640,11 @@ and available for instant viewing.
             self.selected_intervals = [data["date"], data2["date"], data3["date"]]
             
             well_layers = [None,None,None]
-            
-            for i in range(0,self.number_of_maps):           
+            start = timer()
+            for i in range(0,self.number_of_maps):     
+                start2 = timer()      
                 well_layers[i] = self.well_base_layer.copy()
+                print(f"copy well layer {timer()-start2}")
                 well_layers[i].append(
                     make_new_well_layer(
                         self.selected_intervals[i],
@@ -661,23 +667,23 @@ and available for instant viewing.
                         label="Injectors",
                     )
                 ) 
-                  
+             
             for well_layer in well_layers[0]:
                 surface_layers.append(well_layer)       
-                                                      
+            print(f"Well data {timer()-start}")                                 
             for well_layer in well_layers[1]:    
                 surface_layers2.append(well_layer)    
                               
             for well_layer in well_layers[2]:    
                 surface_layers3.append(well_layer)
-
+            start = timer()
             self.selected_names = [data["name"], data2["name"], data3["name"]]
             self.selected_attributes = [data["attr"], data2["attr"], data3["attr"]]
             self.selected_ensembles = [ensemble, ensemble2, ensemble3]
             self.selected_realizations = [real, real2, real3]
 
             headings, sim_info, labels = self.get_headings("observations")
-
+            print(f"remaining {timer()-start}")
             return (
                 headings[0],
                 headings[1],
