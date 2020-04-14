@@ -116,21 +116,6 @@ another_property:
         # print('_names_in_attr: ',names)
         return names
 
-    def _types(self):
-        map_number = 0
-        current_name = self.current_selections["name"]
-        current_attribute = self.current_selections["attribute"]
-        df = self.metadata.loc[
-            (self.metadata["data.name"] == current_name)
-            & (self.metadata["data.content"] == current_attribute)
-        ]
-        map_types = unique_values(df["map_type"].values)
-
-        if not map_types:
-            map_types = unique_values(self.metadata["map_type"].values)
-
-        # print('_types: ', map_types)
-        return map_types
 
     def _interval_in_attr(self, attribute):
         intervals = self.intervals

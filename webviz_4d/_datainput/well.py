@@ -15,30 +15,6 @@ def load_well(well_path):
     return xtgeo.Well(well_path)
 
 
-@CACHE.memoize(timeout=CACHE.TIMEOUT)
-def make_well_layers(wellfiles, zmin=0, max_points=100, color="black", checked=True):
-    """Make layeredmap wells layer"""
-    data = []
-    for wellfile in wellfiles:
-        try:
-            well = load_well(wellfile, mdlogname="MD")
-        except ValueError:
-            continue
-        well.dataframe = well.dataframe[well.dataframe["Z_TVDSS"] > zmin]
-        while len(well.dataframe.values) > max_points:
-            well.downsample()
-        positions = well.dataframe[["X_UTME", "Y_UTMN"]].values
-        data.append(
-            {
-                "type": "polyline",
-                "color": color,
-                "positions": positions,
-                "tooltip": well.name,
-            }
-        )
-    return {"name": "Wells", "checked": checked, "base_layer": False, "data": data}
-
-
 def find_files(folder, suffix) -> io.BytesIO:
     return io.BytesIO(
         json.dumps(
@@ -308,5 +284,5 @@ def make_new_well_layer(
                   
         if polyline_data:
             data.append(polyline_data)
-    print(f"Well function{timer()-start}")
+    #print(f"Well function {timer()-start}")
     return {"name": label, "checked": False, "base_layer": False, "data": data}
