@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 import xtgeo
 import dash
+import pickle
+
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_html_components as html
@@ -20,7 +22,6 @@ from webviz_subsurface_components import LayeredMap
 from webviz_4d._datainput.fmu_input import get_realizations, find_surfaces
 from webviz_4d._datainput.surface import make_surface_layer, load_surface
 from webviz_4d._datainput.well import (
-    make_well_layers,
     load_all_wells,
     make_new_well_layer,
 )
@@ -83,6 +84,8 @@ and available for instant viewing.
             for ens in ensembles
         }
         self.delimiter = "--"
+        self.observation = "observations"
+        self.wellfolder = wellfolder
         self.attribute_settings = attribute_settings if attribute_settings else {}
 
         # Find FMU directory
@@ -98,7 +101,8 @@ and available for instant viewing.
         self.configuration = configuration
         self.config = read_config(self.configuration)  
         default_interval = self.config["map_settings"]["default_interval"] 
-        self.selected_intervals = [default_interval,default_interval,default_interval]    
+        self.selected_intervals = [default_interval,default_interval,default_interval] 
+  
         # print(self.config)
         self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
         #print('self.map_defaults ',self.map_defaults)
@@ -111,7 +115,11 @@ and available for instant viewing.
 
         self.intervals = get_all_intervals(self.metadata)
         #print("self.intervals ", self.intervals)
-
+        
+        self.selected_names = [None, None, None]
+        self.selected_attributes = [None, None, None]
+        self.selected_ensembles = [None, None, None]
+        self.selected_realizations = [None, None, None]
         self.wellsuffix = ".w"
 
         self.drilled_well_df, self.drilled_well_info, self.interval_df = load_all_wells(wellfolder, self.wellsuffix)
@@ -119,13 +127,14 @@ and available for instant viewing.
 
         self.colors = get_well_colors(self.config)
 
-        self.well_base_layer = []
-        self.well_base_layer.append(
-            make_new_well_layer(self.selected_intervals,self.drilled_well_df, self.drilled_well_info, self.interval_df)
+        self.well_base_layers = []
+        self.well_base_layers.append(
+            make_new_well_layer(self.selected_intervals[0],self.drilled_well_df, self.drilled_well_info, self.interval_df)
         )
-        self.well_base_layer.append(
+        
+        self.well_base_layers.append(
             make_new_well_layer(
-                self.selected_intervals,
+                self.selected_intervals[0],
                 self.drilled_well_df,
                 self.drilled_well_info,
                 self.interval_df,
@@ -137,9 +146,9 @@ and available for instant viewing.
         
         for folder in planned_wells_dir:
             planned_well_df, planned_well_info, dummy_df = load_all_wells(folder, self.wellsuffix)
-            self.well_base_layer.append(
+            self.well_base_layers.append(
                 make_new_well_layer(
-                    self.selected_intervals,
+                    self.selected_intervals[0],
                     planned_well_df,
                     planned_well_info,
                     dummy_df,
@@ -149,7 +158,7 @@ and available for instant viewing.
                 )
             )   
         
-        
+
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
         )
@@ -506,53 +515,141 @@ and available for instant viewing.
             for runpath in runpaths
         ]
 
-    def get_headings(self, map_type):
-        headings = []
-        sim_info = []
-        labels = []
+    def get_heading(self,map_ind, observation_type):
+        if self.map_defaults[map_ind]["map_type"] == observation_type:
+            txt = "Observed map: "
+            info = "-"
+        else:
+            txt = "Simulated map: "
+            info = self.selected_ensembles[map_ind] + " " + self.selected_realizations[map_ind]
 
-        i = 0
-        for map_default in self.map_defaults:
-            if map_default["map_type"] == map_type:
-                txt = "Observed map: "
-                info = "-"
-            else:
-                txt = "Simulated map: "
-                info = self.selected_ensembles[i] + " " + self.selected_realizations[i]
+        heading = txt + self.selected_attributes[map_ind] + " (" + self.selected_names[map_ind] + ")"
+        
+        sim_info= info
+        label = get_plot_label(self.config, self.selected_intervals[map_ind])
 
-            headings.append(
-                txt + self.selected_attributes[i] + " (" + self.selected_names[i] + ")"
+        return heading, sim_info, label
+
+    def make_map(self, data, ensemble, real, attribute_settings, map_idx):
+        start = timer()
+        data = json.loads(data)
+        attribute_settings = json.loads(attribute_settings)
+        map_type = self.map_defaults[map_idx]["map_type"]
+
+        #print(f"loading data {timer()-start}")
+        start = timer()
+        surface = load_surface(
+            self.get_real_runpath(data, ensemble, real, map_type)
+        )
+        #print(f"loading surface {timer()-start}")
+        start = timer()
+        surface_layers = [
+            make_surface_layer(
+                surface,
+                name="surface",
+                color=attribute_settings.get(data["attr"], {}).get(
+                    "color", "viridis"
+                ),
+                min_val=attribute_settings.get(data["attr"], {}).get("min", None),
+                max_val=attribute_settings.get(data["attr"], {}).get("max", None),
+                unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
+                hillshading=False,
             )
-            sim_info.append(info)
-            labels.append(get_plot_label(self.config, self.selected_intervals[i]))
-
-            i = i + 1
-
-        return headings, sim_info, labels
+        ]
+        #print(f"make surface layer {timer()-start}")
+        self.selected_intervals[map_idx] = data["date"]
+        
+        for well_layer in self.well_base_layers:
+            #print(well_layer["name"])
+            surface_layers.append(well_layer) 
+            
+        interval_file = os.path.join(self.wellfolder,"production_well_layers_" + self.selected_intervals[map_idx] + ".pkl")
+        interval_layer = pickle.load(open(interval_file, "rb" ))
+        surface_layers.append(interval_layer[0]) 
+        #print(interval_layer[0]["name"]) 
+        
+        interval_file = os.path.join(self.wellfolder,"injection_well_layers_" + self.selected_intervals[map_idx] + ".pkl")
+        interval_layer = pickle.load(open(interval_file, "rb" ))
+        surface_layers.append(interval_layer[0])
+        #print(interval_layer[0]["name"]) 
+                       
+        self.selected_names[map_idx]= data["name"]
+        self.selected_attributes[map_idx] = data["attr"]
+        self.selected_ensembles[map_idx] = ensemble
+        self.selected_realizations[map_idx] = real
+        
+        heading, sim_info, label = self.get_heading(map_idx,self.observation)
+        #print(f"remaining {timer()-start}")
+        return (
+            heading,
+            sim_info,
+            surface_layers,
+            label,
+        )
 
     def set_callbacks(self, app):
+        # First map
         @app.callback(
             [
                 Output(self.uuid("heading1"), "children"),
-                Output(self.uuid("heading2"), "children"),
-                Output(self.uuid("heading3"), "children"),
-                Output(self.uuid("sim_info1"), "children"),
-                Output(self.uuid("sim_info2"), "children"),
-                Output(self.uuid("sim_info3"), "children"),
+                Output(self.uuid("sim_info1"), "children"),              
                 Output(self.uuid("map"), "layers"),
-                Output(self.uuid("map2"), "layers"),
-                Output(self.uuid("map3"), "layers"),
                 Output(self.uuid("interval-label1"), "children"),
-                Output(self.uuid("interval-label2"), "children"),
-                Output(self.uuid("interval-label3"), "children"),
             ],
             [
                 Input(self.selector.storage_id, "children"),
                 Input(self.uuid("ensemble"), "value"),
                 Input(self.uuid("realization"), "value"),
+                Input(self.uuid("attribute-settings"), "data"),
+            ],
+        )
+        # pylint: disable=too-many-arguments, too-many-locals
+        def _set_base_layer(
+            data,
+            ensemble,
+            real,
+            attribute_settings,
+        ):
+            #ctx = dash.callback_context.triggered
+            #print(ctx)
+            #print("callback 1")
+            #print("data ", data)
+            return self.make_map(data, ensemble, real, attribute_settings, 0)
+        # Second map            
+        @app.callback(
+            [
+                Output(self.uuid("heading2"), "children"),
+                Output(self.uuid("sim_info2"), "children"),              
+                Output(self.uuid("map2"), "layers"),
+                Output(self.uuid("interval-label2"), "children"),
+            ],
+            [
                 Input(self.selector2.storage_id, "children"),
                 Input(self.uuid("ensemble2"), "value"),
                 Input(self.uuid("realization2"), "value"),
+                Input(self.uuid("attribute-settings"), "data"),
+            ],
+        )
+        # pylint: disable=too-many-arguments, too-many-locals
+        def _set_base_layer(
+            data,
+            ensemble,
+            real,
+            attribute_settings,
+        ):
+            #print("callback 2")
+            #print("data2", data)
+            return self.make_map(data, ensemble, real, attribute_settings, 1)
+
+        # Third map            
+        @app.callback(
+            [
+                Output(self.uuid("heading3"), "children"),
+                Output(self.uuid("sim_info3"), "children"),              
+                Output(self.uuid("map3"), "layers"),
+                Output(self.uuid("interval-label3"), "children"),
+            ],
+            [
                 Input(self.selector3.storage_id, "children"),
                 Input(self.uuid("ensemble3"), "value"),
                 Input(self.uuid("realization3"), "value"),
@@ -564,140 +661,11 @@ and available for instant viewing.
             data,
             ensemble,
             real,
-            data2,
-            ensemble2,
-            real2,
-            data3,
-            ensemble3,
-            real3,
             attribute_settings,
         ):
-            # print("data ", data)
-            start = timer()
-            data = json.loads(data)
-
-            data2 = json.loads(data2)
-            data3 = json.loads(data3)
-            attribute_settings = json.loads(attribute_settings)
-            map_type1 = self.map_defaults[0]["map_type"]
-            map_type2 = self.map_defaults[1]["map_type"]
-            map_type3 = self.map_defaults[2]["map_type"]
-            print(f"loading data {timer()-start}")
-            start = timer()
-            surface = load_surface(
-                self.get_real_runpath(data, ensemble, real, map_type1)
-            )
-            print(f"loading surface {timer()-start}")
-            surface2 = load_surface(
-                self.get_real_runpath(data2, ensemble2, real2, map_type2)
-            )
-
-            surface3 = load_surface(
-                self.get_real_runpath(data3, ensemble3, real3, map_type3)
-            )
-            start = timer()
-            surface_layers = [
-                make_surface_layer(
-                    surface,
-                    name="surface",
-                    color=attribute_settings.get(data["attr"], {}).get(
-                        "color", "viridis"
-                    ),
-                    min_val=attribute_settings.get(data["attr"], {}).get("min", None),
-                    max_val=attribute_settings.get(data["attr"], {}).get("max", None),
-                    unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
-                    hillshading=False,
-                )
-            ]
-            print(f"make surface layer{timer()-start}")
-            surface_layers2 = [
-                make_surface_layer(
-                    surface2,
-                    name="surface",
-                    color=attribute_settings.get(data2["attr"], {}).get(
-                        "color", "viridis"
-                    ),
-                    min_val=attribute_settings.get(data2["attr"], {}).get("min", None),
-                    max_val=attribute_settings.get(data2["attr"], {}).get("max", None),
-                    unit=attribute_settings.get(data2["attr"], {}).get("unit", ""),
-                    hillshading=False,
-                )
-            ]
-
-            surface_layers3 = [
-                make_surface_layer(
-                    surface3,
-                    name="surface",
-                    color=attribute_settings.get(data3["attr"], {}).get(
-                        "color", "viridis"
-                    ),
-                    min_val=attribute_settings.get(data3["attr"], {}).get("min", None),
-                    max_val=attribute_settings.get(data3["attr"], {}).get("max", None),
-                    unit=attribute_settings.get(data3["attr"], {}).get("unit", ""),
-                    hillshading=False,
-                )
-            ]
-            self.selected_intervals = [data["date"], data2["date"], data3["date"]]
+            #print("data3", data)
+            return self.make_map(data, ensemble, real, attribute_settings,2)
             
-            well_layers = [None,None,None]
-            start = timer()
-            for i in range(0,self.number_of_maps):     
-                start2 = timer()      
-                well_layers[i] = self.well_base_layer.copy()
-                print(f"copy well layer {timer()-start2}")
-                well_layers[i].append(
-                    make_new_well_layer(
-                        self.selected_intervals[i],
-                        self.drilled_well_df,
-                        self.drilled_well_info,
-                        self.interval_df,
-                        self.colors,
-                        selection="production",
-                        label="Producers",
-                    )
-                )
-                well_layers[i].append(
-                    make_new_well_layer(
-                        self.selected_intervals[i],
-                        self.drilled_well_df,
-                        self.drilled_well_info,
-                        self.interval_df,
-                        self.colors,
-                        selection="injection",
-                        label="Injectors",
-                    )
-                ) 
-             
-            for well_layer in well_layers[0]:
-                surface_layers.append(well_layer)       
-            print(f"Well data {timer()-start}")                                 
-            for well_layer in well_layers[1]:    
-                surface_layers2.append(well_layer)    
-                              
-            for well_layer in well_layers[2]:    
-                surface_layers3.append(well_layer)
-            start = timer()
-            self.selected_names = [data["name"], data2["name"], data3["name"]]
-            self.selected_attributes = [data["attr"], data2["attr"], data3["attr"]]
-            self.selected_ensembles = [ensemble, ensemble2, ensemble3]
-            self.selected_realizations = [real, real2, real3]
-
-            headings, sim_info, labels = self.get_headings("observations")
-            print(f"remaining {timer()-start}")
-            return (
-                headings[0],
-                headings[1],
-                headings[2],
-                sim_info[0],
-                sim_info[1],
-                sim_info[2],
-                surface_layers,
-                surface_layers2,
-                surface_layers3,
-                labels[0],
-                labels[1],
-                labels[2],
-            )
 
         def _update_from_btn(_n_prev, _n_next, current_value, options):
             """Updates dropdown value if previous/next btn is clicked"""
