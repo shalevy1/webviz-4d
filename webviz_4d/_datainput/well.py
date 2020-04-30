@@ -12,10 +12,12 @@ from pathlib import Path
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 def load_well(well_path):
-    return xtgeo.Well(well_path)
+    """ Return a well object (xtgeo) for a given file (RMS ascii format) """
+    return xtgeo.Well(well_path,mdlogname = "MD")
 
 
 def find_files(folder, suffix) -> io.BytesIO:
+    """ Return a sorted list of all files in a folder with a specified suffix  """
     return io.BytesIO(
         json.dumps(
             sorted([str(filename) for filename in Path(folder).glob(f"*{suffix}")])
@@ -24,8 +26,9 @@ def find_files(folder, suffix) -> io.BytesIO:
 
 
 def extract_well_metadata(directory):
+    """ Compile all metadata for wells in a given folder (+ sub-folders) """
     well_info = []
-    interval_info = []
+    depth_info = []
 
     yaml_files = glob.glob(str(directory) + "/**/.*.yaml", recursive=True)
 
@@ -38,18 +41,16 @@ def extract_well_metadata(directory):
 
             if len(data) > 1 and data[1]:
                 for item in data[1:]:
-                    interval_info.append(item)
+                    depth_info.append(item)
 
     well_info_df = json_normalize(well_info)
 
-    interval_df = json_normalize(interval_info)
+    depth_df = json_normalize(depth_info)
 
-    if not interval_df.empty:
-        interval_df.sort_values(
-            by=["interval.wellbore", "interval.mdTop"], inplace=True
-        )
+    if not depth_df.empty:
+        depth_df.sort_values(by=["interval.wellbore", "interval.mdTop"], inplace=True)
 
-    return well_info_df, interval_df
+    return well_info_df, depth_df
 
 
 def load_all_wells(wellfolder, wellsuffix):
@@ -82,6 +83,7 @@ def load_all_wells(wellfolder, wellsuffix):
 
 
 def get_position_data(well_dataframe, md_start):
+    """ Return x- and y-values for a well after a given depth """
     well_dataframe = well_dataframe[well_dataframe["MD"] > md_start]
     positions = well_dataframe[["X_UTME", "Y_UTMN"]].values
 
@@ -89,32 +91,24 @@ def get_position_data(well_dataframe, md_start):
 
 
 def get_well_polyline(
-    wellbore, short_name, well_dataframe, well_type, info, md_start, selection, colors
+    wellbore, short_name, well_dataframe, well_type, fluid, md_start, selection, colors
 ):
+    """ Extract polyline data - well trajectory, color and tooltip """
     color = "black"
     if colors:
         color = colors["default"]
 
-    # if not well_type == "planned":
-    #    wellbore = wellbore.replace("_", "/", 1)
-    #    wellbore = wellbore.replace("_", " ")
-    # print(short_name, well_type)
     tooltip = str(short_name) + " : " + well_type
 
     status = False
 
-    if info == "not applicable":
-        info = None
-
-    if info and not pd.isna(info):
-        tooltip = tooltip + " (" + info + ")"
-
-    # print(tooltip)
+    if fluid and not pd.isna(fluid):
+        tooltip = tooltip + " (" + fluid + ")"
 
     if selection:
         if (
             ("reservoir" in selection or "completed" in selection)
-            and not pd.isna(info)
+            and not pd.isna(fluid)
             and md_start > 0
         ):
             positions = get_position_data(well_dataframe, md_start)
@@ -127,19 +121,19 @@ def get_well_polyline(
             positions = get_position_data(well_dataframe, md_start)
             status = True
 
-        elif well_type == selection and not pd.isna(info) and md_start > 0:
-            ind = info.find(",")
+        elif well_type == selection and not pd.isna(fluid) and md_start > 0:
+            ind = fluid.find(",")
 
             if ind > 0:
-                info = "mixed"
+                fluid = "mixed"
 
             if colors:
-                color = colors[info + "_" + selection]
+                color = colors[fluid + "_" + selection]
 
             positions = get_position_data(well_dataframe, md_start)
             status = True
 
-        elif pd.isna(info):
+        elif pd.isna(fluid):
             positions = get_position_data(well_dataframe, md_start)
             status = True
 
@@ -154,8 +148,6 @@ def get_well_polyline(
             "positions": positions,
             "tooltip": tooltip,
         }
-    else:
-        return None
 
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
@@ -180,31 +172,15 @@ def make_new_well_layer(
     list_set = set(wellbores)
     # convert the set to the list
     unique_wellbores = list(list_set)
-    # unique_wellbores = [
-    #   "25_11-G-38_AY2T3",
-    #   "25_11-G-38_AY3",
-    #   "25_11-G-4_T2",
-    #   "25_11-G-20_A",
-    #   "25_11-G-24_A",
-    #   "25_11-G-32",
-    #   "25_11-G-36",
-    #   "25_11-G-14",
-    #   "25_11-G-23_A",
-    # ]
-
-    pd.set_option("display.max_rows", None)
-
-    # print("Number of wellbores: ", len(unique_wellbores))
-    # print(selection)
 
     for wellbore in unique_wellbores:
-        # print('wellbore ',wellbore)
+        #print('wellbore ',wellbore)
         md_start = 0
         polyline_data = None
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
         well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
-        # print(well_metadata)
+        print(well_metadata)
 
         md_top_res = well_metadata["wellbore.pick_md"].values
         if selection and len(md_top_res) > 0:
@@ -224,13 +200,6 @@ def make_new_well_layer(
             stop_date = None
         else:
             info = well_metadata["wellbore.fluids"].values
-            #start_date = well_metadata["Start date"].values
-            #if start_date:
-            #    start_date = start_date[0]
-
-            #stop_date = well_metadata["Stop date"].values
-            #if stop_date:
-            #    stop_date = stop_date[0]
 
         if info:
             info = info[0]

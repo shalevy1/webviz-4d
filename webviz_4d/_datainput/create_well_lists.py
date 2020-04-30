@@ -7,72 +7,12 @@ import math
 import yaml
 import pandas as pd
 import common
+import well
 
 
 OIL_PRODUCTION_FILE = "BORE_OIL_VOL.csv"
 GAS_INJECTION_FILE = "BORE_GI_VOL.csv"
 WATER_INJECTION_FILE = "BORE_WI_VOL.csv"
-
-
-def get_well_polyline(
-    wellbore, short_name, well_dataframe, well_type, fluid, md_start, selection, colors
-):
-    """ Extract polyline data - well trajectory, color and tooltip """
-    color = "black"
-    if colors:
-        color = colors["default"]
-
-    tooltip = str(short_name) + " : " + well_type
-
-    status = False
-
-    if fluid and not pd.isna(fluid):
-        tooltip = tooltip + " (" + fluid + ")"
-
-    if selection:
-        if (
-            ("reservoir" in selection or "completed" in selection)
-            and not pd.isna(fluid)
-            and md_start > 0
-        ):
-            positions = common.get_position_data(well_dataframe, md_start)
-            status = True
-
-        elif selection == "planned" and well_type == selection:
-            if colors:
-                color = colors[selection]
-
-            positions = common.get_position_data(well_dataframe, md_start)
-            status = True
-
-        elif well_type == selection and not pd.isna(fluid) and md_start > 0:
-            ind = fluid.find(",")
-
-            if ind > 0:
-                fluid = "mixed"
-
-            if colors:
-                color = colors[fluid + "_" + selection]
-
-            positions = common.get_position_data(well_dataframe, md_start)
-            status = True
-
-        elif pd.isna(fluid):
-            positions = common.get_position_data(well_dataframe, md_start)
-            status = True
-
-    else:
-        positions = common.get_position_data(well_dataframe, md_start)
-        status = True
-
-    if status:
-        return {
-            "type": "polyline",
-            "color": color,
-            "positions": positions,
-            "tooltip": tooltip,
-        }
-
 
 
 def check_interval(interval):
@@ -261,7 +201,7 @@ def make_new_well_layer(
             stop_date = None
 
         elif selection in ["reservoir_section", "planned"]:
-            polyline_data = get_well_polyline(
+            polyline_data = well.get_well_polyline(
                 wellbore,
                 short_name,
                 well_dataframe,
@@ -272,7 +212,7 @@ def make_new_well_layer(
                 colors,
             )
         elif not selection:
-            polyline_data = get_well_polyline(
+            polyline_data = well.get_well_polyline(
                 wellbore,
                 short_name,
                 well_dataframe,
@@ -297,7 +237,7 @@ def make_new_well_layer(
             ) = extract_production_info(well_metadata, interval, selection)
 
         if plot:
-            polyline_data = get_well_polyline(
+            polyline_data = well.get_well_polyline(
                 wellbore,
                 short_name,
                 well_dataframe,
