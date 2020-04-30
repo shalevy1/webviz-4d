@@ -47,7 +47,7 @@ def find_files(folder, suffix) -> io.BytesIO:
 
 def load_well(well_path):
     """ Return a well object (xtgeo) for a given file (RMS ascii format) """
-    return xtgeo.Well(well_path)
+    return xtgeo.Well(well_path,mdlogname = "MD")
 
 
 def load_all_wells(wellfolder, wellsuffix):
