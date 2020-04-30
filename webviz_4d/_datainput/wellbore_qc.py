@@ -240,7 +240,9 @@ prod_info_file = (
     "/private/ashska/development/webviz-4d/fields/grane/grane_prod_info.csv"
 )
 qc_file = "/private/ashska/development/webviz-4d/fields/grane/grane_qc.csv"
-combined_meta_data_file = "/private/ashska/development/webviz-4d/fields/grane/grane_metadata.csv"
+combined_meta_data_file = (
+    "/private/ashska/development/webviz-4d/fields/grane/grane_metadata.csv"
+)
 
 smda_df = pd.read_csv(smda_wells_file, sep=";")
 smda = smda_df[
@@ -253,58 +255,53 @@ smda = smda_df[
     ]
 ]
 
-smda.rename(columns={"unique_wellbore_identifier" : "wellbore.name"},inplace=True)
+smda.rename(columns={"unique_wellbore_identifier": "wellbore.name"}, inplace=True)
 print(smda)
 
 well_info_df, interval_df = extract_wellbore_metadata(rep_wells_dir)
 print(well_info_df)
 
-combined_df = pd.merge(smda,
-                 well_info_df,
-                 on="wellbore.name",
-                 how="left")
-                                
+combined_df = pd.merge(smda, well_info_df, on="wellbore.name", how="left")
+
 production_df = pd.read_csv(prod_info_file)
-production_df.rename(columns={"Production well" : "wellbore.name"},inplace=True)
+production_df.rename(columns={"Production well": "wellbore.name"}, inplace=True)
 print(production_df)
 
-merged_df = pd.merge(combined_df,
-                 production_df,
-                 on="wellbore.name",
-                 how="left")
-merged_df.to_csv(qc_file)    
+merged_df = pd.merge(combined_df, production_df, on="wellbore.name", how="left")
+merged_df.to_csv(qc_file)
 
-for index,row in merged_df.iterrows():
+for index, row in merged_df.iterrows():
     well_name = row["Well name"]
     wellbore_type = row["wellbore.type"]
-   
-    if pd.isna(well_name) and (wellbore_type == "production" or wellbore_type == "injection"):
-        #print(row)
+
+    if pd.isna(well_name) and (
+        wellbore_type == "production" or wellbore_type == "injection"
+    ):
+        # print(row)
         wellbore_name = row["wellbore.name"]
         well_name = get_wellname(well_info_df, wellbore_name)
-        start_date = production_df[production_df["Well name"] == well_name]["Start date"].values
-        stop_date = production_df[production_df["Well name"] == well_name]["Stop date"].values
-        
+        start_date = production_df[production_df["Well name"] == well_name][
+            "Start date"
+        ].values
+        stop_date = production_df[production_df["Well name"] == well_name][
+            "Stop date"
+        ].values
+
         if start_date.any():
             start_date = start_date[0]
         else:
             start_date = ""
-        
+
         if stop_date.any():
             stop_date = stop_date[0]
         else:
             stop_date = ""
-                  
-        merged_df.at[index,"Well name"] = well_name
-        merged_df.at[index,"Start date"] = start_date
-        merged_df.at[index,"Stop date"] = stop_date
-        
-        #print(wellbore_name,well_name,start_date)
-                
+
+        merged_df.at[index, "Well name"] = well_name
+        merged_df.at[index, "Start date"] = start_date
+        merged_df.at[index, "Stop date"] = stop_date
+
+        # print(wellbore_name,well_name,start_date)
+
 print(merged_df)
-merged_df.to_csv(combined_meta_data_file) 
-                 
-                 
-
-
-    
+merged_df.to_csv(combined_meta_data_file)

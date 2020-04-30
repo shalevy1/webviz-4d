@@ -1,393 +1,181 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import pandas as pd
-import numpy as np
-import sys
 import os
-import datetime as dt
-from datetime import datetime, timedelta
+from time import strptime
 import calendar
-import yaml
-import glob
-from pandas.io.json import json_normalize
+import argparse
+import numpy as np
+import pandas as pd
+import common
 
 
-def extract_wellbore_metadata(directory):
-    well_info = []
-    interval_info = []
+def get_start_stop_dates(well_prod_data, prod_file_update, volume_code):
+    well_prod_data.replace(" 00:00:00", "", regex=True, inplace=True)
+    # print(well_prod_data)
 
-    print(str(directory))
-    yaml_files = glob.glob(str(directory) + "/**/.*.yaml", recursive=True)
+    start_date = well_prod_data.loc[well_prod_data[volume_code] > 0, "DATEPRD"].min()
+    stop_date = well_prod_data.loc[well_prod_data[volume_code] > 0, "DATEPRD"].max()
 
-    for yaml_file in yaml_files:
-        with open(yaml_file, "r") as stream:
-            data = yaml.safe_load(stream)
-            # print('data',data)
+    if not common.is_nan(start_date):
+        stop_utc_time = strptime(stop_date, "%Y-%m-%d")
+        epoch_time = calendar.timegm(stop_utc_time)
+        # print(stop_date,prod_file_update - epoch_time)
 
-            well_info.append(data[0])
+        if prod_file_update - epoch_time < 130000:
+            # print(stop_date)
+            stop_date = np.nan
 
-            if len(data) > 1 and data[1]:
-                for item in data[1:]:
-                    interval_info.append(item)
+    return start_date, stop_date
 
-    well_info_df = json_normalize(well_info)
 
-    interval_df = json_normalize(interval_info)
+def check_production_wells(sorted_production_wells, well_info, pdm_names_file):
+    well_names = []
 
-    if not interval_df.empty:
-        interval_df.sort_values(
-            by=["interval.wellbore", "interval.mdTop"], inplace=True
-        )
+    # print(sorted_production_wells)
 
-    return well_info_df, interval_df
+    for pdm_well in sorted_production_wells:
+        well_name = common.get_wellname(well_info, pdm_well)
 
+        if not well_name:
+            print("ERROR: " + pdm_well + " not found in REP database")
+            pdm_names = pd.read_csv(pdm_names_file)
 
-def get_well_metadata(metadata_df, wellbore_name, item):
-    value = None
+            try:
+                row = pdm_names[pdm_names["PDM well name"] == pdm_well]
+                correct_name = row["Well name"][0]
+                well_name = common.get_wellname(well_info, correct_name)
+                print("Alias name found in " + pdm_names_file, pdm_well, well_name)
+            except:
+                print("Alias should be defined in " + pdm_names_file)
 
-    well_metadata = metadata_df[metadata_df["wellbore.name"] == wellbore_name]
-    value = well_metadata[item].values[0]
+        well_names.append(well_name)
 
-    return value
-
-
-def get_wellbores(metadata_df, well_name):
-    wellbores = metadata_df[metadata_df["wellbore.well_name"] == well_name]
-    wellbore_names = wellbores["wellbore.name"].values
-
-    return sorted(wellbore_names)
-
-
-def get_mother_wells(metadata_df, well_name):
-    mother_wells = [well_name]
-
-    wellbores = get_wellbores(metadata_df, well_name)
-    # print('wellbores ',wellbores)
-
-    mother_well = well_name
-    for wellbore in wellbores:
-        if not wellbore == mother_well and not wellbore[-2] == "T":
-            if wellbore[-1] in "123456789":
-                l = len(wellbore) - 1
-            else:
-                l = len(wellbore)
-            name = wellbore[:l]
-
-            if not name == mother_well:
-                mother_well = name
-                mother_wells.append(mother_well)
-
-    list_set = set(mother_wells)
-    unique_list = sorted(list(list_set))
-
-    return unique_list
-
-
-def get_branches(well_info_df, mother_well):
-    branches = []
-    i = mother_well.rfind(" ")
-
-    possible_branches = well_info_df[
-        well_info_df["wellbore.name"].str.contains(mother_well, regex=False)
-    ]["wellbore.name"].values
-
-    for branch in possible_branches:
-        ib = branch.rfind(" ")
-        l = len(branch)
-
-        if (
-            branch == mother_well or branch[: l - 1] == mother_well + " T"
-        ):  # Sidetracked mother wells
-            branches.append(branch)
-
-        elif mother_well[:i] == branch[:ib] and not i == 2:  # Avoid ii == i
-            # print(i,mother_well[:i],branch[:ib])
-            branches.append(branch)
-
-    return sorted(branches)
-
-
-def get_wellname(metadata_df, wellbore):
-    # print(wellbore)
-    well_name = get_well_metadata(well_info_df, wellbore, "wellbore.well_name")
-    # print('wellbore,well_name ',wellbore,well_name)
-    mother_wells = get_mother_wells(metadata_df, well_name)
-    # print(mother_wells)
-
-    for mother_well in mother_wells:
-        branches = get_branches(well_info_df, mother_well)
-        # print(branches)
-
-        for branch in branches:
-            if branch == wellbore:
-                return mother_well
-
-    return None
-
-
-def sort_wellbores(well_names):
-    block_names = []
-    slot_names = []
-    slot_numbers = []
-    branch_names = []
-
-    for well_name in well_names:
-        # print(well_name)
-        slot_number = ""
-        branch_name = ""
-
-        index1 = well_name.find("-")
-        index2 = well_name[index1 + 1 :].find("-") + index1 + 1
-
-        if index2 > index1 + 1:
-            slot_name = well_name[index1 + 1 : index2]
-            ind = well_name[3:].find(" ")
-
-            if ind > 0:
-                slot_number = int(well_name[index2 + 1 : ind + 4])
-            else:
-                slot_number = int(well_name[index2 + 1 :])
-        else:
-            ind = well_name[3:].find(" ")
-            if ind > 0:
-                slot_name = well_name[index1 + 1 : ind + 4]
-            else:
-                slot_name = well_name[index1 + 1 :]
-
-        if ind > 0:
-            branch_name = well_name[ind + 3 :]
-
-        block_name = well_name[:index1]
-
-        block_names.append(block_name)
-        slot_names.append(slot_name)
-        slot_numbers.append(slot_number)
-        branch_names.append(branch_name)
-
-    df = pd.DataFrame(
-        zip(well_names, block_names, slot_names, slot_numbers, branch_names),
-        columns=["Well_name", "Block_name", "Slot_name", "Slot_number", "Branch_name"],
-    )
-
-    # pd.set_option('display.max_rows', None)
-    df.sort_values(
-        by=["Block_name", "Slot_name", "Slot_number", "Branch_name"], inplace=True
-    )
-    sorted_wellbores = df["Well_name"].values
-
-    return sorted_wellbores
-
-
-def get_dates(well_df, txt):
-    start = "--------"
-    stop = "--------"
-
-    rows = well_df.loc[well_df[txt] > 0]
-
-    if not rows.empty:
-        start = rows["DATEPRD"].values[0][:10]
-        stop = rows["DATEPRD"].values[-1][:10]
-
-    return start, stop
-
-
-def convert_date(date_orig):
-    year = date_orig[-4:]
-    month_int = list(calendar.month_abbr).index(date_orig[3:6])
-
-    if month_int < 10:
-        month = "0" + str(month_int)
-    else:
-        month = str(month_int)
-
-    day = date_orig[:2]
-    return year + "-" + month + "-" + day + " 00:00:00"
-
-
-def get_date(dates_list, option):
-    start_dates = []
-    stop_dates = []
-
-    for dates in dates_list:
-        start_date = dates[0]
-
-        if start_date != "--------":
-            start_dates.append(start_date)
-
-        stop_date = dates[1]
-
-        if stop_date != "--------":
-            stop_dates.append(stop_date)
-
-    if option == "first":
-        date = min(start_dates)
-    elif option == "last":
-        date = max(stop_dates)
-        yesterday = (datetime.now() - timedelta(1)).strftime("%Y-%m-%d")
-        if date == yesterday:
-            date = "--------"
-
-    return date
+    return well_names
 
 
 ## Main program
-
-wells_dir = "/private/ashska/development/Grane"
-prod_data_file = (
-    "/private/ashska/development/webviz-4d/fields/grane_pdm/grane_prod_data.csv"
-)
-prod_info_file = (
-    "/private/ashska/development/webviz-4d/fields/grane/grane_prod_info.csv"
-)
-
-well_info_df, interval_df = extract_wellbore_metadata(wells_dir)
-well_info_df.sort_values(by=["wellbore.name"], inplace=True)
-print(well_info_df)
-
-prod_data = pd.read_csv(prod_data_file)
-prod_data.sort_values(by=["WELL_BORE_CODE", "DATEPRD"], inplace=True)
-
-prod_data_wells = prod_data["WELL_BORE_CODE"].unique()
-print("prod_data_wells", len(prod_data_wells))
-print(prod_data_wells)
-
-well_names = []
-for index, row in well_info_df.iterrows():
-    wellbore_name = row["wellbore.name"]
-    well_name = get_well_metadata(well_info_df, wellbore_name, "wellbore.well_name")
-    well_names.append(well_name)
-    wellbore_names = get_wellbores(well_info_df, well_name)
-
-list_set = set(well_names)
-well_names = sorted(list(list_set))
-
-i = 0
-all_wellbores = []
-
-for well_name in well_names:
-    # print(well_name)
-
-    mother_wells = get_mother_wells(well_info_df, well_name)
-    for mother_well in mother_wells:
-        # print("- ", mother_well)
-
-        wellbores = get_branches(well_info_df, mother_well)
-        for wellbore in wellbores:
-            all_wellbores.append(wellbore)
-            # print(" - ", wellbore, i)
-            i = i + 1
-    # print("")
-
-print(len(all_wellbores))
-
-wellbores = well_info_df["wellbore.name"].values
-
-for wellbore in wellbores:
-    indices = [i for i, x in enumerate(all_wellbores) if x == wellbore]
-
-    if not indices:
-        print("ERROR: " + wellbore + " not found in list")
-
-sorted_wellbores = sort_wellbores(wellbores)
-sorted_production_wells = sort_wellbores(prod_data_wells)
-
-well_names = []
-start_dates = []
-stop_dates = []
-oil_prod_volumes = []
-gas_prod_volumes = []
-water_prod_volumes = []
-gas_inject_volumes = []
-water_inject_volumes = []
-
-for wellbore in sorted_production_wells:
-    well_df = prod_data[prod_data["WELL_BORE_CODE"] == wellbore]
-    oil_prod_dates = get_dates(well_df, "BORE_OIL_VOL")
-    gas_prod_dates = get_dates(well_df, "BORE_GAS_VOL")
-    water_prod_dates = get_dates(well_df, "BORE_WAT_VOL")
-    gas_inject_dates = get_dates(well_df, "BORE_GI_VOL")
-    water_inject_dates = get_dates(well_df, "BORE_WI_VOL")
-    sum_df = well_df.sum(numeric_only=True)
-    well_oil_volumes = sum_df["BORE_OIL_VOL"]
-    well_gas_volumes = sum_df["BORE_GAS_VOL"]
-    well_water_volumes = sum_df["BORE_WAT_VOL"]
-    well_gas_inject_volumes = sum_df["BORE_GI_VOL"]
-    well_water_inject_volumes = sum_df["BORE_WI_VOL"]
-
-    if wellbore == "NO 25/11-G-22 BY 1":
-        wellbore = "NO 25/11-G-22 BY1"
-    well_name = get_wellname(well_info_df, wellbore)
-    well_names.append(well_name)
-
-    start_date = get_date(
-        [
-            oil_prod_dates,
-            gas_prod_dates,
-            water_prod_dates,
-            gas_inject_dates,
-            water_inject_dates,
-        ],
-        "first",
+def main():
+    parser = argparse.ArgumentParser(description="Extract production data")
+    parser.add_argument("well_directory", help="Enter path to the main well folder")
+    parser.add_argument(
+        "production_file", help="Enter path to a file with the daily production volumes"
     )
-    stop_date = get_date(
-        [
-            oil_prod_dates,
-            gas_prod_dates,
-            water_prod_dates,
-            gas_inject_dates,
-            water_inject_dates,
-        ],
-        "last",
+    parser.add_argument("fmu_directory", help="Enter path to the FMU case folder")
+
+    args = parser.parse_args()
+
+    well_directory = args.well_directory
+    production_file = args.production_file
+    fmu_directory = args.fmu_directory
+
+    print(well_directory, production_file, fmu_directory)
+
+    wellbore_info_file = "wellbore_info.csv"
+    delimiter = "--"
+    map_suffix = ".gri"
+
+    well_info = pd.read_csv(os.path.join(well_directory, wellbore_info_file))
+    # print(well_info)
+
+    prod_data = pd.read_csv(production_file)
+    prod_file_update = os.path.getmtime(production_file)
+
+    print(prod_data)
+
+    prod_data_wells = prod_data["WELL_BORE_CODE"].unique()
+
+    sorted_production_wells = common.sort_wellbores(prod_data_wells)
+    pdm_names_file = os.path.join(well_directory, "wrong_pdm_well_names.csv")
+    all_well_names = check_production_wells(
+        sorted_production_wells, well_info, pdm_names_file
     )
-    start_dates.append(start_date)
-    stop_dates.append(stop_date)
 
-    oil_prod_volumes.append(well_oil_volumes)
-    gas_prod_volumes.append(well_gas_volumes)
-    water_prod_volumes.append(well_water_volumes)
-    gas_inject_volumes.append(well_gas_inject_volumes)
-    water_inject_volumes.append(well_water_inject_volumes)
+    dates_4d = common.all_interval_dates(fmu_directory, delimiter, map_suffix)
+    print(dates_4d)
+    # print(len(dates_4d))
 
-    print(wellbore)
-    # print(" Oil produduction ", oil_prod_dates, well_oil_volumes)
-    # print(" Gas produduction ", gas_prod_dates, well_gas_volumes)
-    # print(" Water produduction ", water_prod_dates, well_water_volumes)
-    # print(" Gas injection ", gas_inject_dates, well_gas_inject_volumes)
-    # print(" Water injection ", water_inject_dates, well_water_inject_volumes)
+    volume_codes = [
+        "BORE_OIL_VOL",
+        "BORE_GAS_VOL",
+        "BORE_WAT_VOL",
+        "BORE_GI_VOL",
+        "BORE_WI_VOL",
+    ]
 
-    indices = [i for i, x in enumerate(all_wellbores) if x == wellbore]
+    for volume_code in volume_codes:
+        pdm_names = []
+        well_names = []
+        start_dates = []
+        stop_dates = []
+        intervals = []
+        volumes = np.zeros((len(sorted_production_wells), len(dates_4d) + 2))
 
-    if not indices:
-        print("ERROR: " + wellbore + " not found in list")
+        print(volume_code)
+        volume_df = pd.DataFrame()
 
-prod_df = pd.DataFrame(
-    zip(
-        sorted_production_wells,
-        well_names,
-        start_dates,
-        stop_dates,
-        oil_prod_volumes,
-        gas_prod_volumes,
-        water_prod_volumes,
-        gas_inject_volumes,
-        water_inject_volumes,
-    ),
-    columns=[
-        "Production well",
-        "Well name",
-        "Start date",
-        "Stop date",
-        "Oil volume",
-        "Gas volume",
-        "Water volume",
-        "Injected gas",
-        "Injected water",
-    ],
-)
+        index = 0
+        for pdm_well in sorted_production_wells:
+            print(pdm_well)
+            well_prod_data = prod_data[prod_data["WELL_BORE_CODE"] == pdm_well]
+            well_prod_data = well_prod_data[["WELL_BORE_CODE", "DATEPRD", volume_code]]
+            # print(well_prod_data)
+            start_date, stop_date = get_start_stop_dates(
+                well_prod_data, prod_file_update, volume_code
+            )
 
-print(prod_df)
-print("Number of production wellbores: ", len(prod_df["Production well"].unique()))
-print("Number of production wells: ", len(prod_df["Well name"].unique()))
+            pdm_names.append(pdm_well)
+            well_names.append(all_well_names[index])
+            start_dates.append(start_date)
+            stop_dates.append(stop_date)
 
-prod_df.to_csv(prod_info_file,index=False)
+            for i in range(0, len(dates_4d) - 1):
+                intervals.append(dates_4d[i] + "-" + dates_4d[i + 1])
+
+                volumes[index, i] = well_prod_data.loc[
+                    (well_prod_data["DATEPRD"] >= dates_4d[i])
+                    & (well_prod_data["DATEPRD"] < dates_4d[i + 1]),
+                    volume_code,
+                ].sum()
+                # print(pdm_well, intervals[i], volumes[index, i])
+
+            last_interval = dates_4d[i + 1] + "-now"
+            intervals.append(last_interval)
+            volumes[index, i + 1] = well_prod_data.loc[
+                (well_prod_data["DATEPRD"] >= dates_4d[i + 1]), volume_code,
+            ].sum()
+
+            all_intervals = dates_4d[0] + "-now"
+            intervals.append(all_intervals)
+            volumes[index, i + 2] = well_prod_data.loc[
+                (well_prod_data["DATEPRD"] >= dates_4d[0]), volume_code,
+            ].sum()
+            # print("")
+
+            index = index + 1
+
+        volume_df["PDM well name"] = pdm_names
+        volume_df["Well name"] = well_names
+        volume_df["Start date"] = start_dates
+        volume_df["Stop date"] = stop_dates
+
+        pd.set_option("display.max_columns", None)
+        pd.set_option("display.max_rows", None)
+
+        for i in range(0, len(dates_4d) + 1):
+            volume_df[intervals[i]] = volumes[:, i]
+            print(i, intervals[i])
+            print(volume_df["1993-01-01-2005-07-01"])
+
+        volume_df_actual = volume_df[volume_df[all_intervals] > 0]
+
+        print(volume_df)
+
+        csv_file = os.path.join(well_directory, volume_code + ".csv")
+        volume_df_actual.to_csv(csv_file, index=False)
+
+        print("Data exported to file " + csv_file)
+
+
+if __name__ == "__main__":
+    main()

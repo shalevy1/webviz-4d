@@ -74,9 +74,9 @@ def load_all_wells(wellfolder, wellsuffix):
     all_wells_df = pd.concat(all_wells_list)
 
     well_info, interval_df = extract_well_metadata(wellfolder)
-    metadata_file = os.path.join(wellfolder,"wellbore_info.csv")
+    metadata_file = os.path.join(wellfolder, "wellbore_info.csv")
     metadata = pd.read_csv(metadata_file)
-    #print('load_all_wells ',metadata)
+    # print('load_all_wells ',metadata)
 
     return (all_wells_df, metadata, interval_df)
 
@@ -98,13 +98,13 @@ def get_well_polyline(
     # if not well_type == "planned":
     #    wellbore = wellbore.replace("_", "/", 1)
     #    wellbore = wellbore.replace("_", " ")
-    #print(short_name, well_type)
+    # print(short_name, well_type)
     tooltip = str(short_name) + " : " + well_type
 
     status = False
 
     if info == "not applicable":
-        info = None    
+        info = None
 
     if info and not pd.isna(info):
         tooltip = tooltip + " (" + info + ")"
@@ -119,13 +119,13 @@ def get_well_polyline(
         ):
             positions = get_position_data(well_dataframe, md_start)
             status = True
-            
+
         elif selection == "planned" and well_type == selection:
             if colors:
                 color = colors[selection]
 
             positions = get_position_data(well_dataframe, md_start)
-            status = True    
+            status = True
 
         elif well_type == selection and not pd.isna(info) and md_start > 0:
             ind = info.find(",")
@@ -138,12 +138,11 @@ def get_well_polyline(
 
             positions = get_position_data(well_dataframe, md_start)
             status = True
-            
+
         elif pd.isna(info):
             positions = get_position_data(well_dataframe, md_start)
             status = True
-            
-       
+
     else:
         positions = get_position_data(well_dataframe, md_start)
         status = True
@@ -171,6 +170,7 @@ def make_new_well_layer(
 ):
     """Make layeredmap wells layer"""
     from timeit import default_timer as timer
+
     start = timer()
     data = []
     if not colors:
@@ -180,7 +180,7 @@ def make_new_well_layer(
     list_set = set(wellbores)
     # convert the set to the list
     unique_wellbores = list(list_set)
-    #unique_wellbores = [
+    # unique_wellbores = [
     #   "25_11-G-38_AY2T3",
     #   "25_11-G-38_AY3",
     #   "25_11-G-4_T2",
@@ -190,12 +190,12 @@ def make_new_well_layer(
     #   "25_11-G-36",
     #   "25_11-G-14",
     #   "25_11-G-23_A",
-    #]
+    # ]
 
     pd.set_option("display.max_rows", None)
 
-    #print("Number of wellbores: ", len(unique_wellbores))
-    #print(selection)
+    # print("Number of wellbores: ", len(unique_wellbores))
+    # print(selection)
 
     for wellbore in unique_wellbores:
         # print('wellbore ',wellbore)
@@ -204,85 +204,89 @@ def make_new_well_layer(
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
         well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
-        #print(well_metadata)
-        
+        # print(well_metadata)
+
         md_top_res = well_metadata["wellbore.pick_md"].values
         if selection and len(md_top_res) > 0:
             md_start = min(md_top_res)
-        
+
         short_name = well_metadata["wellbore.short_name"].values
         if short_name:
             short_name = short_name[0]
-        
+
         well_type = well_metadata["wellbore.type"].values
         if well_type:
             well_type = well_type[0]
-        
+
         if well_type == "planned":
             info = well_metadata["wellbore.list_name"].values
             start_date = None
             stop_date = None
         else:
             info = well_metadata["wellbore.fluids"].values
-            start_date = well_metadata["Start date"].values
-            if start_date :
-                start_date = start_date[0]
-                    
-            stop_date = well_metadata["Stop date"].values
-            if stop_date :
-                stop_date = stop_date[0]
-            
+            #start_date = well_metadata["Start date"].values
+            #if start_date:
+            #    start_date = start_date[0]
+
+            #stop_date = well_metadata["Stop date"].values
+            #if stop_date:
+            #    stop_date = stop_date[0]
+
         if info:
-            info = info[0] 
-            
+            info = info[0]
+
         plot = False
-        if selection and well_type == selection and (selection == "production" or selection == "injection"):                   
-            if interval and not pd.isna(start_date) and not pd.isna(stop_date):  
+        if (
+            selection
+            and well_type == selection
+            and (selection == "production" or selection == "injection")
+        ):
+            if interval and not pd.isna(start_date) and not pd.isna(stop_date):
                 interval_start = interval[0:4] + interval[5:7] + interval[8:10]
                 interval_stop = interval[11:15] + interval[16:18] + interval[19:21]
-                           
+
                 if interval_start >= start_date and interval_start <= stop_date:
                     plot = True
-                   
-                elif interval_stop >= start_date and interval_stop <= stop_date: 
-                    plot = True  
-                    
-                if plot:    
-                           
+
+                elif interval_stop >= start_date and interval_stop <= stop_date:
+                    plot = True
+
+                if plot:
+
                     polyline_data = get_well_polyline(
-                            wellbore,
-                            short_name,
-                            well_dataframe,
-                            well_type,
-                            info,
-                            md_start,
-                            selection,
-                            colors,
-                        )       
-        elif selection == "reservoir_section" or selection == "planned": 
+                        wellbore,
+                        short_name,
+                        well_dataframe,
+                        well_type,
+                        info,
+                        md_start,
+                        selection,
+                        colors,
+                    )
+        elif selection == "reservoir_section" or selection == "planned":
             polyline_data = get_well_polyline(
-                    wellbore,
-                    short_name,
-                    well_dataframe,
-                    well_type,
-                    info,
-                    md_start,
-                    selection,
-                    colors,
-                )        
+                wellbore,
+                short_name,
+                well_dataframe,
+                well_type,
+                info,
+                md_start,
+                selection,
+                colors,
+            )
         elif not selection:
             polyline_data = get_well_polyline(
-                    wellbore,
-                    short_name,
-                    well_dataframe,
-                    well_type,
-                    info,
-                    md_start,
-                    selection,
-                    colors,
-                )
-                  
+                wellbore,
+                short_name,
+                well_dataframe,
+                well_type,
+                info,
+                md_start,
+                selection,
+                colors,
+            )
+
         if polyline_data:
             data.append(polyline_data)
-    #print(f"Well function {timer()-start}")
+    # print(f"Well function {timer()-start}")
     return {"name": label, "checked": False, "base_layer": False, "data": data}
