@@ -116,7 +116,6 @@ another_property:
         # print('_names_in_attr: ',names)
         return names
 
-
     def _interval_in_attr(self, attribute):
         intervals = self.intervals
         if intervals is not None and intervals == [np.nan]:

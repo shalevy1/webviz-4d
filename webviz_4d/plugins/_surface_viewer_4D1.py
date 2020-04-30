@@ -7,8 +7,6 @@ import numpy as np
 import pandas as pd
 import xtgeo
 import dash
-import pickle
-
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_html_components as html
@@ -40,7 +38,7 @@ from webviz_4d._datainput._metadata import (
 )
 
 
-class SurfaceViewer4D(WebvizPluginABC):
+class SurfaceViewer4D1(WebvizPluginABC):
     """### SurfaceViewerFMU
 
 A plugin to covisualize surfaces from an ensemble.
@@ -85,7 +83,6 @@ and available for instant viewing.
         }
         self.delimiter = "--"
         self.observation = "observations"
-        self.wellfolder = wellfolder
         self.attribute_settings = attribute_settings if attribute_settings else {}
 
         # Find FMU directory
@@ -97,12 +94,11 @@ and available for instant viewing.
         self.fmu_info = os.path.dirname(self.directory)
         # print(directory)
 
-        self.number_of_maps = 3
+        self.number_of_maps = 1
         self.configuration = configuration
         self.config = read_config(self.configuration)
         default_interval = self.config["map_settings"]["default_interval"]
         self.selected_intervals = [default_interval, default_interval, default_interval]
-
         # print(self.config)
         self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
         # print('self.map_defaults ',self.map_defaults)
@@ -129,8 +125,8 @@ and available for instant viewing.
 
         self.colors = get_well_colors(self.config)
 
-        self.well_base_layers = []
-        self.well_base_layers.append(
+        self.well_base_layer = []
+        self.well_base_layer.append(
             make_new_well_layer(
                 self.selected_intervals[0],
                 self.drilled_well_df,
@@ -138,8 +134,7 @@ and available for instant viewing.
                 self.interval_df,
             )
         )
-
-        self.well_base_layers.append(
+        self.well_base_layer.append(
             make_new_well_layer(
                 self.selected_intervals[0],
                 self.drilled_well_df,
@@ -155,7 +150,7 @@ and available for instant viewing.
             planned_well_df, planned_well_info, dummy_df = load_all_wells(
                 folder, self.wellsuffix
             )
-            self.well_base_layers.append(
+            self.well_base_layer.append(
                 make_new_well_layer(
                     self.selected_intervals[0],
                     planned_well_df,
@@ -169,12 +164,6 @@ and available for instant viewing.
 
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
-        )
-        self.selector2 = SurfaceSelector(
-            app, self.metadata, self.intervals, self.map_defaults[1]
-        )
-        self.selector3 = SurfaceSelector(
-            app, self.metadata, self.intervals, self.map_defaults[2]
         )
 
         self.set_callbacks(app)
@@ -341,38 +330,6 @@ and available for instant viewing.
                                 ),
                             ],
                         ),
-                        html.Div(
-                            style={"margin": "10px", "flex": 4},
-                            id=self.uuid("settings-view2"),
-                            children=[
-                                self.selector2.layout,
-                                self.ensemble_layout(
-                                    1,
-                                    ensemble_id=self.uuid("ensemble2"),
-                                    ens_prev_id=self.uuid("ensemble2-prev"),
-                                    ens_next_id=self.uuid("ensemble2-next"),
-                                    real_id=self.uuid("realization2"),
-                                    real_prev_id=self.uuid("realization2-prev"),
-                                    real_next_id=self.uuid("realization2-next"),
-                                ),
-                            ],
-                        ),
-                        html.Div(
-                            style={"margin": "10px", "flex": 4},
-                            id=self.uuid("settings-view3"),
-                            children=[
-                                self.selector3.layout,
-                                self.ensemble_layout(
-                                    2,
-                                    ensemble_id=self.uuid("ensemble3"),
-                                    ens_prev_id=self.uuid("ensemble3-prev"),
-                                    ens_next_id=self.uuid("ensemble3-next"),
-                                    real_id=self.uuid("realization3"),
-                                    real_prev_id=self.uuid("realization3-prev"),
-                                    real_next_id=self.uuid("realization3-next"),
-                                ),
-                            ],
-                        ),
                     ],
                 ),
                 wcc.FlexBox(
@@ -398,7 +355,7 @@ and available for instant viewing.
                                     },
                                 ),
                                 LayeredMap(
-                                    sync_ids=[self.uuid("map2"), self.uuid("map3")],
+                                    sync_ids=[],
                                     id=self.uuid("map"),
                                     height=600,
                                     layers=[],
@@ -406,78 +363,6 @@ and available for instant viewing.
                                 ),
                                 html.Div(
                                     id=self.uuid("interval-label1"),
-                                    style={
-                                        "textAlign": "center",
-                                        "fontSize": 20,
-                                        "fontWeight": "bold",
-                                    },
-                                ),
-                            ],
-                        ),
-                        html.Div(
-                            style={"margin": "10px", "flex": 4},
-                            children=[
-                                html.Div(
-                                    id=self.uuid("heading2"),
-                                    style={
-                                        "textAlign": "center",
-                                        "fontSize": 20,
-                                        "fontWeight": "bold",
-                                    },
-                                ),
-                                html.Div(
-                                    id=self.uuid("sim_info2"),
-                                    style={
-                                        "textAlign": "center",
-                                        "fontSize": 15,
-                                        "fontWeight": "bold",
-                                    },
-                                ),
-                                LayeredMap(
-                                    sync_ids=[self.uuid("map"), self.uuid("map3")],
-                                    id=self.uuid("map2"),
-                                    height=600,
-                                    layers=[],
-                                    hillShading=False,
-                                ),
-                                html.Div(
-                                    id=self.uuid("interval-label2"),
-                                    style={
-                                        "textAlign": "center",
-                                        "fontSize": 20,
-                                        "fontWeight": "bold",
-                                    },
-                                ),
-                            ],
-                        ),
-                        html.Div(
-                            style={"margin": "10px", "flex": 4},
-                            children=[
-                                html.Div(
-                                    id=self.uuid("heading3"),
-                                    style={
-                                        "textAlign": "center",
-                                        "fontSize": 20,
-                                        "fontWeight": "bold",
-                                    },
-                                ),
-                                html.Div(
-                                    id=self.uuid("sim_info3"),
-                                    style={
-                                        "textAlign": "center",
-                                        "fontSize": 15,
-                                        "fontWeight": "bold",
-                                    },
-                                ),
-                                LayeredMap(
-                                    sync_ids=[self.uuid("map"), self.uuid("map2")],
-                                    id=self.uuid("map3"),
-                                    height=600,
-                                    layers=[],
-                                    hillShading=False,
-                                ),
-                                html.Div(
-                                    id=self.uuid("interval-label3"),
                                     style={
                                         "textAlign": "center",
                                         "fontSize": 20,
@@ -544,68 +429,11 @@ and available for instant viewing.
         )
 
         sim_info = info
+        print("self.selected_intervals[map_ind] ", self.selected_intervals[map_ind])
+        print("self.config ", self.config)
         label = get_plot_label(self.config, self.selected_intervals[map_ind])
 
         return heading, sim_info, label
-
-    def make_map(self, data, ensemble, real, attribute_settings, map_idx):
-        start = timer()
-        data = json.loads(data)
-        attribute_settings = json.loads(attribute_settings)
-        map_type = self.map_defaults[map_idx]["map_type"]
-
-        # print(f"loading data {timer()-start}")
-        start = timer()
-        surface = load_surface(self.get_real_runpath(data, ensemble, real, map_type))
-        # print(f"loading surface {timer()-start}")
-        start = timer()
-        surface_layers = [
-            make_surface_layer(
-                surface,
-                name="surface",
-                color=attribute_settings.get(data["attr"], {}).get("color", "viridis"),
-                min_val=attribute_settings.get(data["attr"], {}).get("min", None),
-                max_val=attribute_settings.get(data["attr"], {}).get("max", None),
-                unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
-                hillshading=False,
-            )
-        ]
-        # print(f"make surface layer {timer()-start}")
-        self.selected_intervals[map_idx] = data["date"]
-
-        for well_layer in self.well_base_layers:
-            # print(well_layer["name"])
-            surface_layers.append(well_layer)
-
-        interval_file = os.path.join(
-            self.wellfolder,
-            "production_well_layers_" + self.selected_intervals[map_idx] + ".pkl",
-        )
-        interval_layer = pickle.load(open(interval_file, "rb"))
-        surface_layers.append(interval_layer[0])
-        # print(interval_layer[0]["name"])
-
-        interval_file = os.path.join(
-            self.wellfolder,
-            "injection_well_layers_" + self.selected_intervals[map_idx] + ".pkl",
-        )
-        interval_layer = pickle.load(open(interval_file, "rb"))
-        surface_layers.append(interval_layer[0])
-        # print(interval_layer[0]["name"])
-
-        self.selected_names[map_idx] = data["name"]
-        self.selected_attributes[map_idx] = data["attr"]
-        self.selected_ensembles[map_idx] = ensemble
-        self.selected_realizations[map_idx] = real
-
-        heading, sim_info, label = self.get_heading(map_idx, self.observation)
-        # print(f"remaining {timer()-start}")
-        return (
-            heading,
-            sim_info,
-            surface_layers,
-            label,
-        )
 
     def set_callbacks(self, app):
         # First map
@@ -627,56 +455,80 @@ and available for instant viewing.
         def _set_base_layer(
             data, ensemble, real, attribute_settings,
         ):
-            # ctx = dash.callback_context.triggered
-            # print(ctx)
-            # print("callback 1")
-            # print("data ", data)
-            return self.make_map(data, ensemble, real, attribute_settings, 0)
+            print("data ", data)
+            start = timer()
+            data = json.loads(data)
+            attribute_settings = json.loads(attribute_settings)
+            map_type1 = self.map_defaults[0]["map_type"]
 
-        # Second map
-        @app.callback(
-            [
-                Output(self.uuid("heading2"), "children"),
-                Output(self.uuid("sim_info2"), "children"),
-                Output(self.uuid("map2"), "layers"),
-                Output(self.uuid("interval-label2"), "children"),
-            ],
-            [
-                Input(self.selector2.storage_id, "children"),
-                Input(self.uuid("ensemble2"), "value"),
-                Input(self.uuid("realization2"), "value"),
-                Input(self.uuid("attribute-settings"), "data"),
-            ],
-        )
-        # pylint: disable=too-many-arguments, too-many-locals
-        def _set_base_layer(
-            data, ensemble, real, attribute_settings,
-        ):
-            # print("callback 2")
-            # print("data2", data)
-            return self.make_map(data, ensemble, real, attribute_settings, 1)
+            print(f"loading data {timer()-start}")
+            start = timer()
+            surface = load_surface(
+                self.get_real_runpath(data, ensemble, real, map_type1)
+            )
+            print(f"loading surface {timer()-start}")
+            start = timer()
+            surface_layers = [
+                make_surface_layer(
+                    surface,
+                    name="surface",
+                    color=attribute_settings.get(data["attr"], {}).get(
+                        "color", "viridis"
+                    ),
+                    min_val=attribute_settings.get(data["attr"], {}).get("min", None),
+                    max_val=attribute_settings.get(data["attr"], {}).get("max", None),
+                    unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
+                    hillshading=False,
+                )
+            ]
+            print(f"make surface layer {timer()-start}")
+            self.selected_intervals[0] = data["date"]
 
-        # Third map
-        @app.callback(
-            [
-                Output(self.uuid("heading3"), "children"),
-                Output(self.uuid("sim_info3"), "children"),
-                Output(self.uuid("map3"), "layers"),
-                Output(self.uuid("interval-label3"), "children"),
-            ],
-            [
-                Input(self.selector3.storage_id, "children"),
-                Input(self.uuid("ensemble3"), "value"),
-                Input(self.uuid("realization3"), "value"),
-                Input(self.uuid("attribute-settings"), "data"),
-            ],
-        )
-        # pylint: disable=too-many-arguments, too-many-locals
-        def _set_base_layer(
-            data, ensemble, real, attribute_settings,
-        ):
-            # print("data3", data)
-            return self.make_map(data, ensemble, real, attribute_settings, 2)
+            start2 = timer()
+            well_layers = self.well_base_layer.copy()
+            print(f"copy well layer {timer()-start2}")
+            well_layers.append(
+                make_new_well_layer(
+                    self.selected_intervals[0],
+                    self.drilled_well_df,
+                    self.drilled_well_info,
+                    self.interval_df,
+                    self.colors,
+                    selection="production",
+                    label="Producers",
+                )
+            )
+            well_layers.append(
+                make_new_well_layer(
+                    self.selected_intervals[0],
+                    self.drilled_well_df,
+                    self.drilled_well_info,
+                    self.interval_df,
+                    self.colors,
+                    selection="injection",
+                    label="Injectors",
+                )
+            )
+
+            for well_layer in well_layers:
+                surface_layers.append(well_layer)
+            print(f"Well data {timer()-start}")
+
+            self.selected_names[0] = data["name"]
+            self.selected_attributes[0] = data["attr"]
+            self.selected_ensembles[0] = ensemble
+            self.selected_realizations[0] = real
+
+            map_ind = 0
+            heading, sim_info, label = self.get_heading(map_ind, self.observation)
+            print(heading, sim_info, label)
+            print(f"remaining {timer()-start}")
+            return (
+                heading,
+                sim_info,
+                surface_layers,
+                label,
+            )
 
         def _update_from_btn(_n_prev, _n_next, current_value, options):
             """Updates dropdown value if previous/next btn is clicked"""
@@ -696,10 +548,6 @@ and available for instant viewing.
         for btn_name in [
             "ensemble",
             "realization",
-            "ensemble2",
-            "realization2",
-            "ensemble3",
-            "realization3",
         ]:
             app.callback(
                 Output(self.uuid(f"{btn_name}"), "value"),
@@ -779,48 +627,6 @@ and available for instant viewing.
         return store_functions
 
 
-@CACHE.memoize(timeout=CACHE.TIMEOUT)
-def calculate_surface(fns, statistic):
-    return surface_from_json(json.load(save_surface(fns, statistic)))
-
-
-@webvizstore
-def save_surface(fns, statistic) -> io.BytesIO:
-    surfaces = xtgeo.Surfaces(fns)
-    if len(surfaces.surfaces) == 0:
-        surface = xtgeo.RegularSurface()
-    elif statistic == "Mean":
-        surface = surfaces.apply(np.nanmean, axis=0)
-    elif statistic == "StdDev":
-        surface = surfaces.apply(np.nanstd, axis=0)
-    elif statistic == "Min":
-        surface = surfaces.apply(np.nanmin, axis=0)
-    elif statistic == "Max":
-        surface = surfaces.apply(np.nanmax, axis=0)
-    elif statistic == "P10":
-        surface = surfaces.apply(np.nanpercentile, 10, axis=0)
-    elif statistic == "P90":
-        surface = surfaces.apply(np.nanpercentile, 90, axis=0)
-    else:
-        surface = xtgeo.RegularSurface()
-    return io.BytesIO(surface_to_json(surface).encode())
-
-
-def surface_to_json(surface):
-    return json.dumps(
-        {
-            "ncol": surface.ncol,
-            "nrow": surface.nrow,
-            "xori": surface.xori,
-            "yori": surface.yori,
-            "rotation": surface.rotation,
-            "xinc": surface.xinc,
-            "yinc": surface.yinc,
-            "values": surface.values.copy().filled(np.nan).tolist(),
-        }
-    )
-
-
 def surface_from_json(surfaceobj):
     return xtgeo.RegularSurface(**surfaceobj)
 
@@ -871,10 +677,3 @@ def find_files(folder, suffix) -> io.BytesIO:
             sorted([str(filename) for filename in folder.glob(f"*{suffix}")])
         ).encode()
     )
-
-
-def make_fmu_filename(data):
-    filename = f"{data['name']}--{data['attr']}"
-    if data["date"] is not None:
-        filename += f"--{data['date']}"
-    return filename
