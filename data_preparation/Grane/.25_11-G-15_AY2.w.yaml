@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-15 AY2
+   rms_name: 25_11-G-15_AY2
+   short_name: G-15AY2
+   slot_name: NO 25/11-G-15
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2009-01-29T00:00:00
+   fluids: oil

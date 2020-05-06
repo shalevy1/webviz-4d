@@ -1,0 +1,60 @@
+- wellbore:
+   name: NO 25/11-G-25 AY1T2
+   rms_name: 25_11-G-25_AY1T2
+   short_name: G-25AY1T2
+   slot_name: NO 25/11-G-25
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2015-12-30T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2380.239
+    mdTop: 2367.881
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2562.617
+    mdTop: 2380.239
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2891.497
+    mdTop: 2598.245
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2904.018
+    mdTop: 2891.497
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2916.523
+    mdTop: 2904.018
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3453.141
+    mdTop: 2928.458
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3884.37
+    mdTop: 3453.141
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4078.695
+    mdTop: 3884.37
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4252.528
+    mdTop: 4078.695
+    wellbore: NO 25/11-G-25 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4425.264
+    mdTop: 4252.528
+    wellbore: NO 25/11-G-25 AY1T2

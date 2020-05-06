@@ -1,0 +1,105 @@
+- wellbore:
+   name: NO 25/11-G-8 T2
+   rms_name: 25_11-G-8_T2
+   short_name: G-8T2
+   slot_name: NO 25/11-G-8
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2005-11-27T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 3639.244
+    mdTop: 3231.378
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3650.929
+    mdTop: 3639.244
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 3720.917
+    mdTop: 3650.929
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3732.608
+    mdTop: 3720.917
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 3747.36
+    mdTop: 3735.658
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 3782.341
+    mdTop: 3758.948
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 3817.176
+    mdTop: 3794.041
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 3863.86
+    mdTop: 3828.751
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3875.555
+    mdTop: 3863.86
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 3992.575
+    mdTop: 3875.555
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4004.274
+    mdTop: 3992.575
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4015.966
+    mdTop: 4004.274
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 4062.757
+    mdTop: 4015.966
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4074.461
+    mdTop: 4062.757
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 4565.571
+    mdTop: 4074.461
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 4659.039
+    mdTop: 4565.571
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 4822.773
+    mdTop: 4659.039
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 4846.478
+    mdTop: 4834.783
+    wellbore: NO 25/11-G-8 T2
+- interval:
+    equipment: Screen
+    mdBottom: 4870.17
+    mdTop: 4858.478
+    wellbore: NO 25/11-G-8 T2

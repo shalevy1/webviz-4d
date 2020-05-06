@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-17 CY2T3
+   rms_name: 25_11-G-17_CY2T3
+   short_name: G-17CY2T3
+   slot_name: NO 25/11-G-17
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2012-10-27T00:00:00
+   fluids: oil

@@ -1,0 +1,20 @@
+- wellbore:
+   name: NO 25/11-G-5 T2
+   rms_name: 25_11-G-5_T2
+   short_name: G-5T2
+   slot_name: NO 25/11-G-5
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2005-08-19T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 1004.98
+    mdTop: 0.0
+    wellbore: NO 25/11-G-5 T2
+- interval:
+    equipment: Screen
+    mdBottom: 373.78999999999996
+    mdTop: 0.0
+    wellbore: NO 25/11-G-5 T2

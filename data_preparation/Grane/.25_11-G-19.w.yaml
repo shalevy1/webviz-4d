@@ -1,0 +1,255 @@
+- wellbore:
+   name: NO 25/11-G-19
+   rms_name: 25_11-G-19
+   short_name: G-19
+   slot_name: NO 25/11-G-19
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2002-06-26T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 2113.877
+    mdTop: 2101.521
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 2143.07
+    mdTop: 2120.1
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2138.798
+    mdTop: 2126.421
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2325.19
+    mdTop: 2138.798
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 2342.61
+    mdTop: 2155.08
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2337.557
+    mdTop: 2325.19
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2523.147
+    mdTop: 2337.557
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2354.08
+    mdTop: 2342.61
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 2541.29
+    mdTop: 2354.08
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2535.516
+    mdTop: 2523.147
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2708.7
+    mdTop: 2535.516
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2552.78
+    mdTop: 2541.29
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 2730.09
+    mdTop: 2552.78
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2721.145
+    mdTop: 2708.7
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2918.518
+    mdTop: 2721.145
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2741.61
+    mdTop: 2730.09
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 2941.19
+    mdTop: 2741.61
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2930.347
+    mdTop: 2918.518
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 3116.585
+    mdTop: 2930.347
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2953.05
+    mdTop: 2941.19
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3137.08
+    mdTop: 2953.05
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3128.954
+    mdTop: 3116.585
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3149.08
+    mdTop: 3137.08
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3314.072
+    mdTop: 3141.51
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3335.79
+    mdTop: 3149.08
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3326.444
+    mdTop: 3314.072
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3523.557
+    mdTop: 3326.444
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3347.31
+    mdTop: 3335.79
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3535.79
+    mdTop: 3347.31
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3535.919
+    mdTop: 3523.557
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3547.8
+    mdTop: 3535.79
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3597.642
+    mdTop: 3535.919
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3582.48
+    mdTop: 3547.8
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3617.83
+    mdTop: 3583.48
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3610.007
+    mdTop: 3597.642
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3659.476
+    mdTop: 3610.007
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3629.84
+    mdTop: 3617.83
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3675.86
+    mdTop: 3629.84
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3671.846
+    mdTop: 3659.476
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3832.407
+    mdTop: 3671.846
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3687.86
+    mdTop: 3675.86
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3794.37
+    mdTop: 3687.86
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3842.35
+    mdTop: 3795.37
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 4019.274
+    mdTop: 3835.417
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3854.11
+    mdTop: 3842.35
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 3984.66
+    mdTop: 3854.11
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3996.66
+    mdTop: 3984.66
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 4137.55
+    mdTop: 3996.66
+    wellbore: NO 25/11-G-19
+- interval:
+    equipment: Screen
+    mdBottom: 4148.67
+    mdTop: 4137.55
+    wellbore: NO 25/11-G-19

@@ -1,0 +1,320 @@
+- wellbore:
+   name: NO 25/11-G-7 CY3
+   rms_name: 25_11-G-7_CY3
+   short_name: G-7CY3
+   slot_name: NO 25/11-G-7
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2019-12-30T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 5014.983
+    mdTop: 5003.164
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5037.642
+    mdTop: 5026.544
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5061.402
+    mdTop: 5049.637
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5085.275
+    mdTop: 5073.403
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5108.976
+    mdTop: 5097.263
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5132.703
+    mdTop: 5120.955
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5156.715
+    mdTop: 5144.704
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5179.744
+    mdTop: 5168.705
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 5203.312
+    mdTop: 5191.756
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5227.08
+    mdTop: 5215.306
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5250.805
+    mdTop: 5239.082
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5274.551
+    mdTop: 5262.802
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5297.831
+    mdTop: 5286.562
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 5321.434
+    mdTop: 5309.664
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5344.935
+    mdTop: 5321.434
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 5356.703
+    mdTop: 5344.935
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5429.348
+    mdTop: 5417.746
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5453.123
+    mdTop: 5441.353
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5476.946
+    mdTop: 5465.082
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5500.706
+    mdTop: 5488.936
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5524.313
+    mdTop: 5512.722
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5548.187
+    mdTop: 5536.31
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5571.982
+    mdTop: 5560.195
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 5641.172
+    mdTop: 5583.935
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4113.974
+    mdTop: 4102.471
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4137.99
+    mdTop: 4125.986
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4161.763
+    mdTop: 4149.998
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4185.549
+    mdTop: 4173.773
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4209.328
+    mdTop: 4197.557
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4233.056
+    mdTop: 4221.332
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4256.784
+    mdTop: 4245.065
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4280.561
+    mdTop: 4268.793
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4304.273
+    mdTop: 4292.572
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4327.77
+    mdTop: 4315.948
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4351.422
+    mdTop: 4339.563
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4374.353
+    mdTop: 4362.582
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4398.234
+    mdTop: 4386.361
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4422.101
+    mdTop: 4410.085
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4445.864
+    mdTop: 4434.094
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4469.862
+    mdTop: 4457.859
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4493.878
+    mdTop: 4481.873
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4517.649
+    mdTop: 4505.865
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4541.418
+    mdTop: 4529.648
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4565.274
+    mdTop: 4553.41
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4588.917
+    mdTop: 4577.285
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4612.11
+    mdTop: 4600.908
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4635.492
+    mdTop: 4624.107
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4659.41
+    mdTop: 4647.504
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4682.693
+    mdTop: 4671.405
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4706.414
+    mdTop: 4694.694
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4730.194
+    mdTop: 4718.424
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4753.912
+    mdTop: 4742.187
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4777.637
+    mdTop: 4765.924
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4800.87
+    mdTop: 4789.632
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4824.748
+    mdTop: 4812.875
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4848.521
+    mdTop: 4836.752
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4872.307
+    mdTop: 4860.527
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4896.078
+    mdTop: 4884.308
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4919.954
+    mdTop: 4908.076
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4943.673
+    mdTop: 4931.96
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4967.405
+    mdTop: 4955.686
+    wellbore: NO 25/11-G-7 CY3
+- interval:
+    equipment: Screen
+    mdBottom: 4991.161
+    mdTop: 4979.398
+    wellbore: NO 25/11-G-7 CY3

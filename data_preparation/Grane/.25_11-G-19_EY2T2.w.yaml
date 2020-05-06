@@ -1,0 +1,50 @@
+- wellbore:
+   name: NO 25/11-G-19 EY2T2
+   rms_name: 25_11-G-19_EY2T2
+   short_name: G-19EY2T2
+   slot_name: NO 25/11-G-19
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2014-09-12T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2498.191
+    mdTop: 2181.753
+    wellbore: NO 25/11-G-19 EY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2558.579
+    mdTop: 2522.274
+    wellbore: NO 25/11-G-19 EY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2806.001
+    mdTop: 2558.579
+    wellbore: NO 25/11-G-19 EY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2878.689
+    mdTop: 2866.169
+    wellbore: NO 25/11-G-19 EY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2915.273
+    mdTop: 2902.748
+    wellbore: NO 25/11-G-19 EY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2951.85
+    mdTop: 2939.344
+    wellbore: NO 25/11-G-19 EY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3087.87
+    mdTop: 2975.929
+    wellbore: NO 25/11-G-19 EY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3124.638
+    mdTop: 3087.87
+    wellbore: NO 25/11-G-19 EY2T2

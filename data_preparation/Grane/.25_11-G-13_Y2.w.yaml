@@ -1,0 +1,35 @@
+- wellbore:
+   name: NO 25/11-G-13 Y2
+   rms_name: 25_11-G-13_Y2
+   short_name: G-13Y2
+   slot_name: NO 25/11-G-13
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2009-08-16T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 5548.847
+    mdTop: 5049.18
+    wellbore: NO 25/11-G-13 Y2
+- interval:
+    equipment: Screen
+    mdBottom: 5795.923
+    mdTop: 5548.847
+    wellbore: NO 25/11-G-13 Y2
+- interval:
+    equipment: Screen
+    mdBottom: 6501.1
+    mdTop: 5795.923
+    wellbore: NO 25/11-G-13 Y2
+- interval:
+    equipment: Screen
+    mdBottom: 6661.72
+    mdTop: 6501.1
+    wellbore: NO 25/11-G-13 Y2
+- interval:
+    equipment: Screen
+    mdBottom: 7158.182
+    mdTop: 6799.077
+    wellbore: NO 25/11-G-13 Y2

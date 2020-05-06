@@ -1,0 +1,45 @@
+- wellbore:
+   name: NO 25/11-G-16 AY1T3
+   rms_name: 25_11-G-16_AY1T3
+   short_name: G-16AY1T3
+   slot_name: NO 25/11-G-16
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2017-09-08T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3891.922
+    mdTop: 3855.837
+    wellbore: NO 25/11-G-16 AY1T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3927.348
+    mdTop: 3903.925
+    wellbore: NO 25/11-G-16 AY1T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3963.177
+    mdTop: 3939.353
+    wellbore: NO 25/11-G-16 AY1T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3999.01
+    mdTop: 3975.182
+    wellbore: NO 25/11-G-16 AY1T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4033.978
+    mdTop: 4010.449
+    wellbore: NO 25/11-G-16 AY1T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4070.05
+    mdTop: 4045.977
+    wellbore: NO 25/11-G-16 AY1T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4764.104
+    mdTop: 4082.059
+    wellbore: NO 25/11-G-16 AY1T3

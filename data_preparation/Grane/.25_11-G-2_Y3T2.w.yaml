@@ -1,0 +1,45 @@
+- wellbore:
+   name: NO 25/11-G-2 Y3T2
+   rms_name: 25_11-G-2_Y3T2
+   short_name: G-2Y3T2
+   slot_name: NO 25/11-G-2
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2007-07-26T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 4033.742
+    mdTop: 3917.042
+    wellbore: NO 25/11-G-2 Y3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4045.432
+    mdTop: 4033.742
+    wellbore: NO 25/11-G-2 Y3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4092.202
+    mdTop: 4045.432
+    wellbore: NO 25/11-G-2 Y3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4103.722
+    mdTop: 4092.202
+    wellbore: NO 25/11-G-2 Y3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4324.812
+    mdTop: 4103.722
+    wellbore: NO 25/11-G-2 Y3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4539.742
+    mdTop: 4330.642
+    wellbore: NO 25/11-G-2 Y3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4552.142
+    mdTop: 4539.742
+    wellbore: NO 25/11-G-2 Y3T2

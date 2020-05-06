@@ -1,0 +1,100 @@
+- wellbore:
+   name: NO 25/11-G-35 AT2
+   rms_name: 25_11-G-35_AT2
+   short_name: G-35AT2
+   slot_name: NO 25/11-G-35
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2006-04-13T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 2878.481
+    mdTop: 2517.329
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2890.17
+    mdTop: 2878.481
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3463.54
+    mdTop: 2890.17
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3493.912
+    mdTop: 3470.54
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3505.599
+    mdTop: 3493.912
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3517.278
+    mdTop: 3505.599
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3575.65
+    mdTop: 3517.278
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3599.832
+    mdTop: 3588.159
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3624.004
+    mdTop: 3612.344
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3759.034
+    mdTop: 3746.508
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3796.536
+    mdTop: 3784.041
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3834.043
+    mdTop: 3821.533
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3859.049
+    mdTop: 3846.543
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3884.06
+    mdTop: 3871.556
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 3945.865
+    mdTop: 3895.83
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 4519.689
+    mdTop: 3945.865
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 4569.718
+    mdTop: 4519.689
+    wellbore: NO 25/11-G-35 AT2
+- interval:
+    equipment: Screen
+    mdBottom: 4582.098
+    mdTop: 4569.718
+    wellbore: NO 25/11-G-35 AT2

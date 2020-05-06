@@ -1,0 +1,115 @@
+- wellbore:
+   name: NO 25/11-G-30 AY1T2
+   rms_name: 25_11-G-30_AY1T2
+   short_name: G-30AY1T2
+   slot_name: NO 25/11-G-30
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2017-12-04T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3844.035
+    mdTop: 3820.0
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3856.044
+    mdTop: 3844.035
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3949.299
+    mdTop: 3856.044
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3961.007
+    mdTop: 3949.299
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4009.047
+    mdTop: 3961.007
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4021.052
+    mdTop: 4009.047
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4208.423
+    mdTop: 4021.052
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4220.441
+    mdTop: 4208.423
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4244.453
+    mdTop: 4232.445
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4268.487
+    mdTop: 4256.482
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4292.499
+    mdTop: 4280.493
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4316.511
+    mdTop: 4304.5
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4340.536
+    mdTop: 4328.528
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4364.541
+    mdTop: 4352.537
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4388.03
+    mdTop: 4376.028
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4568.161
+    mdTop: 4400.049
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4580.178
+    mdTop: 4568.161
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4782.598
+    mdTop: 4736.025
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4794.315
+    mdTop: 4782.598
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 5065.81
+    mdTop: 4794.315
+    wellbore: NO 25/11-G-30 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 5077.83
+    mdTop: 5065.81
+    wellbore: NO 25/11-G-30 AY1T2

@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-35 BY2
+   rms_name: 25_11-G-35_BY2
+   short_name: G-35BY2
+   slot_name: NO 25/11-G-35
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2018-10-11T00:00:00
+   fluids: oil

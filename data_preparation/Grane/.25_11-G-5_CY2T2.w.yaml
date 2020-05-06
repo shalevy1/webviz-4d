@@ -1,0 +1,200 @@
+- wellbore:
+   name: NO 25/11-G-5 CY2T2
+   rms_name: 25_11-G-5_CY2T2
+   short_name: G-5CY2T2
+   slot_name: NO 25/11-G-5
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2019-04-03T00:00:00
+   fluids: 
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3692.671
+    mdTop: 3681.504
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3715.474
+    mdTop: 3703.718
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3738.853
+    mdTop: 3727.43
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3762.536
+    mdTop: 3750.822
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3786.305
+    mdTop: 3774.487
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3810.104
+    mdTop: 3798.276
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3833.806
+    mdTop: 3822.05
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2816.032
+    mdTop: 2804.246
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2851.931
+    mdTop: 2839.926
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2887.71
+    mdTop: 2875.884
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2922.932
+    mdTop: 2911.577
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2945.578
+    mdTop: 2934.199
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2969.297
+    mdTop: 2957.526
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2993.03
+    mdTop: 2981.257
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3016.2
+    mdTop: 3004.73
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3039.928
+    mdTop: 3028.153
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3063.659
+    mdTop: 3051.882
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3087.383
+    mdTop: 3075.611
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3158.979
+    mdTop: 3147.22
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3182.762
+    mdTop: 3170.989
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3206.497
+    mdTop: 3194.739
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3230.206
+    mdTop: 3218.45
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3253.939
+    mdTop: 3242.163
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3277.763
+    mdTop: 3265.935
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3301.59
+    mdTop: 3289.72
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3325.369
+    mdTop: 3313.592
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3361.057
+    mdTop: 3349.371
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3396.737
+    mdTop: 3385.008
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3432.527
+    mdTop: 3420.7
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3468.265
+    mdTop: 3456.479
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3503.856
+    mdTop: 3492.168
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3527.636
+    mdTop: 3515.862
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3551.358
+    mdTop: 3539.58
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3575.084
+    mdTop: 3563.316
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3598.687
+    mdTop: 3587.042
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3622.499
+    mdTop: 3610.641
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3645.837
+    mdTop: 3634.453
+    wellbore: NO 25/11-G-5 CY2T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3669.564
+    mdTop: 3657.783
+    wellbore: NO 25/11-G-5 CY2T2

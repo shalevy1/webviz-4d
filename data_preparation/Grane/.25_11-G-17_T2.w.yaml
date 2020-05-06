@@ -1,0 +1,65 @@
+- wellbore:
+   name: NO 25/11-G-17 T2
+   rms_name: 25_11-G-17_T2
+   short_name: G-17T2
+   slot_name: NO 25/11-G-17
+   field: Grane
+   type: production
+   rkb: 26
+   drilling_end_date: 2002-02-27T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 2846.888
+    mdTop: 2014.074
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2064.94
+    mdTop: 2053.6
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2123.2599999999998
+    mdTop: 2077.19
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2264.5699999999997
+    mdTop: 2128.31
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2428.85
+    mdTop: 2269.58
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2479.7999999999997
+    mdTop: 2433.87
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2701.39
+    mdTop: 2484.8399999999997
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2715
+    mdTop: 2702.39
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2890.15
+    mdTop: 2720.04
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2903.75
+    mdTop: 2891.15
+    wellbore: NO 25/11-G-17 T2
+- interval:
+    equipment: Screen
+    mdBottom: 2921.4
+    mdTop: 2908.79
+    wellbore: NO 25/11-G-17 T2

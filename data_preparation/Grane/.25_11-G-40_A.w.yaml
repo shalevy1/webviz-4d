@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-40 A
+   rms_name: 25_11-G-40_A
+   short_name: G-40A
+   slot_name: NO 25/11-G-40
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2005-08-28T00:00:00
+   fluids: oil

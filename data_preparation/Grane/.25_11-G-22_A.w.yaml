@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-22 A
+   rms_name: 25_11-G-22_A
+   short_name: G-22A
+   slot_name: NO 25/11-G-22
+   field: Grane
+   type: observation
+   rkb: 69.9
+   drilling_end_date: 2016-02-17T00:00:00
+   fluids: oil

@@ -1,0 +1,65 @@
+- wellbore:
+   name: NO 25/11-G-30 AY3
+   rms_name: 25_11-G-30_AY3
+   short_name: G-30AY3
+   slot_name: NO 25/11-G-30
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2017-11-21T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3325.808
+    mdTop: 3314.1
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3349.527
+    mdTop: 3337.818
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3372.618
+    mdTop: 3360.906
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3667.763
+    mdTop: 3384.631
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3679.775
+    mdTop: 3667.763
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3832.74
+    mdTop: 3775.227
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4077.904
+    mdTop: 3832.74
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3243.791
+    mdTop: 3174.868
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3255.507
+    mdTop: 3243.791
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3278.583
+    mdTop: 3267.525
+    wellbore: NO 25/11-G-30 AY3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3302.099
+    mdTop: 3290.588
+    wellbore: NO 25/11-G-30 AY3

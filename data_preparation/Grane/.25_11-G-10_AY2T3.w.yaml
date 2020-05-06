@@ -1,0 +1,35 @@
+- wellbore:
+   name: NO 25/11-G-10 AY2T3
+   rms_name: 25_11-G-10_AY2T3
+   short_name: G-10AY2T3
+   slot_name: NO 25/11-G-10
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 
+   fluids: 
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2398.802
+    mdTop: 2375.056
+    wellbore: NO 25/11-G-10 AY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2588.646
+    mdTop: 2458.688
+    wellbore: NO 25/11-G-10 AY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2600.354
+    mdTop: 2588.646
+    wellbore: NO 25/11-G-10 AY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2636.379
+    mdTop: 2624.365
+    wellbore: NO 25/11-G-10 AY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2660.392
+    mdTop: 2648.388
+    wellbore: NO 25/11-G-10 AY2T3

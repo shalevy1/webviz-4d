@@ -1,0 +1,150 @@
+- wellbore:
+   name: NO 25/11-G-10 AY1T2
+   rms_name: 25_11-G-10_AY1T2
+   short_name: G-10AY1T2
+   slot_name: NO 25/11-G-10
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 
+   fluids: 
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2290.082
+    mdTop: 2278.084
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2325.86
+    mdTop: 2302.043
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2361.317
+    mdTop: 2337.815
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2397.067
+    mdTop: 2373.263
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2432.87
+    mdTop: 2409.062
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2468.866
+    mdTop: 2444.871
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2504.425
+    mdTop: 2480.824
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2540.248
+    mdTop: 2516.436
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2576.212
+    mdTop: 2552.204
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2611.967
+    mdTop: 2588.173
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2646.596
+    mdTop: 2634.796
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2670.575
+    mdTop: 2658.559
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2706.066
+    mdTop: 2694.255
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2741.882
+    mdTop: 2730.081
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2777.646
+    mdTop: 2765.848
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2813.335
+    mdTop: 2801.62
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2837.351
+    mdTop: 2825.344
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2861.183
+    mdTop: 2849.373
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2885.152
+    mdTop: 2873.142
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2908.973
+    mdTop: 2896.97
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2932.942
+    mdTop: 2920.926
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2956.895
+    mdTop: 2944.889
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2992.623
+    mdTop: 2980.604
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3028.397
+    mdTop: 3016.588
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3064.116
+    mdTop: 3052.429
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3099.955
+    mdTop: 3087.948
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3135.699
+    mdTop: 3123.9
+    wellbore: NO 25/11-G-10 AY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3171.277
+    mdTop: 3159.465
+    wellbore: NO 25/11-G-10 AY1T2

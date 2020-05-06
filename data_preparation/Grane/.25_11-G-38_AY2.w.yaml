@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-38 AY2
+   rms_name: 25_11-G-38_AY2
+   short_name: G-38AY2
+   slot_name: NO 25/11-G-38
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2011-05-09T00:00:00
+   fluids: oil

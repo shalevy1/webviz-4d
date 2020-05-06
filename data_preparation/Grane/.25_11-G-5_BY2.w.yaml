@@ -1,0 +1,50 @@
+- wellbore:
+   name: NO 25/11-G-5 BY2
+   rms_name: 25_11-G-5_BY2
+   short_name: G-5BY2
+   slot_name: NO 25/11-G-5
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2011-11-26T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2728.308
+    mdTop: 2391.559
+    wellbore: NO 25/11-G-5 BY2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 2968.05
+    mdTop: 2764.25
+    wellbore: NO 25/11-G-5 BY2
+- interval:
+    equipment: Screen
+    mdBottom: 3101.314
+    mdTop: 2968.05
+    wellbore: NO 25/11-G-5 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3112.403
+    mdTop: 3101.314
+    wellbore: NO 25/11-G-5 BY2
+- interval:
+    equipment: Screen
+    mdBottom: 3245.846
+    mdTop: 3112.403
+    wellbore: NO 25/11-G-5 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3258.198
+    mdTop: 3245.846
+    wellbore: NO 25/11-G-5 BY2
+- interval:
+    equipment: Screen
+    mdBottom: 3611.363
+    mdTop: 3258.198
+    wellbore: NO 25/11-G-5 BY2
+- interval:
+    equipment: Screen
+    mdBottom: 3827.716
+    mdTop: 3766.715
+    wellbore: NO 25/11-G-5 BY2

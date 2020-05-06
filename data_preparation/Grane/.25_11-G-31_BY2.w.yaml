@@ -1,0 +1,65 @@
+- wellbore:
+   name: NO 25/11-G-31 BY2
+   rms_name: 25_11-G-31_BY2
+   short_name: G-31BY2
+   slot_name: NO 25/11-G-31
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2016-09-11T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4423.57
+    mdTop: 4255.819
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4435.629
+    mdTop: 4423.57
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4473.012
+    mdTop: 4435.629
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4485.409
+    mdTop: 4473.012
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4571.559
+    mdTop: 4485.409
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4583.613
+    mdTop: 4571.559
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4595.955
+    mdTop: 4583.613
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4607.465
+    mdTop: 4595.955
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4680.126
+    mdTop: 4607.465
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4692.468
+    mdTop: 4680.126
+    wellbore: NO 25/11-G-31 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4742.082
+    mdTop: 4692.468
+    wellbore: NO 25/11-G-31 BY2

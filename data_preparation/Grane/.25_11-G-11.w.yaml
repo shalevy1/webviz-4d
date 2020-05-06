@@ -1,0 +1,20 @@
+- wellbore:
+   name: NO 25/11-G-11
+   rms_name: 25_11-G-11
+   short_name: G-11
+   slot_name: NO 25/11-G-11
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2004-10-14T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 2515.792
+    mdTop: 2353.479
+    wellbore: NO 25/11-G-11
+- interval:
+    equipment: Screen
+    mdBottom: 3300.649
+    mdTop: 2528.132
+    wellbore: NO 25/11-G-11

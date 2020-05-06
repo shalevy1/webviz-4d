@@ -1,0 +1,175 @@
+- wellbore:
+   name: NO 25/11-G-18
+   rms_name: 25_11-G-18
+   short_name: G-18
+   slot_name: NO 25/11-G-18
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2002-11-19T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 2437.266
+    mdTop: 2180.534
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2443.62
+    mdTop: 2182.51
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2450.073
+    mdTop: 2437.266
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2682.668
+    mdTop: 2450.073
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2690.94
+    mdTop: 2455.39
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2695.028
+    mdTop: 2682.668
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2930.03
+    mdTop: 2695.028
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2936.79
+    mdTop: 2702.48
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 2942.223
+    mdTop: 2930.03
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3004.0
+    mdTop: 2942.223
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3184.34
+    mdTop: 2948.77
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3029.262
+    mdTop: 3016.445
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3053.701
+    mdTop: 3041.267
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3078.957
+    mdTop: 3066.151
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3103.59
+    mdTop: 3090.773
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3128.558
+    mdTop: 3116.143
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3153.812
+    mdTop: 3141.002
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3179.071
+    mdTop: 3166.255
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3191.361
+    mdTop: 3179.071
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3419.82
+    mdTop: 3191.361
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3433.52
+    mdTop: 3196.1
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3432.637
+    mdTop: 3419.82
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3688.117
+    mdTop: 3432.637
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3695.74
+    mdTop: 3445.52
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3700.838
+    mdTop: 3688.117
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 4221.3
+    mdTop: 3700.838
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3814.71
+    mdTop: 3707.76
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 3920.46
+    mdTop: 3826.71
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 4015.091
+    mdTop: 3932.17
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 4348.701
+    mdTop: 4016.081
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 4491.078
+    mdTop: 4360.598
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 4562.358
+    mdTop: 4515.008
+    wellbore: NO 25/11-G-18
+- interval:
+    equipment: Screen
+    mdBottom: 4634.668
+    mdTop: 4563.338
+    wellbore: NO 25/11-G-18

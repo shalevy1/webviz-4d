@@ -180,7 +180,7 @@ def make_new_well_layer(
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
         well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
-        print(well_metadata)
+        #print(well_metadata)
 
         md_top_res = well_metadata["wellbore.pick_md"].values
         if selection and len(md_top_res) > 0:

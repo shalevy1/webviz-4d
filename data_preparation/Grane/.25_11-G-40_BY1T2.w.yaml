@@ -1,0 +1,40 @@
+- wellbore:
+   name: NO 25/11-G-40 BY1T2
+   rms_name: 25_11-G-40_BY1T2
+   short_name: G-40BY1T2
+   slot_name: NO 25/11-G-40
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2017-04-10T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2954.968
+    mdTop: 2799.834
+    wellbore: NO 25/11-G-40 BY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2966.982
+    mdTop: 2954.968
+    wellbore: NO 25/11-G-40 BY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3237.104
+    mdTop: 2966.982
+    wellbore: NO 25/11-G-40 BY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3249.087
+    mdTop: 3237.104
+    wellbore: NO 25/11-G-40 BY1T2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3344.456
+    mdTop: 3249.087
+    wellbore: NO 25/11-G-40 BY1T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3356.336
+    mdTop: 3344.456
+    wellbore: NO 25/11-G-40 BY1T2

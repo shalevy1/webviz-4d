@@ -1,0 +1,60 @@
+- wellbore:
+   name: NO 25/11-G-3 AY3T2
+   rms_name: 25_11-G-3_AY3T2
+   short_name: G-3AY3T2
+   slot_name: NO 25/11-G-3
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2010-03-16T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 3704.805
+    mdTop: 3630.425
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3717.315
+    mdTop: 3704.805
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4053.981
+    mdTop: 3717.315
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4066.489
+    mdTop: 4053.981
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen
+    mdBottom: 4241.296
+    mdTop: 4066.489
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4253.804
+    mdTop: 4241.296
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 4739.167
+    mdTop: 4291.335
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 4789.21
+    mdTop: 4751.686
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 4914.273
+    mdTop: 4801.732
+    wellbore: NO 25/11-G-3 AY3T2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 5101.343
+    mdTop: 4926.788
+    wellbore: NO 25/11-G-3 AY3T2

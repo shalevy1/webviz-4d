@@ -1,0 +1,12 @@
+- wellbore:
+   list_name: AMAP
+   name: PR83Y4
+   rms_name: PR83Y4
+   short_name: PR83Y4
+   field: grane
+   type: planned
+   rkb: 0.0
+   drilling_end_date: 
+   fluids: 
+   pick_name: toplowerheimdal--depthsurface.gri
+   pick_md: 2035.0091784878382

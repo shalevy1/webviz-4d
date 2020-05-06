@@ -1,0 +1,25 @@
+- wellbore:
+   name: NO 25/11-G-21 BY1T4
+   rms_name: 25_11-G-21_BY1T4
+   short_name: G-21BY1T4
+   slot_name: NO 25/11-G-21
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2012-05-17T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3361.853
+    mdTop: 3238.41
+    wellbore: NO 25/11-G-21 BY1T4
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3644.496
+    mdTop: 3385.651
+    wellbore: NO 25/11-G-21 BY1T4
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3766.841
+    mdTop: 3680.354
+    wellbore: NO 25/11-G-21 BY1T4

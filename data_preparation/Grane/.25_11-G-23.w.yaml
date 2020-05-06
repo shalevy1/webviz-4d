@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-23
+   rms_name: 25_11-G-23
+   short_name: G-23
+   slot_name: NO 25/11-G-23
+   field: Grane
+   type: injection
+   rkb: 69.9
+   drilling_end_date: 2003-01-04T00:00:00
+   fluids: water

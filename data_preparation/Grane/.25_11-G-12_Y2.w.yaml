@@ -1,0 +1,20 @@
+- wellbore:
+   name: NO 25/11-G-12 Y2
+   rms_name: 25_11-G-12_Y2
+   short_name: G-12Y2
+   slot_name: NO 25/11-G-12
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2006-11-07T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 3587.258
+    mdTop: 3349.503
+    wellbore: NO 25/11-G-12 Y2
+- interval:
+    equipment: Screen & Blank Pipe - generic
+    mdBottom: 4217.97
+    mdTop: 3587.258
+    wellbore: NO 25/11-G-12 Y2

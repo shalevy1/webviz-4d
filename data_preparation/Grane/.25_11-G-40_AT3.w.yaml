@@ -1,0 +1,80 @@
+- wellbore:
+   name: NO 25/11-G-40 AT3
+   rms_name: 25_11-G-40_AT3
+   short_name: G-40AT3
+   slot_name: NO 25/11-G-40
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2005-09-04T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 2739.312
+    mdTop: 2330.34
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2948.57
+    mdTop: 2739.312
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2960.26
+    mdTop: 2948.57
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2971.948
+    mdTop: 2960.26
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2983.64
+    mdTop: 2971.948
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2995.328
+    mdTop: 2983.64
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3076.769
+    mdTop: 2995.328
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen
+    mdBottom: 3149.023
+    mdTop: 3078.829
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen
+    mdBottom: 3300.659
+    mdTop: 3149.023
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen
+    mdBottom: 3370.839
+    mdTop: 3300.659
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen
+    mdBottom: 3593.08
+    mdTop: 3370.839
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen
+    mdBottom: 3862.12
+    mdTop: 3593.08
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen
+    mdBottom: 3890.972
+    mdTop: 3879.276
+    wellbore: NO 25/11-G-40 AT3
+- interval:
+    equipment: Screen
+    mdBottom: 3931.54
+    mdTop: 3908.152
+    wellbore: NO 25/11-G-40 AT3

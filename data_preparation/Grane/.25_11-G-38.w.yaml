@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-38
+   rms_name: 25_11-G-38
+   short_name: G-38
+   slot_name: NO 25/11-G-38
+   field: Grane
+   type: observation
+   rkb: 69.9
+   drilling_end_date: 2011-03-29T00:00:00
+   fluids: oil

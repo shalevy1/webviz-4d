@@ -1,0 +1,85 @@
+- wellbore:
+   name: NO 25/11-G-35 BY2T3
+   rms_name: 25_11-G-35_BY2T3
+   short_name: G-35BY2T3
+   slot_name: NO 25/11-G-35
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2018-10-17T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2703.774
+    mdTop: 2691.959
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2727.765
+    mdTop: 2715.768
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2739.769
+    mdTop: 2727.765
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2763.79
+    mdTop: 2751.774
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2775.786
+    mdTop: 2763.79
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2787.799
+    mdTop: 2775.786
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2799.82
+    mdTop: 2787.799
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2847.034
+    mdTop: 2799.82
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2858.789
+    mdTop: 2847.034
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2894.532
+    mdTop: 2858.789
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2906.546
+    mdTop: 2894.532
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2942.571
+    mdTop: 2906.546
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2954.573
+    mdTop: 2942.571
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2978.407
+    mdTop: 2966.403
+    wellbore: NO 25/11-G-35 BY2T3
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3263.961
+    mdTop: 2978.407
+    wellbore: NO 25/11-G-35 BY2T3

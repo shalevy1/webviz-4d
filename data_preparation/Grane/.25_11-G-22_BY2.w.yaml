@@ -1,0 +1,45 @@
+- wellbore:
+   name: NO 25/11-G-22 BY2
+   rms_name: 25_11-G-22_BY2
+   short_name: G-22BY2
+   slot_name: NO 25/11-G-22
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2016-03-07T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3247.262
+    mdTop: 3198.957
+    wellbore: NO 25/11-G-22 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3259.487
+    mdTop: 3247.262
+    wellbore: NO 25/11-G-22 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3307.307
+    mdTop: 3259.487
+    wellbore: NO 25/11-G-22 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3319.327
+    mdTop: 3307.307
+    wellbore: NO 25/11-G-22 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3367.471
+    mdTop: 3319.327
+    wellbore: NO 25/11-G-22 BY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3379.506
+    mdTop: 3367.471
+    wellbore: NO 25/11-G-22 BY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3428.898
+    mdTop: 3379.506
+    wellbore: NO 25/11-G-22 BY2

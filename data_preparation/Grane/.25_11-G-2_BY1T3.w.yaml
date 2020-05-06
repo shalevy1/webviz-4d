@@ -1,0 +1,80 @@
+- wellbore:
+   name: NO 25/11-G-2 BY1T3
+   rms_name: 25_11-G-2_BY1T3
+   short_name: G-2BY1T3
+   slot_name: NO 25/11-G-2
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2015-05-12T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen
+    mdBottom: 3866.024
+    mdTop: 3853.511
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 3902.52
+    mdTop: 3890.001
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 3927.002
+    mdTop: 3914.498
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 3974.899
+    mdTop: 3962.387
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4011.349
+    mdTop: 3998.848
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4047.326
+    mdTop: 4034.813
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4083.472
+    mdTop: 4070.96
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4319.626
+    mdTop: 4107.451
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4344.11
+    mdTop: 4331.613
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4368.624
+    mdTop: 4356.112
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4393.075
+    mdTop: 4380.554
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4417.598
+    mdTop: 4405.074
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 4603.936
+    mdTop: 4429.606
+    wellbore: NO 25/11-G-2 BY1T3
+- interval:
+    equipment: Screen
+    mdBottom: 5374.557
+    mdTop: 4603.936
+    wellbore: NO 25/11-G-2 BY1T3

@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-19 EY1
+   rms_name: 25_11-G-19_EY1
+   short_name: G-19EY1
+   slot_name: NO 25/11-G-19
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2014-08-16T00:00:00
+   fluids: oil

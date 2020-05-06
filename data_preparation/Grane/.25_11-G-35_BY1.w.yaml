@@ -1,0 +1,175 @@
+- wellbore:
+   name: NO 25/11-G-35 BY1
+   rms_name: 25_11-G-35_BY1
+   short_name: G-35BY1
+   slot_name: NO 25/11-G-35
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2018-11-10T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2824.193
+    mdTop: 2812.378
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2847.852
+    mdTop: 2836.038
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2871.682
+    mdTop: 2859.683
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2895.521
+    mdTop: 2883.523
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3821.846
+    mdTop: 3786.762
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3857.731
+    mdTop: 3833.695
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3905.175
+    mdTop: 3869.558
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3941.026
+    mdTop: 3917.016
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3988.737
+    mdTop: 3952.848
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4023.734
+    mdTop: 4000.042
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4070.75
+    mdTop: 4035.19
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4106.589
+    mdTop: 4082.576
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4154.265
+    mdTop: 4118.431
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4190.121
+    mdTop: 4166.086
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4237.523
+    mdTop: 4201.937
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2943.029
+    mdTop: 2907.22
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2990.694
+    mdTop: 2954.867
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3037.631
+    mdTop: 3002.011
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3086.332
+    mdTop: 3049.453
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3133.64
+    mdTop: 3097.636
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3181.189
+    mdTop: 3145.479
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3204.904
+    mdTop: 3192.888
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3228.446
+    mdTop: 3216.749
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3252.132
+    mdTop: 3240.134
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3417.804
+    mdTop: 3394.303
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3465.193
+    mdTop: 3429.644
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3512.882
+    mdTop: 3477.011
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3560.665
+    mdTop: 3524.697
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3608.315
+    mdTop: 3572.485
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3655.825
+    mdTop: 3620.137
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3691.541
+    mdTop: 3667.666
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3738.895
+    mdTop: 3703.557
+    wellbore: NO 25/11-G-35 BY1
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3774.934
+    mdTop: 3750.911
+    wellbore: NO 25/11-G-35 BY1

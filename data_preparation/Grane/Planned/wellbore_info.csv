@@ -1,0 +1,10 @@
+,wellbore.name,wellbore.type,wellbore.fluids,wellbore.list_name,wellbore.well_name,wellbore.rms_name,wellbore.short_name,wellbore.pick_name,wellbore.pick_md
+0,G-15_DY1_rev0,planned,,Planned,G-15_DY1_rev0,G-15_DY1_rev0,G-15_DY1_rev0,toplowerheimdal--depthsurface,2421.3157271587797
+1,G-15_DY2_rev0,planned,,Planned,G-15_DY2_rev0,G-15_DY2_rev0,G-15_DY2_rev0,toplowerheimdal--depthsurface,2338.783339421985
+2,G-15_DY3_rev0,planned,,Planned,G-15_DY3_rev0,G-15_DY3_rev0,G-15_DY3_rev0,toplowerheimdal--depthsurface,2543.7760593264243
+3,G-26_AY2_rev1,planned,,Planned,G-26_AY2_rev1,G-26_AY2_rev1,G-26_AY2_rev1,toplowerheimdal--depthsurface,2105.3468789727103
+4,G-26_AY3_rev1,planned,,Planned,G-26_AY3_rev1,G-26_AY3_rev1,G-26_AY3_rev1,toplowerheimdal--depthsurface,2105.3468790027105
+5,G-15_C_rev0,planned,,Planned,G-15_C_rev0,G-15_C_rev0,G-15_C_rev0,toplowerheimdal--depthsurface,2418.3705143966145
+6,G-26_AY1_rev1,planned,,Planned,G-26_AY1_rev1,G-26_AY1_rev1,G-26_AY1_rev1,toplowerheimdal--depthsurface,2105.3464347312943
+7,G-15_B_rev0,planned,,Planned,G-15_B_rev0,G-15_B_rev0,G-15_B_rev0,toplowerheimdal--depthsurface,1902.9318199075617
+8,G-26_AY4_rev1,planned,,Planned,G-26_AY4_rev1,G-26_AY4_rev1,G-26_AY4_rev1,toplowerheimdal--depthsurface,2105.3468837246564

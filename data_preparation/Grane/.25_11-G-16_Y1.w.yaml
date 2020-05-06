@@ -1,0 +1,10 @@
+- wellbore:
+   name: NO 25/11-G-16 Y1
+   rms_name: 25_11-G-16_Y1
+   short_name: G-16Y1
+   slot_name: NO 25/11-G-16
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2008-09-11T00:00:00
+   fluids: not applicable

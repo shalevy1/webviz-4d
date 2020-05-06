@@ -1,0 +1,85 @@
+- wellbore:
+   name: NO 25/11-G-18 AY2
+   rms_name: 25_11-G-18_AY2
+   short_name: G-18AY2
+   slot_name: NO 25/11-G-18
+   field: Grane
+   type: production
+   rkb: 69.9
+   drilling_end_date: 2017-02-01T00:00:00
+   fluids: oil
+- interval:
+    equipment: Screen - generic
+    mdBottom: 2666.873
+    mdTop: 2242.675
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 2678.72
+    mdTop: 2666.873
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3132.947
+    mdTop: 3097.179
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3144.969
+    mdTop: 3132.947
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3292.087
+    mdTop: 3144.969
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3304.443
+    mdTop: 3292.087
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3413.845
+    mdTop: 3304.443
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3426.2
+    mdTop: 3413.845
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3677.546
+    mdTop: 3569.658
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 3908.681
+    mdTop: 3677.546
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 3921.036
+    mdTop: 3908.681
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4102.141
+    mdTop: 3921.036
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen w. Swell Packer - generic
+    mdBottom: 4114.494
+    mdTop: 4102.141
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4126.838
+    mdTop: 4114.494
+    wellbore: NO 25/11-G-18 AY2
+- interval:
+    equipment: Screen - generic
+    mdBottom: 4139.182
+    mdTop: 4126.838
+    wellbore: NO 25/11-G-18 AY2
