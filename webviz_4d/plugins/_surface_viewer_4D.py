@@ -27,8 +27,6 @@ from webviz_4d._datainput.well import (
 )
 from webviz_4d._private_plugins.surface_selector import SurfaceSelector
 
-from webviz_4d._datainput._colormaps import load_custom_colormaps
-
 from webviz_4d._datainput._metadata import (
     get_metadata,
     compose_filename,
@@ -107,10 +105,6 @@ and available for instant viewing.
 
         # print(self.config)
         self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
-        colormaps_folder = self.config["map_settings"]["colormaps_folder"]
-        
-        load_custom_colormaps(colormaps_folder)        
-
         # print('self.map_defaults ',self.map_defaults)
 
         self.metadata, self.dates = get_metadata(
@@ -561,9 +555,10 @@ and available for instant viewing.
         map_type = self.map_defaults[map_idx]["map_type"]
 
         # print(f"loading data {timer()-start}")
+        start = timer()
         surface = load_surface(self.get_real_runpath(data, ensemble, real, map_type))
         # print(f"loading surface {timer()-start}")
-        
+        start = timer()
         surface_layers = [
             make_surface_layer(
                 surface,
