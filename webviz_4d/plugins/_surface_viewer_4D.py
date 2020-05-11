@@ -44,21 +44,17 @@ from webviz_4d._datainput._metadata import (
 
 class SurfaceViewer4D(WebvizPluginABC):
     """### SurfaceViewerFMU
-
 A plugin to covisualize surfaces from an ensemble.
 There are 3 separate map views. 2 views can be set independently, while
 the 3rd view displays the resulting map by combining the other maps e.g.
 by taking the difference or summing the values.
-
 There is flexibility in which combinations of surfaces that are displayed
 and calculated, such that surfaces can e.g. be compared across ensembles.
-
 The available maps are gathered from the `share/results/maps/` folder
 for each realization. Statistical calculations across the ensemble(s) are
 done on the fly. If the ensemble or surfaces have a large size it is recommended
 to run webviz in `portable` mode so that the statistical surfaces are pre-calculated
 and available for instant viewing.
-
 * `ensembles`: Which ensembles in `shared_settings` to visualize.
 * `attributes`: List of surface attributes to include, if not given
                 all surface attributes will be included.
@@ -121,6 +117,9 @@ and available for instant viewing.
 
         self.intervals = get_all_intervals(self.metadata)
         # print("self.intervals ", self.intervals)
+        
+        self.surface_metadata = pd.read_csv(os.path.join(self.wellfolder,"attribute_maps.csv"))
+        print(self.surface_metadata)
 
         self.selected_names = [None, None, None]
         self.selected_attributes = [None, None, None]
@@ -561,18 +560,21 @@ and available for instant viewing.
         map_type = self.map_defaults[map_idx]["map_type"]
 
         # print(f"loading data {timer()-start}")
-        surface = load_surface(self.get_real_runpath(data, ensemble, real, map_type))
+        surface_file = self.get_real_runpath(data, ensemble, real, map_type)
+        surface = load_surface(surface_file)
+        metadata = self.surface_metadata.loc[self.surface_metadata["file path"] == surface_file]
         # print(f"loading surface {timer()-start}")
         
         surface_layers = [
             make_surface_layer(
                 surface,
-                name="surface",
+                name=data["attr"],
                 color=attribute_settings.get(data["attr"], {}).get("color", "viridis"),
                 min_val=attribute_settings.get(data["attr"], {}).get("min", None),
                 max_val=attribute_settings.get(data["attr"], {}).get("max", None),
                 unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
                 hillshading=False,
+                min_max_df = metadata,
             )
         ]
         # print(f"make surface layer {timer()-start}")

@@ -57,12 +57,14 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
     print(wellbore_info)
 
     pick_name = surface.name
-    
+
     if not wellbore_info.empty:
         for index, item in wellbore_info.iterrows():
             wellbore_name = item["wellbore.name"]
             print(wellbore_name)
-            rms_name = wellbore_name.replace("/", "_").replace("NO ", "").replace(" ", "_")
+            rms_name = (
+                wellbore_name.replace("/", "_").replace("NO ", "").replace(" ", "_")
+            )
             well_name = common.get_wellname(wellbore_info, wellbore_name)
             well_names.append(well_name)
             print(well_name)
@@ -82,38 +84,37 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
             short_names.append(short_name)
             depth_surfaces.append(pick_name)
             depth_picks.append(wellbore_pick_md)
-            
-    else:   # Planned wells   
-        wellbore_names = [] 
+
+    else:  # Planned wells
+        wellbore_names = []
         wellbore_types = []
         wellbore_fluids = []
-        wellbore_files = glob.glob(str(well_directory) + "/*.w") 
-        print('wellbore_files', wellbore_files) 
-        
+        wellbore_files = glob.glob(str(well_directory) + "/*.w")
+        print("wellbore_files", wellbore_files)
+
         for wellbore_file in wellbore_files:
             wellbore = well.load_well(wellbore_file)
-            wellbore_name = wellbore.name.split('/')[0]
+            wellbore_name = wellbore.name.split("/")[0]
             wellbore_names.append(wellbore_name)
             well_names.append(wellbore_name)
             short_names.append(wellbore_name)
             rms_names.append(wellbore_name)
-            wellbore_types.append('planned')
-            wellbore_fluids.append('')
-            
+            wellbore_types.append("planned")
+            wellbore_fluids.append("")
+
             points = wellbore.get_surface_picks(surface)
             wellbore_pick_md = None
 
             if hasattr(points, "dataframe"):
                 print(points.dataframe)
                 wellbore_pick_md = points.dataframe["MD"].values[0]
-                
+
             depth_surfaces.append(pick_name)
-            depth_picks.append(wellbore_pick_md)    
-                
+            depth_picks.append(wellbore_pick_md)
+
         wellbore_info["wellbore.name"] = well_names
         wellbore_info["wellbore.type"] = wellbore_types
         wellbore_info["wellbore.fluids"] = wellbore_fluids
-              
 
     wellbore_info["wellbore.well_name"] = well_names
     wellbore_info["wellbore.rms_name"] = rms_names
@@ -161,7 +162,7 @@ def main():
     )
 
     planned_wells_dir = [f.path for f in os.scandir(well_directory) if f.is_dir()]
-    
+
     for folder in planned_wells_dir:
         wellbore_info = pd.DataFrame()
         wellbore_info = compile_data(surface, folder, wellbore_info, well_suffix)

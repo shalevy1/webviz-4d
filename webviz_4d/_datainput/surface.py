@@ -1,4 +1,6 @@
 import numpy as np
+import numpy.ma as ma
+import math
 from xtgeo import RegularSurface
 from webviz_config.common_cache import CACHE
 
@@ -36,13 +38,44 @@ def make_surface_layer(
     max_val=None,
     color="viridis",
     hillshading=False,
-    unit="",
+    min_max_df=None,
+    unit="",    
 ):
     """Make LayeredMap surface image base layer"""
     zvalues = get_surface_arr(surface)[2]
     bounds = [[surface.xmin, surface.ymin], [surface.xmax, surface.ymax]]
+    
+    if not min_max_df.empty:
+        lower_limit = min_max_df["lower_limit"].values[0]
+        
+        if lower_limit is not None and not math.isnan(lower_limit):
+            min_val = lower_limit
+            
+        upper_limit = min_max_df["upper_limit"].values[0]
+        
+        if upper_limit is not None and not math.isnan(upper_limit):
+            max_val = upper_limit
+    
+    if min_val is not None:
+        zvalues[(zvalues < min_val) & (ma.getmask(zvalues) == ma.nomask)] = min_val
+        
+        if np.nanmin(zvalues) > min_val:
+            zvalues[0,0] = ma.nomask
+            zvalues.data[0,0] = min_val
+                  
+    if max_val is not None:
+        zvalues[(zvalues > max_val) & (ma.getmask(zvalues) == ma.nomask)] = max_val 
+        
+        if np.nanmax(zvalues) < max_val:
+            zvalues[-1,-1] = ma.nomask
+            zvalues.data[-1,-1] = max_val
+        
+        
     min_val = min_val if min_val is not None else np.nanmin(zvalues)
     max_val = max_val if max_val is not None else np.nanmax(zvalues)
+    
+    print("Layered map:", name, min_val,max_val)
+    
     return {
         "name": name,
         "checked": True,
