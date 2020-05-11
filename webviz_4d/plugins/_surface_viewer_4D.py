@@ -104,6 +104,8 @@ and available for instant viewing.
         # print(self.config)
         self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
         colormaps_folder = self.config["map_settings"]["colormaps_folder"]
+        if colormaps_folder:
+            print("Reading custom colormaps from:", colormaps_folder)
         
         load_custom_colormaps(colormaps_folder)        
 
