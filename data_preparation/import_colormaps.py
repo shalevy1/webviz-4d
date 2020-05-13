@@ -3,6 +3,7 @@ import glob
 import xml.etree.ElementTree as ET
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 from matplotlib import colors
 import pickle
 
@@ -53,16 +54,28 @@ def import_colormaps(folder, suffix):
                 fp = open(pickle_file, "wb")
                 pickle.dump(cm, fp)
                 fp.close()
-
                 print("Colormap " + name + " stored as " + pickle_file)
+
+                cm_r = cm.reversed()
+                pickle_file = cmap_file.replace(suffix, "_r.pkl")
+                fp = open(pickle_file, "wb")
+                pickle.dump(cm_r, fp)
+                fp.close()
+                print("Colormap " + name + "_r stored as " + pickle_file)
 
             else:
                 print("ERROR: " + suffix + " not supported")
 
 
 def main():
-    folder = "/private/ashska/development/webviz-4d/fields/grane/colormaps/"
+    parser = argparse.ArgumentParser(
+        description="Import and convert DSG colormaps")
+    parser.add_argument("cmap_directory", help="Enter path to the colormaps folder")  
+    args = parser.parse_args()
+    folder = args.cmap_directory
+
     SUFFIX = ".clx"
+    
     import_colormaps(folder, SUFFIX)
 
 
