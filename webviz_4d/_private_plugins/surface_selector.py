@@ -33,9 +33,7 @@ some_property:
     interval:
         - somedate
         - somedate
-    types:    
-        - 'results'
-        - 'observations'
+
 another_property:
     names:
         - surfacename
@@ -50,22 +48,10 @@ another_property:
         self.metadata = metadata
         self.intervals = intervals
         self.current_selections = map_defaults
-        print(self.current_selections)
         self._storage_id = f"{str(uuid4())}-surface-selector"
-
         self.set_ids()
         self.set_callbacks(app)
 
-    @staticmethod
-    def read_config(config):
-        """Reads config file either from a yaml provided file or from a dict"""
-        if isinstance(config, str):
-            return yaml.safe_load(open(config, "r"))
-
-        if isinstance(config, dict):
-            return config
-
-        raise TypeError("Config must be a dictionary of a yaml file")
 
     @property
     def storage_id(self):
@@ -83,37 +69,25 @@ another_property:
         self.date_id = f"{uuid}-date"
         self.date_id_btn_prev = f"{uuid}-date-btn-prev"
         self.date_id_btn_next = f"{uuid}-date-btn-next"
-        self.type_id = f"{uuid}-type"
-        self.type_id_btn_prev = f"{uuid}-type-btn-prev"
-        self.type_id_btn_next = f"{uuid}-type-btn-next"
         self.name_wrapper_id = f"{uuid}-name-wrapper"
         self.date_wrapper_id = f"{uuid}-date-wrapper"
-        self.type_wrapper_id = f"{uuid}-type-wrapper"
 
     @property
     def attrs(self):
-        current_type = self.current_selections["map_type"]
         current_name = self.current_selections["name"]
-        df = self.metadata.loc[
-            (self.metadata["map_type"] == current_type)
-            & (self.metadata["data.name"] == current_name)
-        ]
+        df = self.metadata.loc[self.metadata["data.name"] == current_name]
         attributes = unique_values(df["data.content"].values)
+
         return attributes
 
     def _names_in_attr(self, attribute):
-        current_type = self.current_selections["map_type"]
         current_attribute = self.current_selections["attribute"]
-        df = self.metadata.loc[
-            (self.metadata["map_type"] == current_type)
-            & (self.metadata["data.content"] == current_attribute)
-        ]
+        df = self.metadata.loc[self.metadata["data.content"] == current_attribute]
         names = unique_values(df["data.name"].values)
 
         if not names:
             names = unique_values(self.metadata["data.name"].values)
 
-        # print('_names_in_attr: ',names)
         return names
 
     def _interval_in_attr(self, attribute):
@@ -121,11 +95,11 @@ another_property:
         if intervals is not None and intervals == [np.nan]:
             return None
 
-        # print('_interval: ',interval)
         return intervals
 
     @property
     def attribute_selector(self):
+        print("attribute_selector: value", self.current_selections["attribute"])
         return html.Div(
             style={"display": "grid"},
             children=[
@@ -212,14 +186,6 @@ another_property:
                     children=[
                         self.attribute_selector,
                         self.selector(
-                            self.type_wrapper_id,
-                            self.type_id,
-                            "Surface type",
-                            self.current_selections["map_type"],
-                            self.type_id_btn_prev,
-                            self.type_id_btn_next,
-                        ),
-                        self.selector(
                             self.name_wrapper_id,
                             self.name_id,
                             "Surface name",
@@ -253,7 +219,7 @@ another_property:
         )
         def _update_attr(_n_prev, _n_next, current_value):
             ctx = dash.callback_context.triggered
-            if not ctx or not current_value:
+            if ctx is None or not current_value:
                 raise PreventUpdate
             if not ctx[0]["value"]:
                 return current_value
@@ -276,11 +242,13 @@ another_property:
             ],
             [State(self.name_id, "value")],
         )
-        def _update_name(attr, _n_prev, _n_next, current_value):
+        def _update_name(attr, _n_prev, _n_next, current_value):         
             ctx = dash.callback_context.triggered
-            if not ctx:
+
+            if ctx is None:
                 raise PreventUpdate
             names = self._names_in_attr(attr)
+
             if not names:
                 return None, None, {"visibility": "hidden"}
 
@@ -310,7 +278,7 @@ another_property:
         def _update_date(attr, _n_prev, _n_next, current_value):
             ctx = dash.callback_context.triggered
 
-            if not ctx:
+            if ctx is None:
                 raise PreventUpdate
             interval = self._interval_in_attr(attr)
 
@@ -344,10 +312,12 @@ another_property:
             """
 
             # Preventing update if selections are not valid (waiting for the other callbacks)
+            
             if not name in self._names_in_attr(attr):
                 raise PreventUpdate
             if date and not date in self._interval_in_attr(attr):
                 raise PreventUpdate
+                
             return json.dumps({"name": name, "attr": attr, "date": date})
 
 
