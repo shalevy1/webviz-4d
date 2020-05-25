@@ -36,7 +36,7 @@ def make_surface_layer(
     name="surface",
     min_val=None,
     max_val=None,
-    color="viridis",
+    color="inferno",
     hillshading=False,
     min_max_df=None,
     unit="",    
@@ -45,7 +45,7 @@ def make_surface_layer(
     zvalues = get_surface_arr(surface)[2]
     bounds = [[surface.xmin, surface.ymin], [surface.xmax, surface.ymax]]
     
-    if not min_max_df.empty:
+    if min_max_df is not None and not min_max_df.empty:
         lower_limit = min_max_df["lower_limit"].values[0]
         
         if lower_limit is not None and not math.isnan(lower_limit):

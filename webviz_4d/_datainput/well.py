@@ -5,7 +5,7 @@ import json
 import pandas as pd
 import yaml
 import os
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 from webviz_config.common_cache import CACHE
 from pathlib import Path
 
@@ -68,9 +68,22 @@ def load_all_wells(wellfolder, wellsuffix):
             well = load_well(wellfile)
         except ValueError:
             continue
-        well.dataframe = well.dataframe[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]
-        well.dataframe["WELLBORE_NAME"] = well.name
-        all_wells_list.append(well.dataframe)
+        
+        if "MD" in well.dataframe.columns:
+            well.new_df = well.dataframe[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]    
+        else:
+            qc = well.geometrics()
+            
+            if qc:    
+                well.new_df = well.dataframe.rename(columns={"Q_MDEPTH":"MD"})
+            else:
+                print("ERROR: Measured depth values not found in well:",well.name)
+                well.new_df= pd.DataFrame()
+            
+        if not well.new_df.empty:                        
+            well.dataframe = well.new_df[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]
+            well.dataframe["WELLBORE_NAME"] = well.name
+            all_wells_list.append(well.dataframe)
 
     all_wells_df = pd.concat(all_wells_list)
 

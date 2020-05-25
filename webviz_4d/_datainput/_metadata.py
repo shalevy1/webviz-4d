@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
 import os
 import glob
 import sys
 import pandas as pd
-from pandas.io.json import json_normalize
+import numpy as np
+from pandas import json_normalize
 import yaml
 import re
 import calendar
@@ -30,8 +30,108 @@ def get_map_defaults(configuration, n):
     return map_defaults
 
 
+def create_map_settings(
+    attribute, name, map_type, ensemble, realization, default_interval
+):
+
+    map_dict = {
+        "attribute": attribute,
+        "name": name,
+        "map_type": map_type,
+        "ensemble": ensemble,
+        "realization": realization,
+        "interval": default_interval,
+    }
+
+    return map_dict
+
+
+def create_map_defaults(metadata_df, default_interval, observations, simulations):
+    observed_attributes = get_attributes(metadata_df, observations)
+    print("observed_attributes", observed_attributes)
+    observed_names = get_names(metadata_df, observations)
+
+    simulated_attributes = get_attributes(metadata_df, simulations)
+    print("simulated_attributes", simulated_attributes)
+    simulated_names = get_names(metadata_df, simulations)
+    realizations = get_realizations(metadata_df, simulations)
+    ensembles = get_ensembles(metadata_df, simulations)
+
+    ensemble = ensembles[0]
+    realization = realizations[0]
+
+    map_defaults = []
+
+    if observed_attributes:
+        rows = metadata_df.loc[
+            (metadata_df["data.time.t1"] == default_interval[0:10])
+            & (metadata_df["data.time.t2"] == default_interval[11:])
+        ]
+        print(rows)
+        observed_attribute = observed_attributes[0]
+        observed_name = rows["data.name"].values[0]
+        
+        map_default = create_map_settings(
+            observed_attribute,
+            observed_name,
+            observations,
+            ensemble,
+            realization,
+            default_interval,
+        )
+        map_defaults.append(map_default)
+
+        if simulated_attributes:
+            rows = metadata_df.loc[
+                (metadata_df["data.time.t1"] == default_interval[0:10])
+                & (metadata_df["data.time.t2"] == default_interval[11:])
+            ]
+            print(rows)
+            simulated_attribute = rows["data.content"].values[0]
+            simulated_name = rows["data.name"].values[0]
+            
+            map_default = create_map_settings(
+                simulated_attribute,
+                simulated_name,
+                simulations,
+                ensemble,
+                realization,
+                default_interval,
+            )
+            map_defaults.append(map_default)
+            map_defaults.append(map_default)
+
+    elif simulated_attributes:
+        rows = metadata_df.loc[
+                (metadata_df["data.time.t1"] == default_interval[0:10])
+                & (metadata_df["data.time.t2"] == default_interval[11:])
+            ]
+        print(rows)
+        simulated_attribute = rows["data.content"].values[0]
+        simulated_name = rows["data.name"].values[0]
+        
+        map_default = create_map_settings(
+            simulated_attribute,
+            simulated_name,
+            simulations,
+            ensemble,
+            realization,
+            default_interval,
+        )
+        map_defaults.append(map_default)
+        map_defaults.append(map_default)
+        map_defaults.append(map_default)
+
+    return map_defaults
+
+
 def get_well_colors(configuration):
-    return configuration["well_colors"]
+    try:
+        well_colors = configuration["well_colors"]
+    except:
+        well_colors = None
+
+    return well_colors
 
 
 def check_yaml_file(surfacepath):
@@ -45,7 +145,7 @@ def check_yaml_file(surfacepath):
     return status
 
 
-def extract_metadata(map_file):
+def extract_metadata(fmu_folder):
     meta_data = []
     index = map_file.find("realization")
 
@@ -123,19 +223,33 @@ def convert_date(date):
 
 
 def get_all_intervals(df):
-    intervals = df[["data.time.t1", "data.time.t2"]].values
-    # print('get_all_intervals ',intervals)
+    interval_df = df[["data.time.t1", "data.time.t2"]]
+    new_df = interval_df.drop_duplicates()
+    sorted_df = new_df.sort_values(
+        by=["data.time.t1", "data.time.t2"], ascending=[True, False]
+    )
 
-    interval_list = []
-    for interval in intervals:
-        interval_list.append(interval[0] + "-" + interval[1])
+    incremental_list = []
+    additional_list = []
 
-    list_set = set(interval_list)
-    unique_list = list(list_set)
-    interval_list = sorted(unique_list)
-    # print(interval_list)
+    previous_value = None
+    for index, row in sorted_df.iterrows():
+        interval = row["data.time.t1"] + "-" + row["data.time.t2"]
 
-    return interval_list
+        if index == 0:
+            incremental_list.append(interval)
+            previous_value = row["data.time.t1"]
+        else:
+            if not row["data.time.t1"] == previous_value:
+                incremental_list.append(interval)
+                previous_value = row["data.time.t1"]
+            else:
+                additional_list.append(interval)
+                previous_value = row["data.time.t1"]
+
+    incremental_list.extend(additional_list)
+
+    return incremental_list
 
 
 def get_difference_mode(surfacepath, delimiter):
@@ -161,7 +275,7 @@ def decode_filename(file_path, delimiter):
     surfacepath = str(file_path)
     ind = []
     number = None
-    directory = None
+    folder = None
     map_type = None
     iteration = None
     realization = None
@@ -169,7 +283,7 @@ def decode_filename(file_path, delimiter):
     attribute = None
     dates = [None, None]
 
-    directory = os.path.dirname(surfacepath)
+    folder = os.path.dirname(surfacepath)
 
     if "observations" in str(surfacepath):
         map_type = "observations"
@@ -207,23 +321,11 @@ def decode_filename(file_path, delimiter):
             dates[1] = convert_date(date)
 
     # print('decode ', realization, iteration, map_type, name, attribute, dates)
-    return directory, realization, iteration, map_type, name, attribute, dates
+    return folder, realization, iteration, map_type, name, attribute, dates
 
 
-def get_metadata(directory, defaults, delimiter):
-    filename = compose_filename(
-        directory,
-        defaults["realization"],
-        defaults["ensemble"],
-        defaults["map_type"],
-        defaults["name"],
-        defaults["attribute"],
-        defaults["interval"],
-        delimiter,
-    )
-    # print('filename ' ,filename)
-
-    surfacepath = str(filename)
+def get_metadata(directory, delimiter):
+    print("directory", directory)
     realizations = []
     iterations = []
     map_types = []
@@ -245,14 +347,11 @@ def get_metadata(directory, defaults, delimiter):
 
     all_dates = []
 
-    index = surfacepath.find("realization")
-    directory = os.path.join(surfacepath[:index])
-
     files = glob.glob(directory + "/**/*.gri", recursive=True)
 
     for filename in files:
         (
-            directory,
+            folder,
             realization,
             iteration,
             map_type,
@@ -287,13 +386,13 @@ def get_metadata(directory, defaults, delimiter):
         )
     )
 
-    df = pd.DataFrame(zipped_list, columns=headers)
-    df.fillna(value=pd.np.nan, inplace=True)
+    metadata = pd.DataFrame(zipped_list, columns=headers)
+    metadata.fillna(value=np.nan, inplace=True)
 
-    list_set = set(all_dates)
-    unique_list = list(list_set)
-    unique_dates = sorted(unique_list)
-    return df, unique_dates
+    metadata.to_csv(os.path.join(directory, "surface_metadata.csv"), index=False)
+    print("Surface metadata saved to:", directory)
+
+    return metadata
 
 
 def unique_values(list_values):
@@ -481,7 +580,7 @@ def get_plot_label(configuration, interval):
             labels_dict = configuration["date_labels"]
             label = labels_dict[int(date)]
         except:
-            label = date[:4]
+            label = date[:4] + "-" + date[4:6] + "-" + date[6:8]
 
         labels.append(label)
 
@@ -541,95 +640,91 @@ def sort_realizations(realizations):
     return sorted_list
 
 
+def get_attributes(metadata, map_type):
+    attributes = []
+    selected_type = metadata.loc[metadata["map_type"] == map_type]
+
+    if not selected_type.empty:
+        attribute_list = selected_type["data.content"].values
+        attributes = list(set(attribute_list))
+
+    return sorted(attributes)
+
+
+def get_names(metadata, map_type):
+    names = []
+    selected_type = metadata.loc[metadata["map_type"] == map_type]
+
+    if not selected_type.empty:
+        names_list = selected_type["data.name"].values
+        names = list(set(names_list))
+
+    return sorted(names)
+
+
+def get_realizations(metadata, map_type):
+    realizations = []
+    selected_type = metadata.loc[metadata["map_type"] == map_type]
+
+    if not selected_type.empty:
+        realizations_list = selected_type["fmu_id.realization"].values
+        realizations = list(set(realizations_list))
+
+    return sorted(realizations)
+
+
+def get_ensembles(metadata, map_type):
+    ensembles = []
+    selected_type = metadata.loc[metadata["map_type"] == map_type]
+
+    if not selected_type.empty:
+        ensembles_list = selected_type["fmu_id.iteration"].values
+        ensembles = list(set(ensembles_list))
+
+    return sorted(ensembles)
+
+
 def main():
     delimiter = "--"
-    file_name = "/scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share/results/maps/all--maxpos--20190915_20190515.gri"
-    config_file: "../../webviz-4d/fields/grane_mvp_config.yaml"
-    configuration = read_config(config_file)
+    folder = "/scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0"
 
-    map_file = "/scratch/johan_sverdrup2/jsorb/2020a_b006p2p0_yaml/realization-0/pred/share/maps/recoverables/total--average_pressure--20190101_20250101.gri"
-    print(check_yaml_file(map_file))
-    df, dates = extract_metadata(map_file)
+    observations = "observations"
+    simulations = "results"
 
-    print(df)
-    print(dates)
-    df.to_csv("js.csv")
+    metadata_df = get_metadata(folder, delimiter)
+    intervals = get_all_intervals(metadata_df)
 
-    file_name = "/private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-0/iter-0/share/results/maps/topupperreek--amplitude_max--20030101_20000101.gri"
-    (
-        directory,
-        realization,
-        iteration,
-        map_type,
-        name,
-        attribute,
-        dates,
-    ) = decode_filename(file_name, delimiter)
-    print(file_name)
-    print(directory, realization, iteration, map_type, name, attribute, dates)
+    print(metadata_df)
 
-    reek_df, reek_dates = get_metadata(file_name, delimiter)
-    print(reek_dates)
-    print(reek_df)
-    print("Realizations: ", get_col_values(reek_df, "fmu_id.realization"))
-    print(reek_df[reek_df["filename"] == file_name])
+    print("observations:")
+    print(get_attributes(metadata_df, "observations"))
 
-    print(
-        "Default indices: ", get_default_tag_indices(reek_dates, file_name, delimiter)
+    print("results:")
+    print(get_attributes(metadata_df, "results"))
+
+    configuration = (
+        "/private/ashska/development/webviz-4d/fields/grane/grane_4d_v2.yaml"
     )
-    default_tag_indices = get_default_tag_indices(reek_dates, file_name, delimiter)
-    print("Selected interval: ", get_selected_interval(reek_dates, default_tag_indices))
+    number_of_maps = 3
 
-    print("")
+    configuration = None
 
-    file_name = "/scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share/results/maps/all--maxpos--20190915_20190515.gri"
-    (
-        directory,
-        realization,
-        iteration,
-        map_type,
-        name,
-        attribute,
-        dates,
-    ) = decode_filename(file_name, delimiter)
+    if configuration:
+        config = read_config(configuration)
 
-    grane_df, grane_dates = get_metadata(file_name, delimiter)
-    print(file_name)
-    print(grane_dates)
-    print(grane_df)
-    print(grane_df[grane_df["filename"] == file_name])
+    try:
+        default_interval = config["map_settings"]["default_interval"]
+    except:
+        default_interval = intervals[-1]
 
-    print(
-        "Default indices: ", get_default_tag_indices(grane_dates, file_name, delimiter)
-    )
-    print("")
+    try:
+        map_defaults = get_map_defaults(config, default_interval, number_of_maps)
+    except:
+        map_defaults = create_map_defaults(
+            metadata_df, default_interval, observations, simulations
+        )
 
-    file_name = compose_filename(
-        directory,
-        realization,
-        iteration,
-        map_type,
-        name,
-        attribute,
-        [grane_dates[-1], grane_dates[-2]],
-        delimiter,
-    )
-    print(file_name, os.path.isfile(file_name))
-    print("")
-
-    file_name = "/scratch/johan_sverdrup2/jsorb/2020a_b006p2p0_yaml/realization-0/pred/share/maps/recoverables/total--average_pressure--20190101_20250101.gri"
-    directory = os.path.dirname(file_name)
-    name = os.path.basename(file_name)
-    yaml_file = directory + "/." + name + ".yaml"
-    print(file_name)
-    print(yaml_file)
-
-    js_df, js_dates = extract_metadata(file_name)
-    print(type(js_df))
-    print(js_dates)
-    print(js_df)
-
-    print(js_df[js_df["yaml_file"] == yaml_file])
+    print(map_defaults)
 
 
 if __name__ == "__main__":

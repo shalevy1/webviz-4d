@@ -66,13 +66,17 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
             wellbore_file = os.path.join(well_directory, rms_name) + well_suffix
             wellbore = load_wellbore(wellbore_file)
             short_name = wellbore.shortwellname
+            wellbore.geometrics()
 
             points = wellbore.get_surface_picks(surface)
             wellbore_pick_md = None
 
             if hasattr(points, "dataframe"):
                 #print(points.dataframe)
-                wellbore_pick_md = points.dataframe["MD"].values[0]
+                try:
+                    wellbore_pick_md = points.dataframe["MD"].values[0]
+                except:
+                    wellbore_pick_md = points.dataframe["Q_MDEPTH"].values[0]  
 
             rms_names.append(rms_name)
             short_names.append(short_name)
@@ -102,12 +106,16 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
             wellbore_fluids.append('')
             wellbore_list_names.append(list_name)
             
+            wellbore.geometrics()
             points = wellbore.get_surface_picks(surface)
+            print(points)
             wellbore_pick_md = None
 
             if hasattr(points, "dataframe"):
-                print(points.dataframe)
-                wellbore_pick_md = points.dataframe["MD"].values[0]
+                try:
+                    wellbore_pick_md = points.dataframe["MD"].values[0]
+                except:
+                    wellbore_pick_md = points.dataframe["Q_MDEPTH"].values[0]  
                 
             depth_surfaces.append(pick_name)
             depth_picks.append(wellbore_pick_md)    
