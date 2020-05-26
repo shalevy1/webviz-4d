@@ -52,7 +52,6 @@ another_property:
         self.set_ids()
         self.set_callbacks(app)
 
-
     @property
     def storage_id(self):
         """The id of the dcc.Store component that holds the selection"""
@@ -75,7 +74,11 @@ another_property:
     @property
     def attrs(self):
         current_name = self.current_selections["name"]
-        df = self.metadata.loc[self.metadata["data.name"] == current_name]
+        current_type = self.current_selections["map_type"]
+        df = self.metadata.loc[
+            (self.metadata["data.name"] == current_name)
+            & (self.metadata["map_type"] == current_type)
+        ]
         attributes = unique_values(df["data.content"].values)
 
         return attributes
@@ -242,7 +245,7 @@ another_property:
             ],
             [State(self.name_id, "value")],
         )
-        def _update_name(attr, _n_prev, _n_next, current_value):         
+        def _update_name(attr, _n_prev, _n_next, current_value):
             ctx = dash.callback_context.triggered
 
             if ctx is None:
@@ -312,12 +315,12 @@ another_property:
             """
 
             # Preventing update if selections are not valid (waiting for the other callbacks)
-            
+
             if not name in self._names_in_attr(attr):
                 raise PreventUpdate
             if date and not date in self._interval_in_attr(attr):
                 raise PreventUpdate
-                
+
             return json.dumps({"name": name, "attr": attr, "date": date})
 
 

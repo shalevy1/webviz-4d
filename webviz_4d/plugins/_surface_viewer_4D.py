@@ -68,14 +68,13 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.observations = "observations"
         self.simulations = "results"
         self.config = None
-        self.attribute_settings = {} 
-        self.surface_metadata = None 
+        self.attribute_settings = {}
+        self.surface_metadata = None
         self.well_base_layers = None
-        
-        print("map1_defaults",map1_defaults)
-        print("map2_defaults",map2_defaults)
-        print("map3_defaults",map3_defaults)
-        
+
+        print("map1_defaults", map1_defaults)
+        print("map2_defaults", map2_defaults)
+        print("map3_defaults", map3_defaults)
 
         # Find FMU directory
         keys = list(self.ens_paths.keys())
@@ -87,68 +86,75 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.wellfolder = None
 
         self.number_of_maps = 3
-        
+
         self.metadata = get_metadata(self.fmu_info, self.delimiter)
         self.intervals = get_all_intervals(self.metadata)
-        default_interval = self.intervals[-1] 
-                           
+        default_interval = self.intervals[-1]
+
         if configuration:
-            self.configuration = configuration        
+            self.configuration = configuration
             self.config = read_config(self.configuration)
             print(self.config)
-            
+
             try:
-                default_interval = self.config["map_settings"]["default_interval"]                
+                default_interval = self.config["map_settings"]["default_interval"]
             except:
-                pass 
-            
+                pass
+
             try:
-                self.attribute_settings = self.config["map_settings"]["attribute_settings"]
+                self.attribute_settings = self.config["map_settings"][
+                    "attribute_settings"
+                ]
             except:
-                pass  
-            
-            try:    
+                pass
+
+            try:
                 colormaps_folder = self.config["map_settings"]["colormaps_folder"]
                 if colormaps_folder:
-                    #print("Reading custom colormaps from:", colormaps_folder)
-                    load_custom_colormaps(colormaps_folder)  
+                    # print("Reading custom colormaps from:", colormaps_folder)
+                    load_custom_colormaps(colormaps_folder)
             except:
-                pass  
-                   
+                pass
+
             try:
-                attribute_maps_file = self.config["map_settings"]["colormaps_settings"]                
+                attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
                 self.surface_metadata = pd.read_csv(attribute_maps_file)
-                #print(self.surface_metadata)   
+                # print(self.surface_metadata)
             except:
-                pass   
-                
-        try:        
+                pass
+
+        try:
             self.map_defaults = []
             map1_defaults["interval"] = default_interval
             self.map_defaults.append(map1_defaults)
             map2_defaults["interval"] = default_interval
             self.map_defaults.append(map2_defaults)
             map3_defaults["interval"] = default_interval
-            self.map_defaults.append(map3_defaults)            
-        except: 
-            self.map_defaults = create_map_defaults(self.metadata, default_interval, self.observations, self.simulations)         
-                
-        print('self.map_defaults ',self.map_defaults)
+            self.map_defaults.append(map3_defaults)
+        except:
+            self.map_defaults = create_map_defaults(
+                self.metadata, default_interval, self.observations, self.simulations
+            )
 
-        self.selected_intervals = [default_interval, default_interval, default_interval] 
+        print("self.map_defaults ", self.map_defaults)
+
+        self.selected_intervals = [default_interval, default_interval, default_interval]
 
         self.selected_names = [None, None, None]
         self.selected_attributes = [None, None, None]
         self.selected_ensembles = [None, None, None]
         self.selected_realizations = [None, None, None]
         self.wellsuffix = ".w"
-        
+
         if wellfolder:
             self.wellfolder = wellfolder
-
-            self.drilled_well_df, self.drilled_well_info, self.interval_df = load_all_wells(
-                wellfolder, self.wellsuffix
-            )
+            
+            (
+                self.drilled_well_df,
+                self.drilled_well_info,
+                self.interval_df,
+            ) = load_all_wells(wellfolder, self.wellsuffix)
+            
             planned_wells_dir = [f.path for f in os.scandir(wellfolder) if f.is_dir()]
 
             self.colors = get_well_colors(self.config)
@@ -190,10 +196,10 @@ class SurfaceViewer4D(WebvizPluginABC):
                         label=os.path.basename(folder),
                     )
                 )
-            
-        #print("self.metadata",self.metadata)   
-        #print("self.intervals",self.intervals) 
-        #print("self.map_defaults",self.map_defaults)
+
+        # print("self.metadata",self.metadata)
+        # print("self.intervals",self.intervals)
+        print("self.map_defaults",self.map_defaults)
 
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
@@ -524,8 +530,6 @@ class SurfaceViewer4D(WebvizPluginABC):
         )
 
     def get_real_runpath(self, data, ensemble, real, map_type):
-        print("get_real_runpath ", data, ensemble, real, map_type)
-        print('self.intervals',self.intervals)
 
         filepath = compose_filename(
             self.directory,
@@ -586,14 +590,29 @@ class SurfaceViewer4D(WebvizPluginABC):
         # print(f"loading data {timer()-start}")
         surface_file = self.get_real_runpath(data, ensemble, real, map_type)
         surface = load_surface(surface_file)
-        
+
         if self.surface_metadata is not None:
-            metadata = self.surface_metadata.loc[self.surface_metadata["file path"] == surface_file]
+            m_data = self.surface_metadata.loc[
+                self.surface_metadata["map type"] == map_type
+            ]
+
+            a_data = m_data.loc[m_data["attribute"] == data["attr"]]
+
+            interval = (
+                data["date"][0:4]
+                + data["date"][5:7]
+                + data["date"][8:10]
+                + "_"
+                + data["date"][11:15]
+                + data["date"][16:18]
+                + data["date"][19:21]
+            )
+            i_data = a_data.loc[a_data["interval"] == interval]
+            metadata = i_data[["lower_limit", "upper_limit"]]
         else:
-            metadata = None    
-        # print(f"loading surface {timer()-start}")
-        
-        print("Make surface layer: ",data["attr"])
+            metadata = None
+        print("metadata", metadata)
+
         surface_layers = [
             make_surface_layer(
                 surface,
@@ -603,7 +622,7 @@ class SurfaceViewer4D(WebvizPluginABC):
                 max_val=attribute_settings.get(data["attr"], {}).get("max", None),
                 unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
                 hillshading=False,
-                min_max_df = metadata,
+                min_max_df=metadata,
             )
         ]
         # print(f"make surface layer {timer()-start}")
@@ -617,7 +636,9 @@ class SurfaceViewer4D(WebvizPluginABC):
             try:
                 interval_file = os.path.join(
                     self.wellfolder,
-                    "production_well_layers_" + self.selected_intervals[map_idx] + ".pkl",
+                    "production_well_layers_"
+                    + self.selected_intervals[map_idx]
+                    + ".pkl",
                 )
                 interval_layer = pickle.load(open(interval_file, "rb"))
                 surface_layers.append(interval_layer[0])
@@ -625,13 +646,18 @@ class SurfaceViewer4D(WebvizPluginABC):
 
                 interval_file = os.path.join(
                     self.wellfolder,
-                    "injection_well_layers_" + self.selected_intervals[map_idx] + ".pkl",
+                    "injection_well_layers_"
+                    + self.selected_intervals[map_idx]
+                    + ".pkl",
                 )
                 interval_layer = pickle.load(open(interval_file, "rb"))
                 surface_layers.append(interval_layer[0])
                 # print(interval_layer[0]["name"])
             except:
-                print("WARNING: No production/injection wells found for 4D interval:", self.selected_intervals[map_idx])
+                print(
+                    "WARNING: No production/injection wells found for 4D interval:",
+                    self.selected_intervals[map_idx],
+                )
 
         self.selected_names[map_idx] = data["name"]
         self.selected_attributes[map_idx] = data["attr"]
@@ -670,7 +696,7 @@ class SurfaceViewer4D(WebvizPluginABC):
             # ctx = dash.callback_context.triggered
             # print(ctx)
             # print("callback 1")
-            print("data ", data)
+            # print("data ", data)
             return self.make_map(data, ensemble, real, attribute_settings, 0)
 
         # Second map
