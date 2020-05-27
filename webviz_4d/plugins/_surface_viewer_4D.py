@@ -90,6 +90,8 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.metadata = get_metadata(self.fmu_info, self.delimiter)
         self.intervals = get_all_intervals(self.metadata)
         default_interval = self.intervals[-1]
+        
+        self.surface_layer = None
 
         if configuration:
             self.configuration = configuration
@@ -589,83 +591,92 @@ class SurfaceViewer4D(WebvizPluginABC):
 
         # print(f"loading data {timer()-start}")
         surface_file = self.get_real_runpath(data, ensemble, real, map_type)
-        surface = load_surface(surface_file)
+        
+        if os.path.isfile(surface_file):
+            surface = load_surface(surface_file)
 
-        if self.surface_metadata is not None:
-            m_data = self.surface_metadata.loc[
-                self.surface_metadata["map type"] == map_type
+            if self.surface_metadata is not None:
+                m_data = self.surface_metadata.loc[
+                    self.surface_metadata["map type"] == map_type
+                ]
+
+                a_data = m_data.loc[m_data["attribute"] == data["attr"]]
+
+                interval = (
+                    data["date"][0:4]
+                    + data["date"][5:7]
+                    + data["date"][8:10]
+                    + "_"
+                    + data["date"][11:15]
+                    + data["date"][16:18]
+                    + data["date"][19:21]
+                )
+                i_data = a_data.loc[a_data["interval"] == interval]
+                metadata = i_data[["lower_limit", "upper_limit"]]
+            else:
+                metadata = None
+            print("metadata", metadata)
+
+            surface_layers = [
+                make_surface_layer(
+                    surface,
+                    name=data["attr"],
+                    color=attribute_settings.get(data["attr"], {}).get("color", "inferno"),
+                    min_val=attribute_settings.get(data["attr"], {}).get("min", None),
+                    max_val=attribute_settings.get(data["attr"], {}).get("max", None),
+                    unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
+                    hillshading=False,
+                    min_max_df=metadata,
+                )
             ]
 
-            a_data = m_data.loc[m_data["attribute"] == data["attr"]]
+            # print(f"make surface layer {timer()-start}")
+            self.selected_intervals[map_idx] = data["date"]
 
-            interval = (
-                data["date"][0:4]
-                + data["date"][5:7]
-                + data["date"][8:10]
-                + "_"
-                + data["date"][11:15]
-                + data["date"][16:18]
-                + data["date"][19:21]
-            )
-            i_data = a_data.loc[a_data["interval"] == interval]
-            metadata = i_data[["lower_limit", "upper_limit"]]
+            if self.well_base_layers:
+                for well_layer in self.well_base_layers:
+                    # print(well_layer["name"])
+                    surface_layers.append(well_layer)
+
+                try:
+                    interval_file = os.path.join(
+                        self.wellfolder,
+                        "production_well_layers_"
+                        + self.selected_intervals[map_idx]
+                        + ".pkl",
+                    )
+                    interval_layer = pickle.load(open(interval_file, "rb"))
+                    surface_layers.append(interval_layer[0])
+                    # print(interval_layer[0]["name"])
+
+                    interval_file = os.path.join(
+                        self.wellfolder,
+                        "injection_well_layers_"
+                        + self.selected_intervals[map_idx]
+                        + ".pkl",
+                    )
+                    interval_layer = pickle.load(open(interval_file, "rb"))
+                    surface_layers.append(interval_layer[0])
+                    # print(interval_layer[0]["name"])
+                except:
+                    print(
+                        "WARNING: No production/injection wells found for 4D interval:",
+                        self.selected_intervals[map_idx],
+                    )
+
+            self.selected_names[map_idx] = data["name"]
+            self.selected_attributes[map_idx] = data["attr"]
+            self.selected_ensembles[map_idx] = ensemble
+            self.selected_realizations[map_idx] = real
+
+            heading, sim_info, label = self.get_heading(map_idx, self.observations)
         else:
-            metadata = None
-        print("metadata", metadata)
-
-        surface_layers = [
-            make_surface_layer(
-                surface,
-                name=data["attr"],
-                color=attribute_settings.get(data["attr"], {}).get("color", "inferno"),
-                min_val=attribute_settings.get(data["attr"], {}).get("min", None),
-                max_val=attribute_settings.get(data["attr"], {}).get("max", None),
-                unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
-                hillshading=False,
-                min_max_df=metadata,
-            )
-        ]
-        # print(f"make surface layer {timer()-start}")
-        self.selected_intervals[map_idx] = data["date"]
-
-        if self.well_base_layers:
-            for well_layer in self.well_base_layers:
-                # print(well_layer["name"])
-                surface_layers.append(well_layer)
-
-            try:
-                interval_file = os.path.join(
-                    self.wellfolder,
-                    "production_well_layers_"
-                    + self.selected_intervals[map_idx]
-                    + ".pkl",
-                )
-                interval_layer = pickle.load(open(interval_file, "rb"))
-                surface_layers.append(interval_layer[0])
-                # print(interval_layer[0]["name"])
-
-                interval_file = os.path.join(
-                    self.wellfolder,
-                    "injection_well_layers_"
-                    + self.selected_intervals[map_idx]
-                    + ".pkl",
-                )
-                interval_layer = pickle.load(open(interval_file, "rb"))
-                surface_layers.append(interval_layer[0])
-                # print(interval_layer[0]["name"])
-            except:
-                print(
-                    "WARNING: No production/injection wells found for 4D interval:",
-                    self.selected_intervals[map_idx],
-                )
-
-        self.selected_names[map_idx] = data["name"]
-        self.selected_attributes[map_idx] = data["attr"]
-        self.selected_ensembles[map_idx] = ensemble
-        self.selected_realizations[map_idx] = real
-
-        heading, sim_info, label = self.get_heading(map_idx, self.observations)
-        # print(f"remaining {timer()-start}")
+            print("WARNING: File", surface_file, "doesn't exist")
+            heading = "Selected map doesn't exist"
+            sim_info = '-'
+            surface_layers = []
+            label = '-'
+            
         return (
             heading,
             sim_info,

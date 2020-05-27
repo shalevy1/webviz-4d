@@ -88,8 +88,12 @@ def load_all_wells(wellfolder, wellsuffix):
     all_wells_df = pd.concat(all_wells_list)
 
     well_info, interval_df = extract_well_metadata(wellfolder)
-    metadata_file = os.path.join(wellfolder, "wellbore_info.csv")
-    metadata = pd.read_csv(metadata_file)
+    
+    try:
+        metadata_file = os.path.join(wellfolder, "wellbore_info.csv")
+        metadata = pd.read_csv(metadata_file)
+    except:
+        metadata = None    
     # print('load_all_wells ',metadata)
 
     return (all_wells_df, metadata, interval_df)
@@ -189,30 +193,35 @@ def make_new_well_layer(
     for wellbore in unique_wellbores:
         #print('wellbore ',wellbore)
         md_start = 0
+        info = ''
+        short_name = wellbore
+        well_type = ''
         polyline_data = None
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
-        well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
-        #print(well_metadata)
+        
+        if not metadata_df is None:
+            well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
+            #print(well_metadata)
 
-        md_top_res = well_metadata["wellbore.pick_md"].values
-        if selection and len(md_top_res) > 0:
-            md_start = min(md_top_res)
+            md_top_res = well_metadata["wellbore.pick_md"].values
+            if selection and len(md_top_res) > 0:
+                md_start = min(md_top_res)
 
-        short_name = well_metadata["wellbore.short_name"].values
-        if short_name:
-            short_name = short_name[0]
+            short_name = well_metadata["wellbore.short_name"].values
+            if short_name:
+                short_name = short_name[0]
 
-        well_type = well_metadata["wellbore.type"].values
-        if well_type:
-            well_type = well_type[0]
+            well_type = well_metadata["wellbore.type"].values
+            if well_type:
+                well_type = well_type[0]
 
-        if well_type == "planned":
-            info = well_metadata["wellbore.list_name"].values
-            start_date = None
-            stop_date = None
-        else:
-            info = well_metadata["wellbore.fluids"].values
+            if well_type == "planned":
+                info = well_metadata["wellbore.list_name"].values
+                start_date = None
+                stop_date = None
+            else:
+                info = well_metadata["wellbore.fluids"].values
 
         if info:
             info = info[0]
