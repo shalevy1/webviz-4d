@@ -7,7 +7,7 @@ import calendar
 import argparse
 import numpy as np
 import pandas as pd
-import common
+from webviz_4d._datainput import common
 
 
 def get_start_stop_dates(well_prod_data, prod_file_update, volume_code):

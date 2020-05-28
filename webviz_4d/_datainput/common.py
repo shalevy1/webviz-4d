@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 import json
 import yaml
+import numpy as np
 import pandas as pd
 from pandas.io.json import json_normalize
 import xtgeo
@@ -197,7 +198,7 @@ def get_metadata(directory, defaults, delimiter):
     )
 
     metadata_df = pd.DataFrame(zipped_list, columns=headers)
-    metadata_df.fillna(value=pd.np.nan, inplace=True)
+    metadata_df.fillna(value=np.nan, inplace=True)
 
     list_set = set(all_dates)
     unique_list = list(list_set)
@@ -311,20 +312,21 @@ def get_map_defaults(configuration, n_maps):
     """ Return default settings for maps (extracted from configuration file) """
     map_defaults = []
 
-    interval = configuration["map_settings"]["default_interval"]
+    interval = configuration["default_interval"]
 
     if not "-" in interval[0:8]:
         date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
         date2 = interval[9:13] + "-" + interval[13:15] + "-" + interval[15:17]
         interval = date1 + "-" + date2
-    # print(interval)
+    print(interval) 
 
     for i in range(0, n_maps):
         key = "map" + str(i + 1) + "_defaults"
-        defaults = configuration["map_settings"][key]
-        defaults["interval"] = interval
-        # print(map_def)
+        defaults = configuration[key]
+        defaults["interval"] = interval       
         map_defaults.append(defaults)
+
+        print(i, defaults)
 
     return map_defaults
 
@@ -371,7 +373,12 @@ def all_interval_dates(directory, delimiter, suffix):
 
 def get_well_colors(configuration):
     """ Return well colors from a configuration """
-    return configuration["well_colors"]
+    
+    surface_viewer4D = configuration["pages"][0]["content"][0]["SurfaceViewer4D"]
+    config_4d_file = surface_viewer4D["configuration"]
+    config_4d = read_config(config_4d_file)
+    print(config_4d)
+    return config_4d["well_colors"]
 
 
 def get_all_intervals(metadata_df):

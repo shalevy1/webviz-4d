@@ -5,7 +5,7 @@ import pandas as pd
 from pandas.io.json import json_normalize
 import json
 import requests
-from reper import wrappers
+import wrappers
 from scipy import interpolate
 import math
 import numpy as np
@@ -156,7 +156,7 @@ def main():
         default=["GR", "RHOB", "VSH"],
     )
     parser.add_argument(
-        "--search_txt", help="Limit the wells to by specify a search text", default=""
+        "--search_txt", help="Limit the wells by specifying a search text", default=""
     )
     args = parser.parse_args()
 

@@ -74,8 +74,6 @@ def make_surface_layer(
     min_val = min_val if min_val is not None else np.nanmin(zvalues)
     max_val = max_val if max_val is not None else np.nanmax(zvalues)
     
-    print("Layered map:", name, min_val,max_val)
-    
     return {
         "name": name,
         "checked": True,

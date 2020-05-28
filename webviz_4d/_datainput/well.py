@@ -217,7 +217,8 @@ def make_new_well_layer(
                 well_type = well_type[0]
 
             if well_type == "planned":
-                info = well_metadata["wellbore.list_name"].values
+                #info = well_metadata["wellbore.list_name"].values
+                info = ""
                 start_date = None
                 stop_date = None
             else:

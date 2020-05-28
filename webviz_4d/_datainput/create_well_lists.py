@@ -268,17 +268,19 @@ def main():
     # Well and production data
     wellsuffix = ".w"
     wellfolder = config["pages"][0]["content"][0]["SurfaceViewer4D"]["wellfolder"]
-    wellfolder = "/private/ashska/development/webviz-4d/data_preparation/Grane"
+    wellfolder = "/private/ashska/development/webviz-4d/data_preparation/grane_wells"
 
-    prod_info_dir = "/private/ashska/development/webviz-4d/data_preparation/Grane"
+    prod_info_dir = "/private/ashska/development/webviz-4d/fields/grane_pdm"
 
     directory = os.path.dirname(path).replace("*", "0")
     number_of_maps = 3
     field_config_file = (
-        "/private/ashska/development/webviz-4d/fields/grane/grane_mvp_config.yaml"
+        "/private/ashska/development/webviz-4d/fields/grane/grane_4d_v3.yaml"
     )
+    
     field_config = common.read_config(field_config_file)
-    map_defaults = common.get_map_defaults(field_config, number_of_maps)
+    surface_viewer4d = field_config["pages"][0]["content"][0]["SurfaceViewer4D"]
+    map_defaults = common.get_map_defaults(surface_viewer4d, number_of_maps)
     metadata, dates = common.get_metadata(directory, map_defaults[0], delimiter)
 
     print("Extracting 4D intervals ...")
