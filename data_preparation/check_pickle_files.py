@@ -4,10 +4,10 @@ import pickle
 import glob
 
 
-DIRECTORY = "/private/ashska/development/webviz-4d/data_preparation/Grane/"
+DIRECTORY = "/private/ashska/development/webviz-4d/data_preparation/grane_wells/"
 
 PICKLE_FILES = glob.glob(DIRECTORY + "*.pkl")
-PICKLE_FILES = [DIRECTORY + "production_well_layers_2017-05-15-2014-09-15.pkl"]
+#PICKLE_FILES = [DIRECTORY + "production_well_layers_2017-05-15-2014-09-15.pkl"]
 
 for pickle_file in PICKLE_FILES:
     f = open(pickle_file, "rb")
