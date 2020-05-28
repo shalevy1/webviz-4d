@@ -7,7 +7,7 @@ import calendar
 import argparse
 import numpy as np
 import pandas as pd
-import common
+from webviz_4d._datainput import common
 
 
 def get_start_stop_dates(well_prod_data, prod_file_update, volume_code):
@@ -76,7 +76,9 @@ def main():
     map_suffix = ".gri"
 
     well_info = pd.read_csv(os.path.join(well_directory, wellbore_info_file))
-    # print(well_info)
+    pd.set_option('display.max_columns', None)
+    print("well_info")
+    print(well_info)
 
     prod_data = pd.read_csv(production_file)
     prod_file_update = os.path.getmtime(production_file)

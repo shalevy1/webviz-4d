@@ -56,6 +56,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         map2_defaults: dict = None,
         map3_defaults: dict = None,
         wellfolder: Path = None,
+        default_interval: str = None,
         configuration: Path = None,
     ):
 
