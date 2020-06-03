@@ -97,7 +97,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         if configuration:
             self.configuration = configuration
             self.config = read_config(self.configuration)
-            print(self.config)
+            #print(self.config)
 
             try:
                 default_interval = self.config["map_settings"]["default_interval"]
@@ -139,8 +139,6 @@ class SurfaceViewer4D(WebvizPluginABC):
                 self.metadata, default_interval, self.observations, self.simulations
             )
 
-        print("self.map_defaults ", self.map_defaults)
-
         self.selected_intervals = [default_interval, default_interval, default_interval]
 
         self.selected_names = [None, None, None]
@@ -149,7 +147,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.selected_realizations = [None, None, None]
         self.wellsuffix = ".w"
 
-        if wellfolder:
+        if wellfolder and os.path.isdir(wellfolder):
             self.wellfolder = wellfolder
             
             (
@@ -199,10 +197,9 @@ class SurfaceViewer4D(WebvizPluginABC):
                         label=os.path.basename(folder),
                     )
                 )
+        elif wellfolder and not os.path.isdir(wellfolder): 
+            print("ERROR: Folder", wellfolder,"doesn't exist. No wells loaded")   
 
-        # print("self.metadata",self.metadata)
-        # print("self.intervals",self.intervals)
-        print("self.map_defaults",self.map_defaults)
 
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
@@ -584,7 +581,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         return heading, sim_info, label
 
     def make_map(self, data, ensemble, real, attribute_settings, map_idx):
-        print(data, ensemble, real, attribute_settings, map_idx)
+        #print(data, ensemble, real, attribute_settings, map_idx)
         start = timer()
         data = json.loads(data)
         attribute_settings = json.loads(attribute_settings)
@@ -616,7 +613,6 @@ class SurfaceViewer4D(WebvizPluginABC):
                 metadata = i_data[["lower_limit", "upper_limit"]]
             else:
                 metadata = None
-            print("metadata", metadata)
 
             surface_layers = [
                 make_surface_layer(
@@ -705,10 +701,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         def _set_base_layer(
             data, ensemble, real, attribute_settings,
         ):
-            # ctx = dash.callback_context.triggered
-            # print(ctx)
-            # print("callback 1")
-            # print("data ", data)
+
             return self.make_map(data, ensemble, real, attribute_settings, 0)
 
         # Second map
@@ -730,8 +723,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         def _set_base_layer(
             data, ensemble, real, attribute_settings,
         ):
-            # print("callback 2")
-            print("data2", data)
+
             return self.make_map(data, ensemble, real, attribute_settings, 1)
 
         # Third map
