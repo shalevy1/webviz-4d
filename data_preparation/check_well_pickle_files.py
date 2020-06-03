@@ -1,23 +1,43 @@
-""" Display the wells that are included in a given Pickle well lists """
-
+import argparse
 import pickle
 import glob
 
+# Main program
+def main():
+    """ Display the tooltip info found in all well list (pickle) files found in a folder
+    
+    Parameters
+    ----------
+    folder : str
+        The name of the folder with the pickle files
 
-DIRECTORY = "/private/ashska/development/webviz-4d/data_preparation/grane_wells/"
+    Returns
+    -------
+    """
 
-PICKLE_FILES = glob.glob(DIRECTORY + "*.pkl")
-#PICKLE_FILES = [DIRECTORY + "production_well_layers_2017-05-15-2014-09-15.pkl"]
+    parser = argparse.ArgumentParser(
+        description="Check well list files"
+    )
+    parser.add_argument("folder", help="Enter folder path")
 
-for pickle_file in PICKLE_FILES:
-    f = open(pickle_file, "rb")
-    info = pickle.load(f)
+    args = parser.parse_args()
+    folder = args.folder
 
-    print(pickle_file)
-    data = info[0]["data"]
+    pickle_files = glob.glob(folder + "*.pkl")
 
-    if len(data) > 0:
-        for item in data:
-            print(item["tooltip"])
+    for pickle_file in pickle_files:
+        f = open(pickle_file, "rb")
+        info = pickle.load(f)
 
-    print("")
+        print(pickle_file)
+        data = info[0]["data"]
+
+        if len(data) > 0:
+            for item in data:
+                print(item["tooltip"])
+
+        print("")
+    
+    
+if __name__ == "__main__":
+    main()    
