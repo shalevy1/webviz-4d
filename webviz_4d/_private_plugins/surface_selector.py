@@ -102,7 +102,6 @@ another_property:
 
     @property
     def attribute_selector(self):
-        print("attribute_selector: value", self.current_selections["attribute"])
         return html.Div(
             style={"display": "grid"},
             children=[
