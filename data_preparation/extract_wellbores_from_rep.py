@@ -142,7 +142,7 @@ def write_metadata(
 def main():
     """ Extracts trajectories, well logs and some metadata for all
     drilled wellbores in the REP database. Each wellbore is stored
-    as an RMS ascii well (.w) in a folder named ./<field> and the
+    as an RMS ascii well (.w) in a folder named ../<field> and the
     metadata is also stored in the same folder. The metadata is stored
     as .<rms_name>.w.yaml and contains the following information (if available):
     - wellbore:
@@ -199,7 +199,7 @@ def main():
 
     EQUIPMENT_NAMES = ["Screen", "Perforations"]
 
-    export_dir = "./" + field.replace(" ", "_")
+    export_dir = "../" + field.replace(" ", "_")
 
     wellbores = sorted(wrappers.Field(field).get_wellbore_names())
 
