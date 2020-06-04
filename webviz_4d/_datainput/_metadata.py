@@ -688,6 +688,39 @@ def get_ensembles(metadata, map_type):
         ensembles = list(set(ensembles_list))
 
     return sorted(ensembles)
+    
+    
+def get_update_dates(wellfolder):
+    update_dates = {}
+    
+    try:
+        well_date_file = os.path.join(wellfolder,".welldata_update.yaml")
+
+        with open(well_date_file, "r") as stream:
+            well_meta_data = yaml.safe_load(stream)
+            
+        well_update = well_meta_data[0]["welldata"]["update_time"]
+        update_dates["well_update_date"] = well_update.strftime("%Y-%m-%d %H:%M:%S")
+    except:
+        update_dates["well_update_date"] = ''
+    
+    try:
+        prod_date_file = os.path.join(wellfolder,".production_update.yaml")
+
+        with open(prod_date_file, "r") as stream:
+            production_meta_data = yaml.safe_load(stream)
+          
+        print(production_meta_data)
+        first_date = production_meta_data[0]["production"]["start_date"].strftime("%Y-%m-%d")
+        last_date = production_meta_data[0]["production"]["last_date"].strftime("%Y-%m-%d")
+        
+        update_dates["production_first_date"] = first_date           
+        update_dates["production_last_date"] = last_date   
+    except:  
+        update_dates["production_first_date"] = ''           
+        update_dates["production_last_date"] = ''     
+    
+    return update_dates    
 
 
 def main():

@@ -7,6 +7,7 @@ import pandas as pd
 from pandas import json_normalize
 import yaml
 import numpy as np
+import datetime
 from reper import wrappers
 from webviz_4d._datainput.common import load_well
 
@@ -167,8 +168,6 @@ def main():
         The name of the field
     md_inc : int, optional
         Measured depth increment (default=50)
-    log_curves : list, optional
-        List of log curves (default=["GR", "RHOB", "VSH"])
 
     Returns
     -------
@@ -182,20 +181,15 @@ def main():
         "--md_inc", help="Enter wanted depth (MD) increment", type=int, default=50
     )
     parser.add_argument(
-        "--log_curves",
-        help="Enter list with wanted log curves",
-        default=["GR", "RHOB", "VSH"],
-    )
-    parser.add_argument(
         "--search_txt", help="Limit the wells by specifying a search text", default=""
     )
     args = parser.parse_args()
 
     field = args.field
     md_inc = args.md_inc
-    log_curves = args.log_curves
+
     search_txt = args.search_txt
-    print(field, md_inc, log_curves, search_txt)
+    print(field, md_inc, search_txt)
 
     EQUIPMENT_NAMES = ["Screen", "Perforations"]
 
@@ -283,45 +277,7 @@ def main():
             well_df["EASTING"] = easting_reg
             well_df["NORTHING"] = northing_reg
 
-            for log_curve in log_curves:
-                print(log_curve)
-                curve_data = wrappers.Wellbore(field, wellbore).get_wellbore_log_data(
-                    log_curve
-                )
-                # print(curve_data)
-
-                if curve_data:
-                    # Currently no unit information is used
-
-                    # try:
-                    #    index_unit = curve_data["indexUnit"]
-                    # except:
-                    #    index_unit = "-"
-
-                    # try:
-                    #    curve_unit = curve_data["unit"]
-                    # except:
-                    #    curve_unit = "-"
-
-                    # print('Index unit: ',index_unit)
-                    # print('Curve unit: ',curve_unit)
-
-                    data_points = wrappers.Wellbore(
-                        field, wellbore
-                    ).get_log_data_points(log_curve)
-
-                    md_values = data_points["MD RKB"].values
-                    curve_values = data_points["Value"].values
-
-                    reg_log_values = dummy_log(md_reg)
-                    reg_log_values = replace_values(
-                        reg_log_values, md_values, curve_values, md_reg
-                    )
-
-                    well_df[log_curve] = reg_log_values
-                else:
-                    print("    - not found")
-
+            
             # print(df)
 
             name = wellbore.replace("/", "_").replace("NO ", "").replace(" ", "_")
@@ -345,6 +301,17 @@ def main():
                 fluids,
                 completions,
             )
+            
+    now = datetime.datetime.now()
+    print ("Update time",now.strftime("%Y-%m-%d %H:%M:%S"))
+    
+    outfile = os.path.join(export_dir, ".welldata_update.yaml")
+    f = open(outfile, "w")
+    f.write("- welldata:\n")
+    f.write("   update_time: " + now.strftime("%Y-%m-%d %H:%M:%S") + "\n")
+    f.close()
+    
+    print("Metadata exported to file " + outfile)
 
 
 if __name__ == "__main__":

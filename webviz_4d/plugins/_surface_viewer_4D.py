@@ -40,6 +40,7 @@ from webviz_4d._datainput._metadata import (
     read_config,
     sort_realizations,
     get_plot_label,
+    get_update_dates,
 )
 
 
@@ -85,6 +86,8 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.fmu_info = os.path.dirname(self.directory)
 
         self.wellfolder = None
+        self.well_update = ''
+        self.production_update = ''
 
         self.number_of_maps = 3
 
@@ -149,6 +152,9 @@ class SurfaceViewer4D(WebvizPluginABC):
 
         if wellfolder and os.path.isdir(wellfolder):
             self.wellfolder = wellfolder
+            update_dates = get_update_dates(wellfolder)
+            self.well_update = update_dates["well_update_date"]
+            self.production_update = update_dates["production_last_date"]
             
             (
                 self.drilled_well_df,
@@ -356,6 +362,8 @@ class SurfaceViewer4D(WebvizPluginABC):
             id=self.uuid("layout"),
             children=[
                 html.H3("WebViz-4D " + self.fmu_info),
+                html.H6("Well data update: " + self.well_update),
+                html.H6("Production data update: " + self.production_update),
                 wcc.FlexBox(
                     style={"fontSize": "1rem"},
                     children=[

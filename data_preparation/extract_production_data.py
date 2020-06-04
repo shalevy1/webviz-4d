@@ -10,6 +10,13 @@ import pandas as pd
 from webviz_4d._datainput import common
 
 
+def get_prod_dates(well_prod_data):
+    first_date = well_prod_data["DATEPRD"].values.min()
+    last_date = well_prod_data["DATEPRD"].values.max()
+    
+    return first_date, last_date
+
+
 def get_start_stop_dates(well_prod_data, prod_file_update, volume_code):
     well_prod_data.replace(" 00:00:00", "", regex=True, inplace=True)
     # print(well_prod_data)
@@ -82,6 +89,7 @@ def main():
 
     prod_data = pd.read_csv(production_file)
     prod_file_update = os.path.getmtime(production_file)
+    first_date,last_date = get_prod_dates(prod_data)
 
     print(prod_data)
 
@@ -166,17 +174,27 @@ def main():
 
         for i in range(0, len(dates_4d) + 1):
             volume_df[intervals[i]] = volumes[:, i]
-            print(i, intervals[i])
-            print(volume_df["1993-01-01-2005-07-01"])
+            #print(i, intervals[i])
+            #print(volume_df["1993-01-01-2005-07-01"])
 
         volume_df_actual = volume_df[volume_df[all_intervals] > 0]
-
-        print(volume_df)
+        #print(volume_df_actual)
 
         csv_file = os.path.join(well_directory, volume_code + ".csv")
         volume_df_actual.to_csv(csv_file, index=False)
-
         print("Data exported to file " + csv_file)
+        
+        print("Production start and last date:", first_date, last_date)
+        
+        outfile = os.path.join(well_directory, ".production_update.yaml")
+        f = open(outfile, "w")
+        f.write("- production:\n")
+        f.write("   start_date: " + first_date[0:10] + "\n")
+        f.write("   last_date: " + last_date[0:10] + "\n")
+        f.close()
+        
+        print("Metadata exported to file " + outfile)
+        
 
 
 if __name__ == "__main__":
