@@ -1,0 +1,20 @@
+source /prog/res/komodo/testing-py3/enable.csh
+git clone git@github.com:equinor/webviz-4d.git
+cd webviz-4d
+mkdir well_data
+mkdir production_data
+mkdir colormaps
+python -m venv venv
+source venv/bin/activate.csh
+pip install --upgrade pip
+pip install libecl 
+pip install webviz-config
+pip install webviz-subsurface
+pip install webviz-config-equinor
+pip install ruamel.yaml
+pip install requests
+pip install .
+
+
+
+
