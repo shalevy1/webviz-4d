@@ -301,7 +301,7 @@ def decode_filename(file_path, delimiter):
                 number = find_number(surfacepath, "iter")
 
                 if number:
-                    iteration = "iter-" + number
+                    iteration = "iter-" + number   
 
     for m in re.finditer(delimiter, str(surfacepath)):
         ind.append(m.start())
@@ -319,8 +319,11 @@ def decode_filename(file_path, delimiter):
 
             date = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
             dates[1] = convert_date(date)
+            
+    if "pred" in surfacepath:
+        iteration = "pred"        
 
-    # print('decode ', realization, iteration, map_type, name, attribute, dates)
+    #print('decode ', surfacepath,realization, iteration, map_type, name, attribute, dates)
     return folder, realization, iteration, map_type, name, attribute, dates
 
 
@@ -718,52 +721,22 @@ def get_update_dates(wellfolder):
         update_dates["production_last_date"] = last_date   
     except:  
         update_dates["production_first_date"] = ''           
-        update_dates["production_last_date"] = ''     
+        update_dates["production_last_date"] = ''  
+        
+    #print("Update dates", update_dates)        
     
     return update_dates    
 
 
 def main():
     delimiter = "--"
-    folder = "/scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0"
+    folder = "/scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0"
+    folder = "/private/ashska/tmp/"
 
-    observations = "observations"
-    simulations = "results"
+    pd.set_option('display.max_rows', None)
+    metadata = get_metadata(folder,delimiter)
 
-    metadata_df = get_metadata(folder, delimiter)
-    intervals = get_all_intervals(metadata_df)
-
-    print(metadata_df)
-
-    print("observations:")
-    print(get_attributes(metadata_df, "observations"))
-
-    print("results:")
-    print(get_attributes(metadata_df, "results"))
-
-    configuration = (
-        "/private/ashska/development/webviz-4d/fields/grane/grane_4d_v2.yaml"
-    )
-    number_of_maps = 3
-
-    configuration = None
-
-    if configuration:
-        config = read_config(configuration)
-
-    try:
-        default_interval = config["map_settings"]["default_interval"]
-    except:
-        default_interval = intervals[-1]
-
-    try:
-        map_defaults = get_map_defaults(config, default_interval, number_of_maps)
-    except:
-        map_defaults = create_map_defaults(
-            metadata_df, default_interval, observations, simulations
-        )
-
-    print(map_defaults)
+    print(metadata)
 
 
 if __name__ == "__main__":

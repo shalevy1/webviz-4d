@@ -9,7 +9,7 @@ import json
 import yaml
 import numpy as np
 import pandas as pd
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 import xtgeo
 
 
@@ -311,8 +311,11 @@ def decode_filename(file_path, delimiter):
 def get_map_defaults(configuration, n_maps):
     """ Return default settings for maps (extracted from configuration file) """
     map_defaults = []
+    
+    settings_file = configuration["settings"]
+    settings = read_config(settings_file)
 
-    interval = configuration["default_interval"]
+    interval = settings["map_settings"]["default_interval"]
 
     if not "-" in interval[0:8]:
         date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
@@ -375,7 +378,7 @@ def get_well_colors(configuration):
     """ Return well colors from a configuration """
     
     surface_viewer4D = configuration["pages"][0]["content"][0]["SurfaceViewer4D"]
-    config_4d_file = surface_viewer4D["configuration"]
+    config_4d_file = surface_viewer4D["settings"]
     config_4d = read_config(config_4d_file)
     print(config_4d)
     return config_4d["well_colors"]
@@ -449,14 +452,13 @@ def get_wellbores(metadata_df, well_name):
     return sorted(wellbore_names)
 
 
-def get_mother_wells(metadata_df, well_name):
-    """ Don't understand """
-    mother_wells = [well_name]
+def get_mother_wells(metadata_df, slot_name):
+    """ Returns a list of possible mother wells - excluding sidetracks"""
+    mother_well = slot_name
+    mother_wells = [slot_name]
 
-    wellbores = get_wellbores(metadata_df, well_name)
-    # print('wellbores ',wellbores)
+    wellbores = get_wellbores(metadata_df, slot_name) # All wellbores with same slot
 
-    mother_well = well_name
     for wellbore in wellbores:
         if not wellbore == mother_well and not wellbore[-2] == "T":
             if wellbore[-1] in "123456789":
@@ -476,7 +478,7 @@ def get_mother_wells(metadata_df, well_name):
 
 
 def get_branches(well_info_df, mother_well):
-    """ Obsolete? """
+    """ Get all branches for a well """
     branches = []
     i = mother_well.rfind(" ")
 
@@ -501,15 +503,13 @@ def get_branches(well_info_df, mother_well):
 
 def get_wellname(well_info_df, wellbore):
     """ Return well name for a selected wellbore """
-    well_name = get_well_metadata(well_info_df, wellbore, "wellbore.slot_name")
+    slot_name = get_well_metadata(well_info_df, wellbore, "wellbore.slot_name")
 
-    if well_name:
-        mother_wells = get_mother_wells(well_info_df, well_name)
-        # print(mother_wells)
+    if slot_name:
+        mother_wells = get_mother_wells(well_info_df, slot_name)
 
         for mother_well in mother_wells:
             branches = get_branches(well_info_df, mother_well)
-            # print(branches)
 
             for branch in branches:
                 if branch == wellbore:
@@ -582,3 +582,16 @@ def get_position_data(well_dataframe, md_start):
     positions = well_dataframe[["X_UTME", "Y_UTMN"]].values
 
     return positions
+    
+    
+def get_config_item(config_file,key):
+    config = read_config(config_file)
+    
+    pages = config["pages"]   
+    content = pages[0]["content"]
+    
+    surface_viewer4d = content[0]["SurfaceViewer4D"] 
+    value = surface_viewer4d[key]
+    
+    return value
+    
