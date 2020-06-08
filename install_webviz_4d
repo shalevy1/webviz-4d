@@ -1,5 +1,6 @@
 source /prog/res/komodo/testing-py3/enable.csh
 git clone git@github.com:equinor/webviz-4d.git
+git clone git@github.com:equinor/reper.git
 cd webviz-4d
 mkdir well_data
 mkdir production_data
@@ -13,6 +14,7 @@ pip install webviz-subsurface
 pip install webviz-config-equinor
 pip install ruamel.yaml
 pip install requests
+pip install ../reper
 pip install .
 
 

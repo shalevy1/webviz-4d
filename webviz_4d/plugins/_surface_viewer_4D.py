@@ -57,8 +57,9 @@ class SurfaceViewer4D(WebvizPluginABC):
         map2_defaults: dict = None,
         map3_defaults: dict = None,
         wellfolder: Path = None,
+        production_data: Path = None,
         default_interval: str = None,
-        configuration: Path = None,
+        settings: Path = None,
     ):
 
         super().__init__()
@@ -97,8 +98,8 @@ class SurfaceViewer4D(WebvizPluginABC):
         
         self.surface_layer = None
 
-        if configuration:
-            self.configuration = configuration
+        if settings:
+            self.configuration = settings
             self.config = read_config(self.configuration)
             #print(self.config)
 
