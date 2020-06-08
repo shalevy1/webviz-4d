@@ -1,6 +1,7 @@
 """ Script that extracts trajectories, well logs and some
     metadata for alldrilled wellbores in the REP database """
 import os
+import glob
 import argparse
 import math
 import pandas as pd
@@ -9,47 +10,7 @@ import yaml
 import numpy as np
 import datetime
 from reper import wrappers
-from webviz_4d._datainput.common import load_well
-
-
-def dummy_log(md_reg):
-    """ Create a dummy well log with the same length as the supplied MD array """
-    log = np.empty(len(md_reg))
-    log[:] = np.nan
-
-    return log
-
-
-def replace_values(final_log_values, md_log, log_values, md_reg):
-    """ Replace dummy log values with interpolated real values """
-    md_start = md_reg[0]
-    md_inc = md_reg[1] - md_reg[0]
-
-    md_log_start = math.ceil(md_log[0])
-    md_log_end = math.floor(md_log[-1])
-
-    md_log_reg = np.arange(md_log_start, md_log_end, md_inc)
-    md_array = np.array(md_log, dtype="float64")
-    log_values_array = np.array(log_values, dtype="float64")
-
-    log_reg = np.interp(md_log_reg, md_array, log_values_array)
-    # print(log_reg)
-
-    ind1 = 0
-    l = -math.floor((md_start - md_log_start) / md_inc)
-    ind2 = len(md_log_reg) - 1
-
-    if ind2 + l > len(final_log_values):
-        ind2 = len(final_log_values) - l
-
-    for i in range(ind1, ind2):
-        # print(i,l)
-        if np.isnan(final_log_values[l]) and not np.isnan(log_reg[i]):
-            final_log_values[l] = log_reg[i]
-
-        l = l + 1
-
-    return final_log_values
+from webviz_4d._datainput.common import load_well, read_config
 
 
 def write_rms_wellbore(wellbore_name, wellbore_df, rkb, export_dir):
@@ -98,8 +59,7 @@ def write_rms_wellbore(wellbore_name, wellbore_df, rkb, export_dir):
 
     f.close()
 
-    print("Well data exported to ", outfile)
-    print("")
+    #print("Well data exported to ", outfile)
 
 
 def write_metadata(
@@ -180,138 +140,147 @@ def main():
     parser.add_argument(
         "--md_inc", help="Enter wanted depth (MD) increment", type=int, default=50
     )
-    parser.add_argument(
-        "--search_txt", help="Limit the wells by specifying a search text", default=""
-    )
+
     args = parser.parse_args()
 
     field = args.field
     md_inc = args.md_inc
 
-    search_txt = args.search_txt
-    print(field, md_inc, search_txt)
+    print(field, md_inc)
 
     EQUIPMENT_NAMES = ["Screen", "Perforations"]
 
-    export_dir = "../" + field.replace(" ", "_")
+    export_dir = "./well_data/"
+    
+    # Remove existing wells (not planned wells) and all metadata 
+    if os.path.isdir(export_dir):
+        files = glob.glob(export_dir + "*.w")
+        
+        for f in files:
+            os.remove(f)
+            
+        files = glob.glob(export_dir + ".*.yaml", recursive=True)
+        
+        for f in files:
+            os.remove(f)    
 
     wellbores = sorted(wrappers.Field(field).get_wellbore_names())
 
+    i = 1
     for wellbore in wellbores:
-        if search_txt in wellbore:
-            trajectory = wrappers.Wellbore(field, wellbore).get_wellbore_pos_log()
-            df_trajectory = json_normalize(trajectory)
+        trajectory = wrappers.Wellbore(field, wellbore).get_wellbore_pos_log()
+        df_trajectory = json_normalize(trajectory)
 
-            rkb = wrappers.Wellbore(field, wellbore).get_depth_reference_elevation()
-            df_trajectory["md"] = df_trajectory["md"].values + rkb
+        rkb = wrappers.Wellbore(field, wellbore).get_depth_reference_elevation()
+        df_trajectory["md"] = df_trajectory["md"].values + rkb
 
-            end_date = wrappers.Wellbore(field, wellbore).get_wellbore_end_date()
-            if end_date is None:
-                end_date = ""
+        end_date = wrappers.Wellbore(field, wellbore).get_wellbore_end_date()
+        if end_date is None:
+            end_date = ""
 
-            wellbore_type = wrappers.Wellbore(field, wellbore).get_wellbore_type()
-            if wellbore_type is None:
-                wellbore_type = ""
+        wellbore_type = wrappers.Wellbore(field, wellbore).get_wellbore_type()
+        if wellbore_type is None:
+            wellbore_type = ""
 
-            facility = wrappers.Wellbore(
-                field, wellbore
-            ).get_wellbore_drilling_facility()
-            if facility is None:
-                facility = ""
+        facility = wrappers.Wellbore(
+            field, wellbore
+        ).get_wellbore_drilling_facility()
+        if facility is None:
+            facility = ""
 
-            slot_name = wrappers.Wellbore(field, wellbore).get_well_identifier()
-            if slot_name is None:
-                slot_name = ""
+        slot_name = wrappers.Wellbore(field, wellbore).get_well_identifier()
+        if slot_name is None:
+            slot_name = ""
 
-            fluids = wrappers.Wellbore(field, wellbore).get_wellbore_fluids()
-            if fluids is None:
-                fluids = ""
+        fluids = wrappers.Wellbore(field, wellbore).get_wellbore_fluids()
+        if fluids is None:
+            fluids = ""
 
-            completion_list = wrappers.Wellbore(
-                field, wellbore
-            ).get_wellbore_completion_data()
+        completion_list = wrappers.Wellbore(
+            field, wellbore
+        ).get_wellbore_completion_data()
 
-            completions = []
+        completions = []
 
-            if completion_list:
-                for item in completion_list:
-                    for equipment in EQUIPMENT_NAMES:
-                        if equipment in item["symbolName"]:
-                            completion = {
-                                "wellbore": wellbore,
-                                "equipment": item["symbolName"],
-                                "mdTop": item["mdTop"] + rkb,
-                                "mdBottom": item["mdBottom"] + rkb,
-                            }
-                            completion_dict = {"interval": completion}
-                            completions.append(completion_dict)
+        if completion_list:
+            for item in completion_list:
+                for equipment in EQUIPMENT_NAMES:
+                    if equipment in item["symbolName"]:
+                        completion = {
+                            "wellbore": wellbore,
+                            "equipment": item["symbolName"],
+                            "mdTop": item["mdTop"] + rkb,
+                            "mdBottom": item["mdBottom"] + rkb,
+                        }
+                        completion_dict = {"interval": completion}
+                        completions.append(completion_dict)
 
-            md_wellbore = df_trajectory["md"]
-            tvd_wellbore = df_trajectory["tvd"]
-            easting = df_trajectory["easting"]
-            northing = df_trajectory["northing"]
-            total_depth = md_wellbore.values[-1]
+        md_wellbore = df_trajectory["md"]
+        tvd_wellbore = df_trajectory["tvd"]
+        easting = df_trajectory["easting"]
+        northing = df_trajectory["northing"]
+        total_depth = md_wellbore.values[-1]
 
-            # Resample well trajectory
-            start_md = md_wellbore[0]
-            end_md = math.floor(total_depth)
+        # Resample well trajectory
+        start_md = md_wellbore[0]
+        end_md = math.floor(total_depth)
 
-            md_reg = np.arange(start_md, end_md, md_inc)
+        md_reg = np.arange(start_md, end_md, md_inc)
 
-            tvd_reg = np.interp(md_reg, md_wellbore, tvd_wellbore)
-            easting_reg = np.interp(md_reg, md_wellbore, easting)
-            northing_reg = np.interp(md_reg, md_wellbore, northing)
+        tvd_reg = np.interp(md_reg, md_wellbore, tvd_wellbore)
+        easting_reg = np.interp(md_reg, md_wellbore, easting)
+        northing_reg = np.interp(md_reg, md_wellbore, northing)
 
-            md_reg = np.append(md_reg, md_wellbore.values[-1])
-            tvd_reg = np.append(tvd_reg, tvd_wellbore.values[-1])
-            easting_reg = np.append(easting_reg, easting.values[-1])
-            northing_reg = np.append(northing_reg, northing.values[-1])
+        md_reg = np.append(md_reg, md_wellbore.values[-1])
+        tvd_reg = np.append(tvd_reg, tvd_wellbore.values[-1])
+        easting_reg = np.append(easting_reg, easting.values[-1])
+        northing_reg = np.append(northing_reg, northing.values[-1])
 
-            print(wellbore, ",", rkb, ",", total_depth, md_reg[-1])
+        print(i,wellbore)
 
-            dummy = dummy_log(md_reg)
+        well_df = pd.DataFrame()
+        well_df["MD"] = md_reg
+        well_df["TVDMSL"] = tvd_reg
+        well_df["EASTING"] = easting_reg
+        well_df["NORTHING"] = northing_reg
 
-            well_df = pd.DataFrame()
-            well_df["MD"] = md_reg
-            well_df["TVDMSL"] = tvd_reg
-            well_df["EASTING"] = easting_reg
-            well_df["NORTHING"] = northing_reg
+        
+        # print(df)
 
-            
-            # print(df)
+        name = wellbore.replace("/", "_").replace("NO ", "").replace(" ", "_")
 
-            name = wellbore.replace("/", "_").replace("NO ", "").replace(" ", "_")
+        write_rms_wellbore(wellbore, well_df, rkb, export_dir)
+        rms_file =  name + ".w"
 
-            write_rms_wellbore(wellbore, well_df, rkb, export_dir)
-            rms_file =  name + ".w"
+        xtgeo_wellbore = load_well(os.path.join(export_dir,rms_file))
+        wellbore_short_name = xtgeo_wellbore.shortwellname
+        # print(xtgeo_well)
 
-            xtgeo_wellbore = load_well(os.path.join(export_dir,rms_file))
-            wellbore_short_name = xtgeo_wellbore.shortwellname
-            # print(xtgeo_well)
-
-            write_metadata(
-                export_dir,
-                wellbore,
-                wellbore_short_name,
-                slot_name,
-                field,
-                wellbore_type,
-                rkb,
-                end_date,
-                fluids,
-                completions,
-            )
-            
+        write_metadata(
+            export_dir,
+            wellbore,
+            wellbore_short_name,
+            slot_name,
+            field,
+            wellbore_type,
+            rkb,
+            end_date,
+            fluids,
+            completions,
+        )
+        i = i + 1
+        
     now = datetime.datetime.now()
     print ("Update time",now.strftime("%Y-%m-%d %H:%M:%S"))
-    
+
     outfile = os.path.join(export_dir, ".welldata_update.yaml")
     f = open(outfile, "w")
     f.write("- welldata:\n")
     f.write("   update_time: " + now.strftime("%Y-%m-%d %H:%M:%S") + "\n")
     f.close()
     
-    print("Metadata exported to file " + outfile)
+    print("Wellbores exported to",export_dir)
+    print("Metadata exported to file", outfile)
 
 
 if __name__ == "__main__":

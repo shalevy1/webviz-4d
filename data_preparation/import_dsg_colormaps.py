@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import argparse
 from matplotlib import colors
 import pickle
+from webviz_4d._datainput import common
 
 
 def import_colormaps(folder, suffix):
@@ -70,9 +71,15 @@ def import_colormaps(folder, suffix):
 def main():
     parser = argparse.ArgumentParser(
         description="Import and convert DSG colormaps")
-    parser.add_argument("cmap_directory", help="Enter path to the colormaps folder")  
-    args = parser.parse_args()
-    folder = args.cmap_directory
+    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
+
+    args = parser.parse_args()  
+    config_file = args.config_file
+    
+    settings_file = common.get_config_item(config_file,"settings")
+    settings = common.read_config(settings_file)
+    
+    folder = settings["map_settings"]["colormaps_folder"]
 
     SUFFIX = ".clx"
     

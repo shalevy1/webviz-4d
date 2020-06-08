@@ -3,7 +3,7 @@ import os
 import glob
 import yaml
 import pandas as pd
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 import xtgeo
 import argparse
 from webviz_4d._datainput import common
@@ -21,11 +21,11 @@ def extract_metadata(directory):
     well_info = []
     interval_info = []
 
-    print(directory)
-    yaml_files = glob.glob(directory + "/.*.yaml", recursive=True)
+    print("Reading metadata in", directory)
+    yaml_files = glob.glob(directory + "/.*.w.yaml", recursive=True)
 
     for yaml_file in yaml_files:
-        print(yaml_file)
+        #print(yaml_file)
         with open(yaml_file, "r") as stream:
             data = yaml.safe_load(stream)
             # print('data',data)
@@ -54,20 +54,16 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
     depth_surfaces = []
     depth_picks = []
 
-    print(wellbore_info)
-
     pick_name = surface.name
 
     if not wellbore_info.empty:
         for index, item in wellbore_info.iterrows():
             wellbore_name = item["wellbore.name"]
-            print(wellbore_name)
             rms_name = (
                 wellbore_name.replace("/", "_").replace("NO ", "").replace(" ", "_")
             )
             well_name = common.get_wellname(wellbore_info, wellbore_name)
             well_names.append(well_name)
-            print(well_name)
 
             wellbore_file = os.path.join(well_directory, rms_name) + well_suffix
             wellbore = load_wellbore(wellbore_file)
@@ -90,7 +86,7 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
         wellbore_types = []
         wellbore_fluids = []
         wellbore_files = glob.glob(str(well_directory) + "/*.w")
-        print("wellbore_files", wellbore_files)
+        #print("wellbore_files", wellbore_files)
 
         for wellbore_file in wellbore_files:
             wellbore = load_wellbore(wellbore_file)
@@ -130,32 +126,35 @@ def main():
     parser = argparse.ArgumentParser(
         description="Compile metadata from all wells and extract top reservoir depths"
     )
-    parser.add_argument("well_directory", help="Enter path to the main well folder")
-    parser.add_argument("surface_file", help="Enter path to the top reservoir surface")
-    parser.add_argument("--well_suffix", help="Enter wellfile suffix", default=".w")
+    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
 
-    args = parser.parse_args()
+    args = parser.parse_args()  
+    config_file = args.config_file
 
-    well_directory = args.well_directory
-    surface_file = args.surface_file
-    well_suffix = args.well_suffix
+    well_directory = common.get_config_item(config_file,"wellfolder")  
+    settings_file = common.get_config_item(config_file,"settings")
+    settings = common.read_config(settings_file)
+    surface_file = settings["depth_maps"]["top_reservoir"]
 
-    print(well_directory, surface_file, well_suffix)
+    print(well_directory, surface_file)
 
     WELLBORE_INFO_FILE = "wellbore_info.csv"
     INTERVALS_FILE = "intervals.csv"
+    WELL_SUFFIX = ".w"
 
     wellbore_info, intervals = extract_metadata(well_directory)
+    pd.set_option("display.max_rows", None)
+    print(wellbore_info)
+    
     surface = load_surface(surface_file)
 
-    wellbore_info = compile_data(surface, well_directory, wellbore_info, well_suffix)
+    wellbore_info = compile_data(surface, well_directory, wellbore_info, WELL_SUFFIX)
 
     wellbore_info.to_csv(os.path.join(well_directory, WELLBORE_INFO_FILE))
     intervals.to_csv(os.path.join(well_directory, INTERVALS_FILE))
 
     # print(intervals)
-    pd.set_option("display.max_rows", None)
-    print(wellbore_info)
+    
     print("Metadata stored to " + os.path.join(well_directory, WELLBORE_INFO_FILE))
     print(
         "Completion intervals stored to " + os.path.join(well_directory, INTERVALS_FILE)
@@ -165,7 +164,7 @@ def main():
 
     for folder in planned_wells_dir:
         wellbore_info = pd.DataFrame()
-        wellbore_info = compile_data(surface, folder, wellbore_info, well_suffix)
+        wellbore_info = compile_data(surface, folder, wellbore_info, WELL_SUFFIX)
 
         wellbore_info.to_csv(os.path.join(folder, WELLBORE_INFO_FILE))
         print(wellbore_info)

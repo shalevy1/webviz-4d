@@ -29,7 +29,7 @@ def get_start_stop_dates(well_prod_data, prod_file_update, volume_code):
         epoch_time = calendar.timegm(stop_utc_time)
         # print(stop_date,prod_file_update - epoch_time)
 
-        if prod_file_update - epoch_time < 130000:
+        if prod_file_update - epoch_time < 87000*3:
             # print(stop_date)
             stop_date = np.nan
 
@@ -64,18 +64,18 @@ def check_production_wells(sorted_production_wells, well_info, pdm_names_file):
 ## Main program
 def main():
     parser = argparse.ArgumentParser(description="Extract production data")
-    parser.add_argument("well_directory", help="Enter path to the main well folder")
-    parser.add_argument(
-        "production_file", help="Enter path to a file with the daily production volumes"
-    )
-    parser.add_argument("fmu_directory", help="Enter path to the FMU case folder")
+    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
 
-    args = parser.parse_args()
+    args = parser.parse_args()  
+    config_file = args.config_file
 
-    well_directory = args.well_directory
-    production_file = args.production_file
-    fmu_directory = args.fmu_directory
-
+    sens_run = common.read_config(config_file)["shared_settings"]["scratch_ensembles"]["sens_run"]  
+    print(sens_run)
+    fmu_directory = sens_run.replace("*","0")
+    production_directory = common.get_config_item(config_file,"production_data")
+    production_file = production_directory + "/prod_data.csv" 
+    
+    well_directory = common.get_config_item(config_file,"wellfolder")
     print(well_directory, production_file, fmu_directory)
 
     wellbore_info_file = "wellbore_info.csv"
@@ -180,7 +180,7 @@ def main():
         volume_df_actual = volume_df[volume_df[all_intervals] > 0]
         #print(volume_df_actual)
 
-        csv_file = os.path.join(well_directory, volume_code + ".csv")
+        csv_file = os.path.join(production_directory, volume_code + ".csv")
         volume_df_actual.to_csv(csv_file, index=False)
         print("Data exported to file " + csv_file)
         

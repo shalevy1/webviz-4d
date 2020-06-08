@@ -2,12 +2,14 @@
 
 from pathlib import Path
 import os
+import argparse
 import pickle
 import math
 import yaml
 import pandas as pd
 from webviz_4d._datainput import common
 from webviz_4d._datainput import well
+from webviz_4d._datainput._metadata import get_update_dates
 
 
 OIL_PRODUCTION_FILE = "BORE_OIL_VOL.csv"
@@ -260,7 +262,11 @@ def make_new_well_layer(
 def main():
     # Main
     delimiter = "--"
-    config_file = "/private/ashska/development/webviz-4d/fields/grane/grane_4d.yaml"
+    parser = argparse.ArgumentParser(description="Create well lists based on production data")
+    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
+
+    args = parser.parse_args()  
+    config_file = args.config_file
     config = common.read_config(config_file)
     # print(config)
 
@@ -271,25 +277,28 @@ def main():
     # Well and production data
     wellsuffix = ".w"
     wellfolder = config["pages"][0]["content"][0]["SurfaceViewer4D"]["wellfolder"]
-    wellfolder = "/private/ashska/development/webviz-4d/data_preparation/grane_wells"
 
-    prod_info_dir = "/private/ashska/development/webviz-4d/fields/grane_pdm"
-    prod_info_dir = wellfolder
+    prod_info_dir = common.get_config_item(config_file,"production_data")
+    update_metadata_file = os.path.join(prod_info_dir, ".production_update.yaml")
+    
+    update_dates = get_update_dates(wellfolder)
+    production_update = update_dates["production_last_date"]
+    print("Production data update",production_update)
+    
+    settings_file = common.get_config_item(config_file,"settings")
+    settings = common.read_config(settings_file)
+    interval = settings["map_settings"]["default_interval"]
 
     directory = os.path.dirname(path).replace("*", "0")
     number_of_maps = 3
-    field_config_file = (
-        "/private/ashska/development/webviz-4d/fields/grane/grane_4d_v3.yaml"
-    )
-    
-    field_config = common.read_config(field_config_file)
-    surface_viewer4d = field_config["pages"][0]["content"][0]["SurfaceViewer4D"]
+
+    surface_viewer4d = config["pages"][0]["content"][0]["SurfaceViewer4D"]
     map_defaults = common.get_map_defaults(surface_viewer4d, number_of_maps)
     metadata, dates = common.get_metadata(directory, map_defaults[0], delimiter)
 
     print("Extracting 4D intervals ...")
     intervals_4d = common.get_all_intervals(metadata)
-    colors = common.get_well_colors(field_config)
+    colors = common.get_well_colors(config)
 
     prod_info_files = [os.path.join(prod_info_dir, OIL_PRODUCTION_FILE)]
     prod_info_files.append(os.path.join(prod_info_dir, GAS_INJECTION_FILE))
@@ -308,8 +317,8 @@ def main():
     drilled_well_df, drilled_well_info, interval_df = common.load_all_wells(
         wellfolder, wellsuffix
     )
-    print("drilled_well_info")
-    print(drilled_well_info)
+    #print("drilled_well_info")
+    #print(drilled_well_info)
 
     wellbores = drilled_well_info["wellbore.name"].unique()
 
@@ -334,56 +343,64 @@ def main():
                     ].values[0]
                 except:
                     value = None
-                print(wellbore,value)
+                #print(wellbore,value)
                 values.append(value)
                 
             # Add column with volume in 4D interval to dataframe
             drilled_well_info[header] = values  
 
+    print("intervals_4d")
+    print(intervals_4d)
+    
+    print("Last production update", production_update)
     print("Looping through all 4D intervals ...")
     for interval_4d in intervals_4d:
         print("4D interval:", interval_4d)
-        well_layers = []
-        well_layers.append(
-            make_new_well_layer(
-                interval_4d,
-                drilled_well_df,
-                drilled_well_info,
-                interval_df,
-                prod_info_list,
-                colors,
-                selection="production",
-                label="Producers",
-            )
-        )
-        well_layers_file = os.path.join(
-            wellfolder, "production_well_layers_" + interval_4d + ".pkl"
-        )
-        dbfile = open(well_layers_file, "wb")
-        pickle.dump(well_layers, dbfile)
-        dbfile.close()
-        print("Well layers stored to " + well_layers_file)
 
-        well_layers = []
-        well_layers.append(
-            make_new_well_layer(
-                interval_4d,
-                drilled_well_df,
-                drilled_well_info,
-                interval_df,
-                prod_info_list,
-                colors,
-                selection="injection",
-                label="Injectors",
+        if interval_4d[0:10] <= production_update:
+            well_layers = []
+            well_layers.append(
+                make_new_well_layer(
+                    interval_4d,
+                    drilled_well_df,
+                    drilled_well_info,
+                    interval_df,
+                    prod_info_list,
+                    colors,
+                    selection="production",
+                    label="Producers",
+                )
             )
-        )
-        well_layers_file = os.path.join(
-            wellfolder, "injection_well_layers_" + interval_4d + ".pkl"
-        )
-        dbfile = open(well_layers_file, "wb")
-        pickle.dump(well_layers, dbfile)
-        dbfile.close()
-        print("Well layers stored to " + well_layers_file)
+            well_layers_file = os.path.join(
+                wellfolder, "production_well_layers_" + interval_4d + ".pkl"
+            )
+            dbfile = open(well_layers_file, "wb")
+            pickle.dump(well_layers, dbfile)
+            dbfile.close()
+            print("Well layers stored to " + well_layers_file)
+
+            well_layers = []
+            well_layers.append(
+                make_new_well_layer(
+                    interval_4d,
+                    drilled_well_df,
+                    drilled_well_info,
+                    interval_df,
+                    prod_info_list,
+                    colors,
+                    selection="injection",
+                    label="Injectors",
+                )
+            )
+            well_layers_file = os.path.join(
+                wellfolder, "injection_well_layers_" + interval_4d + ".pkl"
+            )
+            dbfile = open(well_layers_file, "wb")
+            pickle.dump(well_layers, dbfile)
+            dbfile.close()
+            print("Well layers stored to " + well_layers_file)
+        else:
+            print("  - no production data for this time interval")
 
 
 if __name__ == "__main__":

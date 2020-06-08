@@ -1,6 +1,7 @@
 import argparse
 import pickle
 import glob
+from webviz_4d._datainput import common
 
 # Main program
 def main():
@@ -8,8 +9,8 @@ def main():
     
     Parameters
     ----------
-    folder : str
-        The name of the folder with the pickle files
+    configuration_file : str
+        The name of WebViz-4D configuration file
 
     Returns
     -------
@@ -18,12 +19,16 @@ def main():
     parser = argparse.ArgumentParser(
         description="Check well list files"
     )
-    parser.add_argument("folder", help="Enter folder path")
+    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
 
-    args = parser.parse_args()
-    folder = args.folder
+    args = parser.parse_args()  
+    config_file = args.config_file
+    config = common.read_config(config_file)
+    # print(config)
 
-    pickle_files = glob.glob(folder + "*.pkl")
+    wellfolder = config["pages"][0]["content"][0]["SurfaceViewer4D"]["wellfolder"]
+
+    pickle_files = glob.glob(wellfolder + "*.pkl")
 
     for pickle_file in pickle_files:
         f = open(pickle_file, "rb")

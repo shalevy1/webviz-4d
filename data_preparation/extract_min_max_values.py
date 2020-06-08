@@ -1,8 +1,10 @@
 import os
 import glob
 import numpy as np
+import argparse
 from xtgeo import RegularSurface
 import pandas as pd
+from webviz_4d._datainput import common
 
 
 def load_surface(surface_path):
@@ -22,12 +24,22 @@ def get_surface_arr(surface, unrotate=True, flip=True):
 
 
 def main():
-    main_directory = (
-        "/scratch/ert-grane/Petek2019/Petek2019_r001/realization-0/iter-0/share"
-    )
-    data_dirs = ["observations", "results"]
+    parser = argparse.ArgumentParser(description="Extract min-/max-values for all maps")
+    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
 
-    csv_file = "/private/ashska/development/webviz-4d/data_preparation/Grane/attribute_maps.csv"
+    args = parser.parse_args()  
+    config_file = args.config_file
+
+    sens_run = common.read_config(config_file)["shared_settings"]["scratch_ensembles"]["sens_run"] 
+    index = sens_run.index("realization")
+    main_directory = sens_run[0:index]
+    print(main_directory)
+
+    data_dirs = ["observations", "results"]
+    
+    config_dir = os.path.dirname(config_file)
+    csv_file = os.path.join(config_dir,"attribute_maps.csv")
+    print(csv_file)
 
     map_types = []
     surface_names = []
@@ -50,32 +62,43 @@ def main():
     ]
     map_df = pd.DataFrame()
 
-    for data_dir in data_dirs:
-        surface_path = os.path.join(main_directory, data_dir, "maps/*.gri")
-        surface_files = glob.glob(surface_path)
-        map_type = data_dir
+    realizations = glob.glob(main_directory + "/realization-*")
+    
+    for realization in realizations:
+        iterations = glob.glob(realization + "/iter-*")
+        
+        if os.path.isdir(os.path.join(realization,"pred")):
+            iterations.append("pred")
+         
+        print(realization, iterations)
+    
+        for data_dir in data_dirs:
+            for iteration in iterations:
+                surface_files = glob.glob(iteration + "/share/" + data_dir + "/maps/*.gri")
+                map_type = data_dir
 
-        for surface_file in surface_files:
-            if surface_file[-13] == "_":
-                surface = load_surface(surface_file)
-                basename = os.path.basename(surface_file)
-                items = basename.split("--")
-                name = items[0]
-                attribute = items[1]
-                interval = items[2][:-4]
+                for surface_file in surface_files:
+                    if surface_file[-13] == "_":
+                        print(surface_file)
+                        surface = load_surface(surface_file)
+                        basename = os.path.basename(surface_file)
+                        items = basename.split("--")
+                        name = items[0]
+                        attribute = items[1]
+                        interval = items[2][:-4]
 
-                map_types.append(map_type)
-                surface_names.append(name)
-                attributes.append(attribute)
-                intervals.append(interval)
+                        map_types.append(map_type)
+                        surface_names.append(name)
+                        attributes.append(attribute)
+                        intervals.append(interval)
 
-                zvalues = get_surface_arr(surface)[2]
-                min_val = np.nanmin(zvalues)
-                max_val = np.nanmax(zvalues)
+                        zvalues = get_surface_arr(surface)[2]
+                        min_val = np.nanmin(zvalues)
+                        max_val = np.nanmax(zvalues)
 
-                min_values.append(min_val)
-                max_values.append(max_val)
-                map_files.append(surface_file)
+                        min_values.append(min_val)
+                        max_values.append(max_val)
+                        map_files.append(surface_file)
 
     map_df[headers[0]] = map_types
     map_df[headers[1]] = surface_names
