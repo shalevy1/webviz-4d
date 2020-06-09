@@ -731,7 +731,7 @@ def get_update_dates(wellfolder):
 def main():
     delimiter = "--"
     folder = "/scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0"
-    folder = "/private/ashska/tmp/"
+    #folder = "/private/ashska/tmp/"
 
     pd.set_option('display.max_rows', None)
     metadata = get_metadata(folder,delimiter)
