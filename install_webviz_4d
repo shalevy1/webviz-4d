@@ -1,12 +1,31 @@
-source /prog/res/komodo/testing-py3/enable.csh
+#!/bin/bash 
+#set -x
+
+source /prog/res/komodo/testing-py3/enable
+
+if [ -d webviz-4d ]; then
+    echo "ERROR: webiz-4d directory already exist, installation aborted"
+    echo "Type rm -rf webviz-4d to remove the directory"
+    exit
+fi
+
+if [ -d reper ]; then
+    echo "ERROR: reper directory already exist, installation aborted"
+    echo "Type rm -rf reper to remove the directory"
+    exit
+fi
+
 git clone git@github.com:equinor/webviz-4d.git
 git clone git@github.com:equinor/reper.git
-cd webviz-4d
-mkdir well_data
-mkdir production_data
-mkdir colormaps
+
+mkdir webviz-4d/well_data
+mkdir webviz-4d/production_data
+mkdir webviz-4d/colormaps
+mkdir webviz-4d/configurations
+
 python -m venv venv
-source venv/bin/activate.csh
+source venv/bin/activate
+
 pip install --upgrade pip
 pip install libecl 
 pip install webviz-config
@@ -14,8 +33,10 @@ pip install webviz-subsurface
 pip install webviz-config-equinor
 pip install ruamel.yaml
 pip install requests
-pip install ../reper
-pip install .
+pip install ./reper
+pip install ./webviz-4d
+
+echo "Installation completed"
 
 
 
