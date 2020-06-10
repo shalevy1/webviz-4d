@@ -511,14 +511,10 @@ def get_config_item(config_file,key):
     
     
 def get_full_path(item):
-    path = item    
-    script_directory = Path(__file__).parents[2]
-    working_directory = os.getcwd()
-    
-    if working_directory[0:4] == "/tmp":
-        directory = script_directory
-    else:
-        directory = working_directory       
+    path = item 
+    full_path = item   
+
+    directory = os.getcwd()       
     
     if path[0:3] == "../":
         path = path[3:]
@@ -526,6 +522,10 @@ def get_full_path(item):
     elif path[0:2] == "./":
         path = path[2:]                 
         full_path = os.path.join(directory,"configurations",path)  
+        
+    if not os.path.exists(full_path):
+        print("ERROR: Configuration must contain absolute paths for", item)
+        full_path = None    
         
     return full_path 
     
