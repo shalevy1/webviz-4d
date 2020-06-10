@@ -9,7 +9,7 @@ import yaml
 import pandas as pd
 from webviz_4d._datainput import common
 from webviz_4d._datainput import well
-from webviz_4d._datainput._metadata import get_update_dates
+from webviz_4d._datainput._metadata import get_update_dates, get_map_defaults, get_metadata, get_all_intervals
 
 
 OIL_PRODUCTION_FILE = "BORE_OIL_VOL.csv"
@@ -277,27 +277,38 @@ def main():
     # Well and production data
     wellsuffix = ".w"
     wellfolder = config["pages"][0]["content"][0]["SurfaceViewer4D"]["wellfolder"]
+    wellfolder = common.get_full_path(wellfolder)
 
     prod_info_dir = common.get_config_item(config_file,"production_data")
+    prod_info_dir = common.get_full_path(prod_info_dir)
     update_metadata_file = os.path.join(prod_info_dir, ".production_update.yaml")
     
     update_dates = get_update_dates(wellfolder)
     production_update = update_dates["production_last_date"]
     print("Production data update",production_update)
     
-    settings_file = common.get_config_item(config_file,"settings")
-    settings = common.read_config(settings_file)
-    interval = settings["map_settings"]["default_interval"]
+    try:
+        settings_file = common.get_config_item(config_file,"settings")
+        settings = common.read_config(settings_file)
+        interval = settings["map_settings"]["default_interval"]
+    except:
+        settings_file = None
+        settings = None
+        interval = None
 
-    directory = os.path.dirname(path).replace("*", "0")
+
     number_of_maps = 3
 
-    surface_viewer4d = config["pages"][0]["content"][0]["SurfaceViewer4D"]
-    map_defaults = common.get_map_defaults(surface_viewer4d, number_of_maps)
-    metadata, dates = common.get_metadata(directory, map_defaults[0], delimiter)
+    #surface_viewer4d = config["pages"][0]["content"][0]["SurfaceViewer4D"]
+    #map_defaults = get_map_defaults(surface_viewer4d, number_of_maps)
+    #metadata, dates = common.get_metadata(directory, map_defaults[0], delimiter)
+    
+    directory = os.path.dirname(path).replace("*", "0")
+    fmu_info = os.path.dirname(directory)  
+    metadata = get_metadata(fmu_info, ".gri")
 
     print("Extracting 4D intervals ...")
-    intervals_4d = common.get_all_intervals(metadata)
+    intervals_4d = get_all_intervals(metadata)
     colors = common.get_well_colors(config)
 
     prod_info_files = [os.path.join(prod_info_dir, OIL_PRODUCTION_FILE)]

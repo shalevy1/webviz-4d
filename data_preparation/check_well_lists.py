@@ -27,6 +27,7 @@ def main():
     # print(config)
 
     wellfolder = config["pages"][0]["content"][0]["SurfaceViewer4D"]["wellfolder"]
+    wellfolder = common.get_full_path(wellfolder)
 
     pickle_files = glob.glob(wellfolder + "*.pkl")
 

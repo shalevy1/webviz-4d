@@ -62,43 +62,45 @@ def main():
     ]
     map_df = pd.DataFrame()
 
-    realizations = glob.glob(main_directory + "/realization-*")
+    realization = main_directory + "/realization-0"
     
-    for realization in realizations:
-        iterations = glob.glob(realization + "/iter-*")
-        
-        if os.path.isdir(os.path.join(realization,"pred")):
-            iterations.append("pred")
-         
-        print(realization, iterations)
+    #for realization in realizations:
+    iterations = glob.glob(realization + "/iter-*")
+    pred_path = os.path.join(realization,"pred")
+    print(pred_path)
     
-        for data_dir in data_dirs:
-            for iteration in iterations:
-                surface_files = glob.glob(iteration + "/share/" + data_dir + "/maps/*.gri")
-                map_type = data_dir
+    if os.path.isdir(pred_path):
+        iterations.append(pred_path)
+     
+    print(realization, iterations)
 
-                for surface_file in surface_files:
-                    if surface_file[-13] == "_":
-                        print(surface_file)
-                        surface = load_surface(surface_file)
-                        basename = os.path.basename(surface_file)
-                        items = basename.split("--")
-                        name = items[0]
-                        attribute = items[1]
-                        interval = items[2][:-4]
+    for data_dir in data_dirs:
+        for iteration in iterations:
+            surface_files = glob.glob(iteration + "/share/" + data_dir + "/maps/*.gri")
+            map_type = data_dir
 
-                        map_types.append(map_type)
-                        surface_names.append(name)
-                        attributes.append(attribute)
-                        intervals.append(interval)
+            for surface_file in surface_files:
+                if surface_file[-13] == "_":
+                    print(surface_file)
+                    surface = load_surface(surface_file)
+                    basename = os.path.basename(surface_file)
+                    items = basename.split("--")
+                    name = items[0]
+                    attribute = items[1]
+                    interval = items[2][:-4]
 
-                        zvalues = get_surface_arr(surface)[2]
-                        min_val = np.nanmin(zvalues)
-                        max_val = np.nanmax(zvalues)
+                    map_types.append(map_type)
+                    surface_names.append(name)
+                    attributes.append(attribute)
+                    intervals.append(interval)
 
-                        min_values.append(min_val)
-                        max_values.append(max_val)
-                        map_files.append(surface_file)
+                    zvalues = get_surface_arr(surface)[2]
+                    min_val = np.nanmin(zvalues)
+                    max_val = np.nanmax(zvalues)
+
+                    min_values.append(min_val)
+                    max_values.append(max_val)
+                    map_files.append(surface_file)
 
     map_df[headers[0]] = map_types
     map_df[headers[1]] = surface_names

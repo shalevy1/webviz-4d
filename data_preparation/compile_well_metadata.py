@@ -53,8 +53,13 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
     short_names = []
     depth_surfaces = []
     depth_picks = []
-
-    pick_name = surface.name
+    
+    if surface:
+        pick_name = surface.name
+    else:
+        points = None
+        pick_name = None
+        wellbore_pick_md = None
 
     if not wellbore_info.empty:
         for index, item in wellbore_info.iterrows():
@@ -69,10 +74,11 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
             wellbore = load_wellbore(wellbore_file)
             short_name = wellbore.shortwellname
 
-            points = wellbore.get_surface_picks(surface)
-            wellbore_pick_md = None
+            if surface:
+                points = wellbore.get_surface_picks(surface)
+                pick_name = surface.name
 
-            if hasattr(points, "dataframe"):
+            if points and hasattr(points, "dataframe"):
                 print(points.dataframe)
                 wellbore_pick_md = points.dataframe["MD"].values[0]
 
@@ -98,10 +104,11 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
             wellbore_types.append("planned")
             wellbore_fluids.append("")
 
-            points = wellbore.get_surface_picks(surface)
-            wellbore_pick_md = None
+            if surface:
+                points = wellbore.get_surface_picks(surface)
+                wellbore_pick_md = None
 
-            if hasattr(points, "dataframe"):
+            if points and hasattr(points, "dataframe"):
                 print(points.dataframe)
                 wellbore_pick_md = points.dataframe["MD"].values[0]
 
@@ -131,12 +138,27 @@ def main():
     args = parser.parse_args()  
     config_file = args.config_file
 
-    well_directory = common.get_config_item(config_file,"wellfolder")  
-    settings_file = common.get_config_item(config_file,"settings")
-    settings = common.read_config(settings_file)
-    surface_file = settings["depth_maps"]["top_reservoir"]
+    try:
+        well_directory = common.get_config_item(config_file,"wellfolder") 
+        well_directory = common.get_full_path(well_directory) 
+    except:
+        well_directory = None
+            
+    if well_directory:
+        #try:        
+        settings_file = common.get_config_item(config_file,"settings")
+        settings_file = common.get_full_path(settings_file)
+        settings = common.read_config(settings_file)
+        print("settings")
+        print(settings)
+        surface_file = settings["depth_maps"]["top_reservoir"]
+        surface = load_surface(surface_file)
+        #except:
+        #    surface_file = None
+        #    surface = None    
 
-    print(well_directory, surface_file)
+    print("Well directory", well_directory)
+    print("Surface file", surface_file)
 
     WELLBORE_INFO_FILE = "wellbore_info.csv"
     INTERVALS_FILE = "intervals.csv"
@@ -144,9 +166,7 @@ def main():
 
     wellbore_info, intervals = extract_metadata(well_directory)
     pd.set_option("display.max_rows", None)
-    print(wellbore_info)
-    
-    surface = load_surface(surface_file)
+    print(wellbore_info)   
 
     wellbore_info = compile_data(surface, well_directory, wellbore_info, WELL_SUFFIX)
 

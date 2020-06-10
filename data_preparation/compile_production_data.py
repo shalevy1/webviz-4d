@@ -46,15 +46,16 @@ def check_production_wells(sorted_production_wells, well_info, pdm_names_file):
 
         if not well_name:
             print("ERROR: " + pdm_well + " not found in REP database")
-            pdm_names = pd.read_csv(pdm_names_file)
 
             try:
+                pdm_names = pd.read_csv(pdm_names_file)
                 row = pdm_names[pdm_names["PDM well name"] == pdm_well]
                 correct_name = row["Well name"][0]
                 well_name = common.get_wellname(well_info, correct_name)
                 print("Alias name found in " + pdm_names_file, pdm_well, well_name)
             except:
-                print("Alias should be defined in " + pdm_names_file)
+                print("ERROR: Alias should be defined in " + pdm_names_file)
+                well_name = None
 
         well_names.append(well_name)
 
@@ -73,10 +74,15 @@ def main():
     print(sens_run)
     fmu_directory = sens_run.replace("*","0")
     production_directory = common.get_config_item(config_file,"production_data")
+    production_directory = common.get_full_path(production_directory)
     production_file = production_directory + "/prod_data.csv" 
     
     well_directory = common.get_config_item(config_file,"wellfolder")
-    print(well_directory, production_file, fmu_directory)
+    well_directory = common.get_full_path(well_directory)
+    
+    print("FMU directory", fmu_directory)
+    print("Well directory", well_directory)
+    print("Production file", production_file)
 
     wellbore_info_file = "wellbore_info.csv"
     delimiter = "--"
