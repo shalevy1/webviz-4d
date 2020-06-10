@@ -116,96 +116,7 @@ def extract_well_metadata(directory):
         depth_df.sort_values(by=["interval.wellbore", "interval.mdTop"], inplace=True)
 
     return well_info_df, depth_df
-
-
-def get_metadata(directory, defaults, delimiter):
-    """ Return metadata and the unique dates for all 
-    surfaces in a given folder by decoding of the file names """
-    filename = compose_filename(
-        directory,
-        defaults["realization"],
-        defaults["ensemble"],
-        defaults["map_type"],
-        defaults["name"],
-        defaults["attribute"],
-        defaults["interval"],
-        delimiter,
-    )
-    # print('filename ' ,filename)
-
-    surfacepath = str(filename)
-    realizations = []
-    iterations = []
-    map_types = []
-    names = []
-    attributes = []
-    times1 = []
-    times2 = []
-    filenames = []
-    headers = [
-        "fmu_id.realization",
-        "fmu_id.iteration",
-        "map_type",
-        "data.name",
-        "data.content",
-        "data.time.t1",
-        "data.time.t2",
-        "filename",
-    ]
-
-    all_dates = []
-
-    index = surfacepath.find("realization")
-    directory = os.path.join(surfacepath[:index])
-
-    files = glob.glob(directory + "/**/*.gri", recursive=True)
-
-    for filename in files:
-        (
-            directory,
-            realization,
-            iteration,
-            map_type,
-            name,
-            attribute,
-            dates,
-        ) = decode_filename(filename, delimiter)
-
-        if dates[0] and dates[1]:
-            all_dates.append(dates[0])
-            all_dates.append(dates[1])
-
-            realizations.append(realization)
-            iterations.append(iteration)
-            map_types.append(map_type)
-            names.append(name)
-            attributes.append(attribute)
-            times1.append(dates[0])
-            times2.append(dates[1])
-            filenames.append(filename)
-
-    zipped_list = list(
-        zip(
-            realizations,
-            iterations,
-            map_types,
-            names,
-            attributes,
-            times1,
-            times2,
-            filenames,
-        )
-    )
-
-    metadata_df = pd.DataFrame(zipped_list, columns=headers)
-    metadata_df.fillna(value=np.nan, inplace=True)
-
-    list_set = set(all_dates)
-    unique_list = list(list_set)
-    unique_dates = sorted(unique_list)
-
-    return metadata_df, unique_dates
-
+    
 
 def compose_filename(
     directory, real, iteration, map_type, name, attribute, interval, delimiter
@@ -313,6 +224,7 @@ def get_map_defaults(configuration, n_maps):
     map_defaults = []
     
     settings_file = configuration["settings"]
+    settings_file = get_full_path(settings_file)
     settings = read_config(settings_file)
 
     interval = settings["map_settings"]["default_interval"]
@@ -378,10 +290,12 @@ def get_well_colors(configuration):
     """ Return well colors from a configuration """
     
     surface_viewer4D = configuration["pages"][0]["content"][0]["SurfaceViewer4D"]
-    config_4d_file = surface_viewer4D["settings"]
-    config_4d = read_config(config_4d_file)
-    print(config_4d)
-    return config_4d["well_colors"]
+    settings_file = surface_viewer4D["settings"]
+    settings_file = get_full_path(settings_file)
+    
+    settings = read_config(settings_file)
+    print(settings)
+    return settings["well_colors"]
 
 
 def get_all_intervals(metadata_df):
@@ -595,3 +509,25 @@ def get_config_item(config_file,key):
     
     return value
     
+    
+def get_full_path(item):
+    path = item    
+    script_directory = Path(__file__).parents[2]
+    working_directory = os.getcwd()
+    
+    if working_directory[0:4] == "/tmp":
+        directory = script_directory
+    else:
+        directory = working_directory       
+    
+    if path[0:3] == "../":
+        path = path[3:]
+        full_path = os.path.join(directory,path)  
+    elif path[0:2] == "./":
+        path = path[2:]                 
+        full_path = os.path.join(directory,"configurations",path)  
+        
+    return full_path 
+    
+    
+

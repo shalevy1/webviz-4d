@@ -62,6 +62,10 @@ def load_all_wells(wellfolder, wellsuffix):
         else None
     )
 
+    if not wellfiles:
+        print("ERROR: No well files found in folder",wellfolder)
+        return None, None, None
+
     print("Loading wells from " + str(wellfolder) + " ...")
     for wellfile in wellfiles:
         try:

@@ -7,12 +7,18 @@ from pandas import json_normalize
 import yaml
 import re
 import calendar
+from webviz_4d._datainput import common
 
 
 def get_map_defaults(configuration, n):
     map_defaults = []
 
-    interval = configuration["map_settings"]["default_interval"]
+    settings_file = configuration["settings"]
+    settings_file = common.get_full_path(settings_file)
+    print("settings_file",settings_file)
+    
+    settings = common.read_config(settings_file)
+    interval = settings["map_settings"]["default_interval"]
 
     if not "-" in interval[0:8]:
         date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
@@ -22,7 +28,7 @@ def get_map_defaults(configuration, n):
 
     for i in range(0, n):
         key = "map" + str(i + 1) + "_defaults"
-        defaults = configuration["map_settings"][key]
+        defaults = settings["map_settings"][key]
         defaults["interval"] = interval
         # print(map_def)
         map_defaults.append(defaults)
@@ -147,9 +153,9 @@ def check_yaml_file(surfacepath):
 
 def extract_metadata(fmu_folder):
     meta_data = []
-    index = map_file.find("realization")
+    #index = map_file.find("realization")
 
-    yaml_files = glob.glob(map_file[:index] + "/**/.*.yaml", recursive=True)
+    yaml_files = glob.glob(fmu_folder + "/**/.*.yaml", recursive=True)
 
     for yaml_file in yaml_files:
         with open(yaml_file, "r") as stream:
@@ -331,72 +337,78 @@ def get_metadata(directory, delimiter):
     metadata_file = os.path.join(directory, "surface_metadata.csv")
     
     if os.path.isfile(metadata_file):
+        print("Reading surface metadata file", metadata_file)
         metadata = pd.read_csv(metadata_file)
-        print("Reading surface metadata ...")
-    else:    
-        print("Compiling surface metadata ...")
-        realizations = []
-        iterations = []
-        map_types = []
-        names = []
-        attributes = []
-        times1 = []
-        times2 = []
-        filenames = []
-        headers = [
-            "fmu_id.realization",
-            "fmu_id.iteration",
-            "map_type",
-            "data.name",
-            "data.content",
-            "data.time.t1",
-            "data.time.t2",
-            "filename",
-        ]
+    else:   
+        try:
+            metadata  = extract_metadata(directory) 
+            print("Metadata files found and compiled")
+        except:    
+            print("Creating surface metadata ...")
+            realizations = []
+            iterations = []
+            map_types = []
+            names = []
+            attributes = []
+            times1 = []
+            times2 = []
+            filenames = []
+            headers = [
+                "fmu_id.realization",
+                "fmu_id.iteration",
+                "map_type",
+                "data.name",
+                "data.content",
+                "data.time.t1",
+                "data.time.t2",
+                "filename",
+            ]
 
-        all_dates = []
+            all_dates = []
+            
+            
 
-        files = glob.glob(directory + "/**/*.gri", recursive=True)
+            files = glob.glob(directory + "/**/*.gri", recursive=True)
 
-        for filename in files:
-            (
-                folder,
-                realization,
-                iteration,
-                map_type,
-                name,
-                attribute,
-                dates,
-            ) = decode_filename(filename, delimiter)
+            for filename in files:
+                (
+                    folder,
+                    realization,
+                    iteration,
+                    map_type,
+                    name,
+                    attribute,
+                    dates,
+                ) = decode_filename(filename, delimiter)
 
-            if dates[0] and dates[1]:
-                all_dates.append(dates[0])
-                all_dates.append(dates[1])
+                if dates[0] and dates[1]:
+                    all_dates.append(dates[0])
+                    all_dates.append(dates[1])
 
-                realizations.append(realization)
-                iterations.append(iteration)
-                map_types.append(map_type)
-                names.append(name)
-                attributes.append(attribute)
-                times1.append(dates[0])
-                times2.append(dates[1])
-                filenames.append(filename)
+                    realizations.append(realization)
+                    iterations.append(iteration)
+                    map_types.append(map_type)
+                    names.append(name)
+                    attributes.append(attribute)
+                    times1.append(dates[0])
+                    times2.append(dates[1])
+                    filenames.append(filename)
 
-        zipped_list = list(
-            zip(
-                realizations,
-                iterations,
-                map_types,
-                names,
-                attributes,
-                times1,
-                times2,
-                filenames,
+            zipped_list = list(
+                zip(
+                    realizations,
+                    iterations,
+                    map_types,
+                    names,
+                    attributes,
+                    times1,
+                    times2,
+                    filenames,
+                )
             )
-        )
 
-        metadata = pd.DataFrame(zipped_list, columns=headers)
-        metadata.fillna(value=np.nan, inplace=True)
+            metadata = pd.DataFrame(zipped_list, columns=headers)
+            metadata.fillna(value=np.nan, inplace=True)
 
         metadata.to_csv(metadata_file, index=False)
         print("Surface metadata saved to:", metadata_file)

@@ -21,13 +21,14 @@ from webviz_subsurface_components import LayeredMap
 
 from webviz_4d._datainput.fmu_input import get_realizations, find_surfaces
 from webviz_4d._datainput.surface import make_surface_layer, load_surface
+from webviz_4d._datainput.common import get_full_path
 from webviz_4d._datainput.well import (
     load_all_wells,
     make_new_well_layer,
 )
 from webviz_4d._private_plugins.surface_selector import SurfaceSelector
-
 from webviz_4d._datainput._colormaps import load_custom_colormaps
+
 
 from webviz_4d._datainput._metadata import (
     get_metadata,
@@ -75,9 +76,10 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.surface_metadata = None
         self.well_base_layers = None
 
-        print("map1_defaults", map1_defaults)
-        print("map2_defaults", map2_defaults)
-        print("map3_defaults", map3_defaults)
+        #print("map1_defaults", map1_defaults)
+        #print("map2_defaults", map2_defaults)
+        #print("map3_defaults", map3_defaults)
+        #print("settings",settings)
 
         # Find FMU directory
         keys = list(self.ens_paths.keys())
@@ -117,18 +119,24 @@ class SurfaceViewer4D(WebvizPluginABC):
 
             try:
                 colormaps_folder = self.config["map_settings"]["colormaps_folder"]
+
                 if colormaps_folder:
-                    # print("Reading custom colormaps from:", colormaps_folder)
+                    colormaps_folder = get_full_path(colormaps_folder)
+                        
+                    print("Reading custom colormaps from:", colormaps_folder)
                     load_custom_colormaps(colormaps_folder)
             except:
                 pass
 
-            try:
-                attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
+            #try:
+            attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
+            
+            if attribute_maps_file:
+                attribute_maps_file = get_full_path(attribute_maps_file)
                 self.surface_metadata = pd.read_csv(attribute_maps_file)
-                # print(self.surface_metadata)
-            except:
-                pass
+                print("Colormaps settings loaded from file",attribute_maps_file)
+            #except:
+            #    pass
 
         try:
             self.map_defaults = []
@@ -150,6 +158,9 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.selected_ensembles = [None, None, None]
         self.selected_realizations = [None, None, None]
         self.wellsuffix = ".w"
+        
+        self.well_base_layers = []
+        self.colors = get_well_colors(self.config)
 
         if wellfolder and os.path.isdir(wellfolder):
             self.wellfolder = wellfolder
@@ -163,47 +174,48 @@ class SurfaceViewer4D(WebvizPluginABC):
                 self.interval_df,
             ) = load_all_wells(wellfolder, self.wellsuffix)
             
+            if self.drilled_well_df is not None:           
+
+                self.well_base_layers.append(
+                    make_new_well_layer(
+                        self.selected_intervals[0],
+                        self.drilled_well_df,
+                        self.drilled_well_info,
+                        self.interval_df,
+                    )
+                )
+
+                self.well_base_layers.append(
+                    make_new_well_layer(
+                        self.selected_intervals[0],
+                        self.drilled_well_df,
+                        self.drilled_well_info,
+                        self.interval_df,
+                        self.colors,
+                        selection="reservoir_section",
+                        label="Reservoir sections",
+                    )
+                )
+            
             planned_wells_dir = [f.path for f in os.scandir(wellfolder) if f.is_dir()]
-
-            self.colors = get_well_colors(self.config)
-
-            self.well_base_layers = []
-            self.well_base_layers.append(
-                make_new_well_layer(
-                    self.selected_intervals[0],
-                    self.drilled_well_df,
-                    self.drilled_well_info,
-                    self.interval_df,
-                )
-            )
-
-            self.well_base_layers.append(
-                make_new_well_layer(
-                    self.selected_intervals[0],
-                    self.drilled_well_df,
-                    self.drilled_well_info,
-                    self.interval_df,
-                    self.colors,
-                    selection="reservoir_section",
-                    label="Reservoir sections",
-                )
-            )
 
             for folder in planned_wells_dir:
                 planned_well_df, planned_well_info, dummy_df = load_all_wells(
                     folder, self.wellsuffix
                 )
-                self.well_base_layers.append(
-                    make_new_well_layer(
-                        self.selected_intervals[0],
-                        planned_well_df,
-                        planned_well_info,
-                        dummy_df,
-                        self.colors,
-                        selection="planned",
-                        label=os.path.basename(folder),
+                
+                if planned_well_df is not None:
+                    self.well_base_layers.append(
+                        make_new_well_layer(
+                            self.selected_intervals[0],
+                            planned_well_df,
+                            planned_well_info,
+                            dummy_df,
+                            self.colors,
+                            selection="planned",
+                            label=os.path.basename(folder),
+                        )
                     )
-                )
         elif wellfolder and not os.path.isdir(wellfolder): 
             print("ERROR: Folder", wellfolder,"doesn't exist. No wells loaded")   
 
