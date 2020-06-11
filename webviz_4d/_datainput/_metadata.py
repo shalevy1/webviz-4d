@@ -725,7 +725,7 @@ def get_update_dates(wellfolder):
         with open(prod_date_file, "r") as stream:
             production_meta_data = yaml.safe_load(stream)
           
-        print(production_meta_data)
+        #print(production_meta_data)
         first_date = production_meta_data[0]["production"]["start_date"].strftime("%Y-%m-%d")
         last_date = production_meta_data[0]["production"]["last_date"].strftime("%Y-%m-%d")
         

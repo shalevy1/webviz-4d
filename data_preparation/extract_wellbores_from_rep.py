@@ -138,7 +138,7 @@ def main():
     )
     parser.add_argument("field", help="Enter name of field")
     parser.add_argument(
-        "--md_inc", help="Enter wanted depth (MD) increment", type=int, default=50
+        "--md_inc", help="Enter wanted depth (MD) increment, 0=> no interpolation", type=int, default=0
     )
 
     args = parser.parse_args()
@@ -221,20 +221,26 @@ def main():
         northing = df_trajectory["northing"]
         total_depth = md_wellbore.values[-1]
 
-        # Resample well trajectory
-        start_md = md_wellbore[0]
-        end_md = math.floor(total_depth)
+        # Resample well trajectory if wanted
+        if md_inc > 0:
+            start_md = md_wellbore[0]
+            end_md = math.floor(total_depth)
 
-        md_reg = np.arange(start_md, end_md, md_inc)
+            md_reg = np.arange(start_md, end_md, md_inc)
 
-        tvd_reg = np.interp(md_reg, md_wellbore, tvd_wellbore)
-        easting_reg = np.interp(md_reg, md_wellbore, easting)
-        northing_reg = np.interp(md_reg, md_wellbore, northing)
+            tvd_reg = np.interp(md_reg, md_wellbore, tvd_wellbore)
+            easting_reg = np.interp(md_reg, md_wellbore, easting)
+            northing_reg = np.interp(md_reg, md_wellbore, northing)
 
-        md_reg = np.append(md_reg, md_wellbore.values[-1])
-        tvd_reg = np.append(tvd_reg, tvd_wellbore.values[-1])
-        easting_reg = np.append(easting_reg, easting.values[-1])
-        northing_reg = np.append(northing_reg, northing.values[-1])
+            md_reg = np.append(md_reg, md_wellbore.values[-1])
+            tvd_reg = np.append(tvd_reg, tvd_wellbore.values[-1])
+            easting_reg = np.append(easting_reg, easting.values[-1])
+            northing_reg = np.append(northing_reg, northing.values[-1])
+        else:
+            md_reg = md_wellbore 
+            tvd_reg = tvd_wellbore
+            easting_reg = easting
+            northing_reg = northing   
 
         print(i,wellbore)
 
