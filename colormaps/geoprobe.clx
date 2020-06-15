@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<colorBar>
+<controlPoints maxIndex="255.0" minIndex="0.0">
+<controlPoint blue="255" green="255" index="0.0" red="0"/>
+<controlPoint blue="249" green="2" index="67.0" red="2"/>
+<controlPoint blue="195" green="19" index="75.0" red="20"/>
+<controlPoint blue="66" green="66" index="99.0" red="69"/>
+<controlPoint blue="109" green="109" index="111.0" red="114"/>
+<controlPoint blue="136" green="137" index="115.0" red="143"/>
+<controlPoint blue="186" green="188" index="131.0" red="195"/>
+<controlPoint blue="133" green="155" index="139.0" red="178"/>
+<controlPoint blue="87" green="125" index="147.0" red="163"/>
+<controlPoint blue="0" green="69" index="163.0" red="139"/>
+<controlPoint blue="0" green="85" index="195.0" red="255"/>
+<controlPoint blue="0" green="247" index="255.0" red="255"/>
+</controlPoints>
+<opacities>
+<opacity value="1.0"/>
+</opacities>
+<Discrete value="false"/>
+</colorBar>
