@@ -24,12 +24,13 @@ def main():
     args = parser.parse_args()  
     config_file = args.config_file
     config = common.read_config(config_file)
-    # print(config)
 
-    wellfolder = config["pages"][0]["content"][0]["SurfaceViewer4D"]["wellfolder"]
+    wellfolder = common.get_config_item(config_file,"wellfolder")
     wellfolder = common.get_full_path(wellfolder)
+    print("Reading well lists in", wellfolder)
 
-    pickle_files = glob.glob(wellfolder + "*.pkl")
+    pickle_files = glob.glob(wellfolder + "/*.pkl")
+    print(pickle_files)
 
     for pickle_file in pickle_files:
         f = open(pickle_file, "rb")
