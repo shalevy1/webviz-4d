@@ -20,8 +20,6 @@ git clone git@github.com:equinor/reper.git
 
 mkdir webviz-4d/well_data
 mkdir webviz-4d/production_data
-mkdir webviz-4d/colormaps
-mkdir webviz-4d/configurations
 
 python -m venv venv
 source venv/bin/activate
