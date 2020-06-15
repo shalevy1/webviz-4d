@@ -1,0 +1,82 @@
+title: WebViz-4D Example
+
+shared_settings:
+  scratch_ensembles:
+    sens_run: /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-*/iter-0
+    iter-0: /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-*/iter-0
+    
+pages:  
+  - title: Front page
+    content:  
+      - Markdown:
+          markdown_file: ./front_page.md
+          
+  - title: Observed and simulated maps
+    content:
+      - SurfaceViewer4D:
+          ensembles:
+            - iter-0
+
+          wellfolder:
+                ../well_data
+                
+          production_data:
+                ../production_data      
+          
+          map1_defaults:
+            attribute: maxpos
+            name: all
+            map_type: observations
+            ensemble: iter-0
+            realization: realization-0
+          map2_defaults:
+            attribute: maxpos
+            name: all
+            map_type: results
+            ensemble: iter-0
+            realization: realization-0  
+          map3_defaults:
+            attribute: gasthickness
+            name: all
+            map_type: results
+            ensemble: iter-0
+            realization: realization-0  
+            
+          default_interval: 2019-09-15-2019-05-15    
+          
+          settings:  ./settings_template.yaml
+                                 
+          
+  - title: Oil production volumes in 4D intervals  
+    content:
+      - DataTable:
+          csv_file: ../production_data/BORE_OIL_VOL.csv  
+          sorting: True
+          filtering: True   
+          
+  - title: Gas injection volumes in 4D intervals  
+    content:
+      - DataTable:
+          csv_file: ../production_data/BORE_GI_VOL.csv  
+          sorting: True
+          filtering: True     
+          
+  - title: Water injection volumes in 4D intervals  
+    content:
+      - DataTable:
+          csv_file: ../production_data/BORE_WI_VOL.csv  
+          sorting: True
+          filtering: True                     
+                     
+  - title: Documentation
+    content:  
+      - Markdown:
+          markdown_file: ./documentation.md
+      - SyntaxHighlighter:
+          filename: ./config_template.yaml
+          dark_theme: yes   
+      - SyntaxHighlighter:
+          filename: ./settings_template.yaml
+          dark_theme: yes             
+           
+

@@ -286,15 +286,9 @@ def all_interval_dates(directory, delimiter, suffix):
     return unique_dates
 
 
-def get_well_colors(configuration):
-    """ Return well colors from a configuration """
-    
-    surface_viewer4D = configuration["pages"][0]["content"][0]["SurfaceViewer4D"]
-    settings_file = surface_viewer4D["settings"]
-    settings_file = get_full_path(settings_file)
-    
-    settings = read_config(settings_file)
-    print(settings)
+def get_well_colors(settings):
+    """ Return well colors from a configuration """   
+
     return settings["well_colors"]
 
 
@@ -499,20 +493,27 @@ def get_position_data(well_dataframe, md_start):
     
     
 def get_config_item(config_file,key):
-    config = read_config(config_file)
+    config = read_config(config_file)  
+    pages = config["pages"]  
     
-    pages = config["pages"]   
-    content = pages[0]["content"]
+    for page in pages:     
+        content = page["content"]
+
+        try:
+            surface_viewer4d = content[0]["SurfaceViewer4D"] 
+            value = surface_viewer4d[key]
+            return value
+        except:
+            pass            
     
-    surface_viewer4d = content[0]["SurfaceViewer4D"] 
-    value = surface_viewer4d[key]
-    
-    return value
+    return None
     
     
 def get_full_path(item):
     path = item 
     full_path = item   
+    
+    print("item",item)
 
     directory = os.getcwd()       
     
