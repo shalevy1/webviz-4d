@@ -276,26 +276,26 @@ def main():
 
     # Well and production data
     wellsuffix = ".w"
-    wellfolder = config["pages"][0]["content"][0]["SurfaceViewer4D"]["wellfolder"]
-    wellfolder = common.get_full_path(wellfolder)
+    well_directory = common.get_config_item(config_file,"wellfolder")
+    well_directory = common.get_full_path(well_directory)
 
     prod_info_dir = common.get_config_item(config_file,"production_data")
     prod_info_dir = common.get_full_path(prod_info_dir)
     update_metadata_file = os.path.join(prod_info_dir, ".production_update.yaml")
     
-    update_dates = get_update_dates(wellfolder)
+    update_dates = get_update_dates(well_directory)
     production_update = update_dates["production_last_date"]
     print("Production data update",production_update)
     
     try:
         settings_file = common.get_config_item(config_file,"settings")
+        settings_file = common.get_full_path(settings_file)
         settings = common.read_config(settings_file)
         interval = settings["map_settings"]["default_interval"]
     except:
         settings_file = None
         settings = None
         interval = None
-
 
     number_of_maps = 3
 
@@ -309,7 +309,7 @@ def main():
 
     print("Extracting 4D intervals ...")
     intervals_4d = get_all_intervals(metadata)
-    colors = common.get_well_colors(config)
+    colors = common.get_well_colors(settings)
 
     prod_info_files = [os.path.join(prod_info_dir, OIL_PRODUCTION_FILE)]
     prod_info_files.append(os.path.join(prod_info_dir, GAS_INJECTION_FILE))
@@ -326,7 +326,7 @@ def main():
         prod_info_list.append(prod_info)
 
     drilled_well_df, drilled_well_info, interval_df = common.load_all_wells(
-        wellfolder, wellsuffix
+        well_directory, wellsuffix
     )
     #print("drilled_well_info")
     #print(drilled_well_info)
@@ -363,6 +363,9 @@ def main():
     print("intervals_4d")
     print(intervals_4d)
     
+    print("drilled_well_info")
+    print(drilled_well_info)    
+    
     print("Last production update", production_update)
     print("Looping through all 4D intervals ...")
     for interval_4d in intervals_4d:
@@ -383,7 +386,7 @@ def main():
                 )
             )
             well_layers_file = os.path.join(
-                wellfolder, "production_well_layers_" + interval_4d + ".pkl"
+                well_directory, "production_well_layers_" + interval_4d + ".pkl"
             )
             dbfile = open(well_layers_file, "wb")
             pickle.dump(well_layers, dbfile)
@@ -404,7 +407,7 @@ def main():
                 )
             )
             well_layers_file = os.path.join(
-                wellfolder, "injection_well_layers_" + interval_4d + ".pkl"
+                well_directory, "injection_well_layers_" + interval_4d + ".pkl"
             )
             dbfile = open(well_layers_file, "wb")
             pickle.dump(well_layers, dbfile)

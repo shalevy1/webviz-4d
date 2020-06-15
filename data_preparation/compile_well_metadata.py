@@ -138,11 +138,11 @@ def main():
     args = parser.parse_args()  
     config_file = args.config_file
 
-    try:
-        well_directory = common.get_config_item(config_file,"wellfolder") 
-        well_directory = common.get_full_path(well_directory) 
-    except:
-        well_directory = None
+    #try:
+    well_directory = common.get_config_item(config_file,"wellfolder") 
+    well_directory = common.get_full_path(well_directory) 
+    #except:
+    #    well_directory = None
             
     if well_directory:
         #try:        
