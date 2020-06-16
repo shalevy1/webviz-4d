@@ -187,7 +187,7 @@ def main():
         #print(volume_df_actual)
 
         csv_file = os.path.join(production_directory, volume_code + ".csv")
-        volume_df_actual.to_csv(csv_file, index=False)
+        volume_df_actual.to_csv(csv_file, index=False, float_format="%.0f")
         print("Data exported to file " + csv_file)
         
         print("Production start and last date:", first_date, last_date)

@@ -30,7 +30,6 @@ def main():
     print("Reading well lists in", wellfolder)
 
     pickle_files = glob.glob(wellfolder + "/*.pkl")
-    print(pickle_files)
 
     for pickle_file in pickle_files:
         f = open(pickle_file, "rb")
