@@ -531,4 +531,32 @@ def get_full_path(item):
     return full_path 
     
     
+def main():
+    # read_config
+    config_file = "./examples/reek_4d.yaml"
+    config = read_config(config_file)
+    print("config")
+    print(config)
+    outfile = "./test_data/config.json"
+    with open(outfile, 'w') as file:
+        file.write(json.dumps(config))
+        
+    #find_files
+    directory = "../webviz-subsurface-testdata/reek_history_match/realization-0/iter-0/share/results/maps"
+    map_files = find_files(directory,".w")
+    print("map_files")
+    print(map_files)
+    
+    
+      
+        
+    
+
+
+if __name__ == "__main__":
+    main()
+
+
+    
+    
 
