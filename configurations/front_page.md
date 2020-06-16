@@ -1,13 +1,13 @@
-### Welcome to WebViz-4D for the Grane field
+### Welcome to WebViz-4D
 
 WebViz-4D is built on webviz-subsurface, but has been customized to only display maps showing timelapse differences.
 
-In this setup we have configured four menu options:
+In this setup we have configured several menu options:
 
 - Observed and simulated attribute maps
-- Table with oil production volumes in 4D intervals
-- Table with injected gas volumes in 4D intervals
-- Table with injected water volumes in 4D intervals
+- Interactive plotting of injected and produced volumes
+- Tables with production volumes in 4D intervals
+- Table with injection volumes in 4D intervals
 
 #### How to launch this application
 - Log on to an RGS node in Stavanger

@@ -45,23 +45,64 @@ pages:
           default_interval: 2019-09-15-2019-05-15    
           
           settings:  ./settings_template.yaml
-                                 
           
-  - title: Oil production volumes in 4D intervals  
+  - title: Production plots  
+    content:
+        - TablePlotter:
+            csv_file: ../production_data/production_fluid_table.csv
+            filter_cols:
+              - Well_name  
+              - 4D_interval
+              - Fluid
+            plot_options:
+              x: 4D_interval
+              y: Volumes
+              type: bar   
+              color: Fluid
+    
+  - title: Injection plots  
+    content:
+        - TablePlotter:
+            csv_file: ../production_data/injection_fluid_table.csv
+            filter_cols:
+              - Well_name  
+              - 4D_interval
+              - Fluid
+            plot_options:
+              x: 4D_interval
+              y: Volumes
+              type: bar   
+              color: Fluid                                 
+          
+  - title: Oil production volumes 
     content:
       - DataTable:
           csv_file: ../production_data/BORE_OIL_VOL.csv  
           sorting: True
           filtering: True   
           
-  - title: Gas injection volumes in 4D intervals  
+  - title: Gas production volumes 
+    content:
+      - DataTable:
+          csv_file: ../production_data/BORE_GAS_VOL.csv  
+          sorting: True
+          filtering: True       
+          
+  - title: Water production volumes 
+    content:
+      - DataTable:
+          csv_file: ../production_data/BORE_WAT_VOL.csv  
+          sorting: True
+          filtering: True             
+          
+  - title: Gas injection volumes 
     content:
       - DataTable:
           csv_file: ../production_data/BORE_GI_VOL.csv  
           sorting: True
           filtering: True     
           
-  - title: Water injection volumes in 4D intervals  
+  - title: Water injection volumes  
     content:
       - DataTable:
           csv_file: ../production_data/BORE_WI_VOL.csv  
