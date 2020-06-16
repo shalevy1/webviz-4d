@@ -2,15 +2,15 @@ title: Reek Example
 
 shared_settings:
   scratch_ensembles:
-    sens_run: /private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
-    iter-0: /private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
-    iter-1: /private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-*/iter-1  
-    iter-2: /private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-*/iter-2
-    iter-3: /private/ashska/development/webviz-subsurface-testdata/reek_history_match/realization-*/iter-3          
+    sens_run: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
+    iter-0: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
+    iter-1: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-1  
+    iter-2: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-2
+    iter-3: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-3          
     
 pages:  
    
-  - title: Simulated maps
+  - title: Simulated and "observed" maps
     content:
       - SurfaceViewer4D:
           ensembles:
@@ -20,4 +20,4 @@ pages:
             - iter-3
 
           wellfolder:
-                /private/ashska/development//webviz-subsurface-testdata/observed_data/wells 
+                ../../webviz-subsurface-testdata/observed_data/wells 
