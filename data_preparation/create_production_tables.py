@@ -8,6 +8,7 @@ def write_data(prod_df,fluid,scale,f):
         
     for index,row in prod_df.iterrows():
         well_name = row["PDM well name"].replace("NO 25/11-","")
+        well_name = well_name.replace(" ","")
 
         for column in columns:
             if "-" in column:
