@@ -1,0 +1,23 @@
+title: Reek Example
+
+shared_settings:
+  scratch_ensembles:
+    sens_run: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
+    iter-0: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
+    iter-1: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-1  
+    iter-2: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-2
+    iter-3: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-3          
+    
+pages:  
+   
+  - title: Simulated and "observed" maps
+    content:
+      - SurfaceViewer4D:
+          ensembles:
+            - iter-0
+            - iter-1
+            - iter-2
+            - iter-3
+
+          wellfolder:
+                ../../webviz-subsurface-testdata/observed_data/wells 

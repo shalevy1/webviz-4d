@@ -33,9 +33,7 @@ some_property:
     interval:
         - somedate
         - somedate
-    types:    
-        - 'results'
-        - 'observations'
+
 another_property:
     names:
         - surfacename
@@ -50,22 +48,9 @@ another_property:
         self.metadata = metadata
         self.intervals = intervals
         self.current_selections = map_defaults
-        print(self.current_selections)
         self._storage_id = f"{str(uuid4())}-surface-selector"
-
         self.set_ids()
         self.set_callbacks(app)
-
-    @staticmethod
-    def read_config(config):
-        """Reads config file either from a yaml provided file or from a dict"""
-        if isinstance(config, str):
-            return yaml.safe_load(open(config, "r"))
-
-        if isinstance(config, dict):
-            return config
-
-        raise TypeError("Config must be a dictionary of a yaml file")
 
     @property
     def storage_id(self):
@@ -83,61 +68,36 @@ another_property:
         self.date_id = f"{uuid}-date"
         self.date_id_btn_prev = f"{uuid}-date-btn-prev"
         self.date_id_btn_next = f"{uuid}-date-btn-next"
-        self.type_id = f"{uuid}-type"
-        self.type_id_btn_prev = f"{uuid}-type-btn-prev"
-        self.type_id_btn_next = f"{uuid}-type-btn-next"
         self.name_wrapper_id = f"{uuid}-name-wrapper"
         self.date_wrapper_id = f"{uuid}-date-wrapper"
-        self.type_wrapper_id = f"{uuid}-type-wrapper"
 
     @property
     def attrs(self):
-        current_type = self.current_selections["map_type"]
         current_name = self.current_selections["name"]
+        current_type = self.current_selections["map_type"]
         df = self.metadata.loc[
-            (self.metadata["map_type"] == current_type)
-            & (self.metadata["data.name"] == current_name)
+            (self.metadata["data.name"] == current_name)
+            & (self.metadata["map_type"] == current_type)
         ]
         attributes = unique_values(df["data.content"].values)
+
         return attributes
 
     def _names_in_attr(self, attribute):
-        current_type = self.current_selections["map_type"]
         current_attribute = self.current_selections["attribute"]
-        df = self.metadata.loc[
-            (self.metadata["map_type"] == current_type)
-            & (self.metadata["data.content"] == current_attribute)
-        ]
+        df = self.metadata.loc[self.metadata["data.content"] == current_attribute]
         names = unique_values(df["data.name"].values)
 
         if not names:
             names = unique_values(self.metadata["data.name"].values)
 
-        # print('_names_in_attr: ',names)
         return names
-
-    def _types(self):
-        map_number = 0
-        current_name = self.current_selections["name"]
-        current_attribute = self.current_selections["attribute"]
-        df = self.metadata.loc[
-            (self.metadata["data.name"] == current_name)
-            & (self.metadata["data.content"] == current_attribute)
-        ]
-        map_types = unique_values(df["map_type"].values)
-
-        if not map_types:
-            map_types = unique_values(self.metadata["map_type"].values)
-
-        # print('_types: ', map_types)
-        return map_types
 
     def _interval_in_attr(self, attribute):
         intervals = self.intervals
         if intervals is not None and intervals == [np.nan]:
             return None
 
-        # print('_interval: ',interval)
         return intervals
 
     @property
@@ -145,7 +105,9 @@ another_property:
         return html.Div(
             style={"display": "grid"},
             children=[
-                html.Label("Surface attribute"),
+                html.Label(
+                    "Surface attribute", style={"fontSize": 15, "fontWeight": "bold"}
+                ),
                 html.Div(
                     style=self.set_grid_layout("6fr 1fr"),
                     children=[
@@ -156,34 +118,10 @@ another_property:
                             ],
                             value=self.current_selections["attribute"],
                             clearable=False,
+                            style={"fontSize": 15, "fontWeight": "normal"},
                         ),
                         self._make_buttons(
                             self.attr_id_btn_prev, self.attr_id_btn_next
-                        ),
-                    ],
-                ),
-            ],
-        )
-
-    def type_selector(self):
-        return html.Div(
-            style={"display": "grid"},
-            children=[
-                html.Label("Surface type"),
-                html.Div(
-                    style=self.set_grid_layout("6fr 1fr"),
-                    children=[
-                        dcc.Dropdown(
-                            id=self.attr_id,
-                            options=[
-                                {"label": map_type, "value": map_type}
-                                for map_types in self.map_types
-                            ],
-                            value=self.current_selections["map_type"],
-                            clearable=False,
-                        ),
-                        self._make_buttons(
-                            self.type_id_btn_prev, self.type_id_btn_next
                         ),
                     ],
                 ),
@@ -215,16 +153,23 @@ another_property:
             ],
         )
 
-    def selector(self, wrapper_id, dropdown_id, title, default_value, btn_prev, btn_next):
+    def selector(
+        self, wrapper_id, dropdown_id, title, default_value, btn_prev, btn_next
+    ):
         return html.Div(
             id=wrapper_id,
             style={"display": "none"},
             children=[
-                html.Label(title),
+                html.Label(title, style={"fontSize": 15, "fontWeight": "bold"}),
                 html.Div(
                     style=self.set_grid_layout("6fr 1fr"),
                     children=[
-                        dcc.Dropdown(id=dropdown_id, value = default_value, clearable=False), 
+                        dcc.Dropdown(
+                            id=dropdown_id,
+                            value=default_value,
+                            clearable=False,
+                            style={"fontSize": 15, "fontWeight": "normal"},
+                        ),
                         self._make_buttons(btn_prev, btn_next),
                     ],
                 ),
@@ -242,14 +187,6 @@ another_property:
                 html.Div(
                     children=[
                         self.attribute_selector,
-                        self.selector(
-                            self.type_wrapper_id,
-                            self.type_id,
-                            "Surface type",
-                            self.current_selections["map_type"],
-                            self.type_id_btn_prev,
-                            self.type_id_btn_next,
-                        ),
                         self.selector(
                             self.name_wrapper_id,
                             self.name_id,
@@ -284,7 +221,7 @@ another_property:
         )
         def _update_attr(_n_prev, _n_next, current_value):
             ctx = dash.callback_context.triggered
-            if not ctx or not current_value:
+            if ctx is None or not current_value:
                 raise PreventUpdate
             if not ctx[0]["value"]:
                 return current_value
@@ -309,9 +246,11 @@ another_property:
         )
         def _update_name(attr, _n_prev, _n_next, current_value):
             ctx = dash.callback_context.triggered
-            if not ctx:
+
+            if ctx is None:
                 raise PreventUpdate
             names = self._names_in_attr(attr)
+
             if not names:
                 return None, None, {"visibility": "hidden"}
 
@@ -341,7 +280,7 @@ another_property:
         def _update_date(attr, _n_prev, _n_next, current_value):
             ctx = dash.callback_context.triggered
 
-            if not ctx:
+            if ctx is None:
                 raise PreventUpdate
             interval = self._interval_in_attr(attr)
 
@@ -375,10 +314,12 @@ another_property:
             """
 
             # Preventing update if selections are not valid (waiting for the other callbacks)
+
             if not name in self._names_in_attr(attr):
                 raise PreventUpdate
             if date and not date in self._interval_in_attr(attr):
                 raise PreventUpdate
+
             return json.dumps({"name": name, "attr": attr, "date": date})
 
 
