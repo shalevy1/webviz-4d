@@ -3,19 +3,12 @@
 
 source /prog/res/komodo/testing-py3/enable
 
-if [ -d webviz-4d ]; then
-    echo "ERROR: webiz-4d directory already exist, installation aborted"
-    echo "Type rm -rf webviz-4d to remove the directory"
-    exit
-fi
-
 if [ -d reper ]; then
     echo "ERROR: reper directory already exist, installation aborted"
     echo "Type rm -rf reper to remove the directory"
     exit
 fi
 
-git clone git@github.com:equinor/webviz-4d.git
 git clone git@github.com:equinor/reper.git
 
 mkdir webviz-4d/well_data
