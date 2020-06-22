@@ -1,0 +1,8 @@
+unset PYTHONPATH
+source ../venv/bin/activate.csh
+python data_preparation/extract_wellbores_from_rep.py Grane
+python data_preparation/compile_well_metadata.py configurations/config_template.yaml
+python data_preparation/compile_production_data.py configurations/config_template.yaml
+python data_preparation/create_tables.py configurations/config_template.yaml
+python data_preparation/create_well_lists.py configurations/config_template.yaml
+python data_preparation/check_well_lists.py configurations/config_template.yaml
