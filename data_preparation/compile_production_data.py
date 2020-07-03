@@ -130,18 +130,13 @@ def main():
 
         all_4d, incremental_4d = _metadata.get_all_intervals(surface_metadata, "normal")
         incremental_4d.sort()
-        print(incremental_4d)
 
         actual_intervals = []
         for interval in incremental_4d:
             date1, date2 = common.get_dates(interval)
-            print(date1, date2)
 
             if date1 < today_str:
                 actual_intervals.append(interval)
-
-        print("actual_intervals")
-        print(actual_intervals)
 
         volume_codes = [
             "BORE_OIL_VOL",

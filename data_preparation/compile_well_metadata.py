@@ -148,6 +148,8 @@ def main():
         well_directory = common.get_full_path(well_directory)
     except:
         well_directory = None
+        print("ERROR: Well directory", well_directory, "not found")
+        print("Execution stopped")
 
     if well_directory:
         try:
