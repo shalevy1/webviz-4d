@@ -2,12 +2,12 @@
 #set -x
 
 if [ "$1" != "" ]; then
-    mkdir webviz_4d/"$1"
-    mkdir webviz_4d/"$1"/well_data
-    mkdir webviz_4d/"$1"/production_data
+    mkdir ./"$1"
+    mkdir ./"$1"/well_data
+    mkdir ./"$1"/production_data
 else
-    mkdir webviz_4d/well_data
-    mkdir webviz_4d/production_data    
+    mkdir ./well_data
+    mkdir ./production_data    
 fi
 
 source /prog/res/komodo/testing-py3/enable
@@ -21,7 +21,7 @@ fi
 git clone git@github.com:equinor/reper.git
 
 python -m venv venv
-source venv/bin/activate
+source ./venv/bin/activate
 
 pip install --upgrade pip
 pip install libecl 
@@ -31,7 +31,7 @@ pip install webviz-config-equinor
 pip install ruamel.yaml
 pip install requests
 pip install ./reper
-pip install ./
+pip install .
 
 echo "Installation completed"
 

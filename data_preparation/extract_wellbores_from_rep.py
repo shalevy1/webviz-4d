@@ -154,6 +154,17 @@ def main():
     EQUIPMENT_NAMES = ["Screen", "Perforations"]
 
     export_dir = field.lower().replace(" ", "_") + "/well_data/"
+    
+    if os.path.isdir(export_dir):
+        print("Wells will be stored in", export_dir)        
+    else:    
+        export_dir =  "./well_data/"
+        
+        if os.path.isdir(export_dir):
+            print("Well data will be stored in", export_dir)  
+        else:
+            print("ERROR: Well directory", export_dir, "not found")
+            exit()       
 
     # Remove existing wells (not planned wells) and all metadata
     if os.path.isdir(export_dir):

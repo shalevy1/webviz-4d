@@ -1,5 +1,14 @@
+#!/bin/bash 
+#set -x
+
+if [ "$#" -ne 1 ]; then
+    echo "Field name is missing, must be given as one string"
+    echo "Execution stopped"
+    exit
+fi
+
 unset PYTHONPATH
-source ../venv/bin/activate.csh
+source ./venv/bin/activate
 
 rm -f update_webviz-4d.txt
 
