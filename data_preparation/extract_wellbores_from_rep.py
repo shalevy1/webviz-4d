@@ -59,7 +59,7 @@ def write_rms_wellbore(wellbore_name, wellbore_df, rkb, export_dir):
 
     f.close()
 
-    #print("Well data exported to ", outfile)
+    # print("Well data exported to ", outfile)
 
 
 def write_metadata(
@@ -125,7 +125,7 @@ def main():
     Parameters
     ----------
     field : str
-        The name of the field
+        The name of the field  
     md_inc : int, optional
         Measured depth increment (default=50)
 
@@ -138,7 +138,10 @@ def main():
     )
     parser.add_argument("field", help="Enter name of field")
     parser.add_argument(
-        "--md_inc", help="Enter wanted depth (MD) increment, 0=> no interpolation", type=int, default=0
+        "--md_inc",
+        help="Enter wanted depth (MD) increment, 0=> no interpolation",
+        type=int,
+        default=0,
     )
 
     args = parser.parse_args()
@@ -146,23 +149,23 @@ def main():
     field = args.field
     md_inc = args.md_inc
 
-    print(field, md_inc)
+    print(field, "Depth increment:", md_inc)
 
     EQUIPMENT_NAMES = ["Screen", "Perforations"]
 
-    export_dir = "./well_data/"
-    
-    # Remove existing wells (not planned wells) and all metadata 
+    export_dir = field.lower().replace(" ", "_") + "/well_data/"
+
+    # Remove existing wells (not planned wells) and all metadata
     if os.path.isdir(export_dir):
         files = glob.glob(export_dir + "*.w")
-        
+
         for f in files:
             os.remove(f)
-            
+
         files = glob.glob(export_dir + ".*.yaml", recursive=True)
-        
+
         for f in files:
-            os.remove(f)    
+            os.remove(f)
 
     wellbores = sorted(wrappers.Field(field).get_wellbore_names())
 
@@ -182,9 +185,7 @@ def main():
         if wellbore_type is None:
             wellbore_type = ""
 
-        facility = wrappers.Wellbore(
-            field, wellbore
-        ).get_wellbore_drilling_facility()
+        facility = wrappers.Wellbore(field, wellbore).get_wellbore_drilling_facility()
         if facility is None:
             facility = ""
 
@@ -237,12 +238,12 @@ def main():
             easting_reg = np.append(easting_reg, easting.values[-1])
             northing_reg = np.append(northing_reg, northing.values[-1])
         else:
-            md_reg = md_wellbore 
+            md_reg = md_wellbore
             tvd_reg = tvd_wellbore
             easting_reg = easting
-            northing_reg = northing   
+            northing_reg = northing
 
-        print(i,wellbore)
+        print(i, wellbore)
 
         well_df = pd.DataFrame()
         well_df["MD"] = md_reg
@@ -250,15 +251,14 @@ def main():
         well_df["EASTING"] = easting_reg
         well_df["NORTHING"] = northing_reg
 
-        
         # print(df)
 
         name = wellbore.replace("/", "_").replace("NO ", "").replace(" ", "_")
 
         write_rms_wellbore(wellbore, well_df, rkb, export_dir)
-        rms_file =  name + ".w"
+        rms_file = name + ".w"
 
-        xtgeo_wellbore = load_well(os.path.join(export_dir,rms_file))
+        xtgeo_wellbore = load_well(os.path.join(export_dir, rms_file))
         wellbore_short_name = xtgeo_wellbore.shortwellname
         # print(xtgeo_well)
 
@@ -275,17 +275,17 @@ def main():
             completions,
         )
         i = i + 1
-        
+
     now = datetime.datetime.now()
-    print ("Update time",now.strftime("%Y-%m-%d %H:%M:%S"))
+    print("Update time", now.strftime("%Y-%m-%d %H:%M:%S"))
 
     outfile = os.path.join(export_dir, ".welldata_update.yaml")
     f = open(outfile, "w")
     f.write("- welldata:\n")
     f.write("   update_time: " + now.strftime("%Y-%m-%d %H:%M:%S") + "\n")
     f.close()
-    
-    print("Wellbores exported to",export_dir)
+
+    print("Wellbores exported to", export_dir)
     print("Metadata exported to file", outfile)
 
 

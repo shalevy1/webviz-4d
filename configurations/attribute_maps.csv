@@ -1,0 +1,13 @@
+map type,name,attribute,interval,minimum value,maximum value,lower_limit,upper_limit,file_path
+results,viking,4d_max,20210101_20210101,-0.0006304026,1.00000002004088E+020,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_max--20210101_20200101.gri
+results,viking,4d_min,20200101_20200101,-0.0071371049,1.00000002004088E+020,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_min--20200101_20190101.gri
+results,all,4d_rms,20210101_20210101,0,0.0115473891,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/all--4d_rms--20210101_20200101.gri
+results,viking,4d_mean,20200101_20200101,-0.0022522076,0.011302908,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_mean--20200101_20190101.gri
+results,viking,4d_min,20210101_20210101,-0.0346064568,1.00000002004088E+020,-0.02,0,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_min--20210101_20190101.gri
+results,viking,4d_mean,20210101_20210101,-0.0173545339,0.0233362622,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_mean--20210101_20190101.gri
+results,viking,4d_mean,20210101_20210101,-0.0161258726,0.0172199863,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_mean--20210101_20200101.gri
+results,viking,4d_max,20200101_20200101,-7.64773766283084E-005,1.00000002004088E+020,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_max--20200101_20190101.gri
+results,all,4d_rms,20210101_20210101,0,0.0138117742,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/all--4d_rms--20210101_20190101.gri
+results,all,4d_rms,20200101_20200101,0,0.0075983228,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/all--4d_rms--20200101_20190101.gri
+results,viking,4d_min,20210101_20210101,-0.0322492719,1.00000002004088E+020,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_min--20210101_20200101.gri
+results,viking,4d_max,20210101_20210101,-0.0006450841,1.00000002004088E+020,0,0.02,/scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/viking--4d_max--20210101_20190101.gri

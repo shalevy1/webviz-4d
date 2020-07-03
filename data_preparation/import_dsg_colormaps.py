@@ -69,20 +69,21 @@ def import_colormaps(folder, suffix):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Import and convert DSG colormaps")
-    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
+    parser = argparse.ArgumentParser(description="Import and convert DSG colormaps")
+    parser.add_argument(
+        "config_file", help="Enter path to the WebViz-4D configuration file"
+    )
 
-    args = parser.parse_args()  
+    args = parser.parse_args()
     config_file = args.config_file
-    
-    settings_file = common.get_config_item(config_file,"settings")
+
+    settings_file = common.get_config_item(config_file, "settings")
     settings = common.read_config(settings_file)
-    
+
     folder = settings["map_settings"]["colormaps_folder"]
 
     SUFFIX = ".clx"
-    
+
     import_colormaps(folder, SUFFIX)
 
 

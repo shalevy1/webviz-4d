@@ -9,7 +9,12 @@ import yaml
 import pandas as pd
 from webviz_4d._datainput import common
 from webviz_4d._datainput import well
-from webviz_4d._datainput._metadata import get_update_dates, get_map_defaults, get_metadata, get_all_intervals
+from webviz_4d._datainput._metadata import (
+    get_update_dates,
+    get_map_defaults,
+    get_metadata,
+    get_all_intervals,
+)
 
 
 OIL_PRODUCTION_FILE = "BORE_OIL_VOL.csv"
@@ -71,6 +76,9 @@ def extract_production_info(well_prod_info, interval, selection):
     stop_date = None
     info = None
     plot = False
+
+    # pd.set_option('display.max_columns', None)
+    # print(well_prod_info)
 
     if selection == "production":
         column = OIL_PRODUCTION_FILE + "_" + interval
@@ -169,8 +177,8 @@ def make_new_well_layer(
 ):
     """Make layeredmap wells layer"""
     data = []
-    
-    #print(interval_4d,wells_df,metadata_df,interval_df,prod_info_list,colors,selection,label)
+
+    # print(interval_4d,wells_df,metadata_df,interval_df,prod_info_list,colors,selection,label)
 
     wellbores = wells_df["WELLBORE_NAME"].values
     list_set = set(wellbores)
@@ -200,7 +208,7 @@ def make_new_well_layer(
             well_type = well_type[0]
 
         if well_type == "planned":
-            #info = well_metadata["wellbore.list_name"].values
+            # info = well_metadata["wellbore.list_name"].values
             info = ""
             start_date = None
             stop_date = None
@@ -261,54 +269,52 @@ def make_new_well_layer(
 
 def main():
     # Main
-    delimiter = "--"
-    parser = argparse.ArgumentParser(description="Create well lists based on production data")
-    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
+    description = "Create well lists based on production data"
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "config_file", help="Enter path to the WebViz-4D configuration file"
+    )
 
-    args = parser.parse_args()  
+    args = parser.parse_args()
+    print(description)
+    print(args)
+    
     config_file = args.config_file
     config = common.read_config(config_file)
-    # print(config)
-
-    # Find FMU directory
-    path = config["shared_settings"]["scratch_ensembles"]["sens_run"]
-    # print(path)
 
     # Well and production data
-    wellsuffix = ".w"
-    well_directory = common.get_config_item(config_file,"wellfolder")
+    well_suffix = common.get_config_item(config, "well_suffix")
+    map_suffix = common.get_config_item(config, "map_suffix")
+    delimiter = common.get_config_item(config, "delimiter")
+    metadata_file = common.get_config_item(config, "surface_metadata")
+
+    well_directory = common.get_config_item(config, "wellfolder")
     well_directory = common.get_full_path(well_directory)
 
-    prod_info_dir = common.get_config_item(config_file,"production_data")
+    prod_info_dir = common.get_config_item(config, "production_data")
     prod_info_dir = common.get_full_path(prod_info_dir)
     update_metadata_file = os.path.join(prod_info_dir, ".production_update.yaml")
-    
+
     update_dates = get_update_dates(well_directory)
     production_update = update_dates["production_last_date"]
-    print("Production data update",production_update)
-    
+    print("Production data update", production_update)
+
     try:
-        settings_file = common.get_config_item(config_file,"settings")
+        settings_file = common.get_config_item(config, "settings")
         settings_file = common.get_full_path(settings_file)
         settings = common.read_config(settings_file)
-        interval = settings["map_settings"]["default_interval"]
+        interval = common.get_config_item(config,"default_interval")
     except:
         settings_file = None
         settings = None
         interval = None
 
-    number_of_maps = 3
-
-    #surface_viewer4d = config["pages"][0]["content"][0]["SurfaceViewer4D"]
-    #map_defaults = get_map_defaults(surface_viewer4d, number_of_maps)
-    #metadata, dates = common.get_metadata(directory, map_defaults[0], delimiter)
-    
-    directory = os.path.dirname(path).replace("*", "0")
-    fmu_info = os.path.dirname(directory)  
-    metadata = get_metadata(fmu_info, ".gri")
+    shared_settings = config["shared_settings"]
 
     print("Extracting 4D intervals ...")
-    intervals_4d = get_all_intervals(metadata)
+    metadata_file = common.get_config_item(config, "surface_metadata")
+    metadata = get_metadata(shared_settings, delimiter, map_suffix, metadata_file)
+    intervals_4d, incremental = get_all_intervals(metadata, "reverse")
     colors = common.get_well_colors(settings)
 
     prod_info_files = [os.path.join(prod_info_dir, OIL_PRODUCTION_FILE)]
@@ -320,16 +326,14 @@ def main():
         print("Reading production info from file " + str(prod_info_file))
         prod_info = pd.read_csv(prod_info_file)
         prod_info.name = os.path.basename(str(prod_info_file))
-        print(prod_info.name)
-        print(prod_info)
 
         prod_info_list.append(prod_info)
 
     drilled_well_df, drilled_well_info, interval_df = common.load_all_wells(
-        well_directory, wellsuffix
+        well_directory, well_suffix
     )
-    #print("drilled_well_info")
-    #print(drilled_well_info)
+    # print("drilled_well_info")
+    # print(drilled_well_info)
 
     wellbores = drilled_well_info["wellbore.name"].unique()
 
@@ -338,7 +342,6 @@ def main():
 
     print("Looping through all production information ...")
     for prod_info in prod_info_list:
-        print(prod_info)
         for column in prod_info.columns:
             values = []
             header = prod_info.name + "_" + column
@@ -354,18 +357,18 @@ def main():
                     ].values[0]
                 except:
                     value = None
-                #print(wellbore,value)
+                # print(wellbore,value)
                 values.append(value)
-                
+
             # Add column with volume in 4D interval to dataframe
-            drilled_well_info[header] = values  
+            drilled_well_info[header] = values
 
     print("intervals_4d")
     print(intervals_4d)
-    
+
     print("drilled_well_info")
-    print(drilled_well_info)    
-    
+    print(drilled_well_info)
+
     print("Last production update", production_update)
     print("Looping through all 4D intervals ...")
     for interval_4d in intervals_4d:

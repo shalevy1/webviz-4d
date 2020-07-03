@@ -15,17 +15,20 @@ def main():
     Returns
     -------
     """
-
-    parser = argparse.ArgumentParser(
-        description="Check well list files"
+    description = "Check well list files"
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "config_file", help="Enter path to the WebViz-4D configuration file"
     )
-    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
 
-    args = parser.parse_args()  
+    args = parser.parse_args()
+    print(description)
+    print(args)
+    
     config_file = args.config_file
     config = common.read_config(config_file)
 
-    wellfolder = common.get_config_item(config_file,"wellfolder")
+    wellfolder = common.get_config_item(config, "wellfolder")
     wellfolder = common.get_full_path(wellfolder)
     print("Reading well lists in", wellfolder)
 
@@ -43,7 +46,7 @@ def main():
                 print(item["tooltip"])
 
         print("")
-    
-    
+
+
 if __name__ == "__main__":
-    main()    
+    main()

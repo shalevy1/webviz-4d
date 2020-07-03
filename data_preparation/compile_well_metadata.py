@@ -25,7 +25,7 @@ def extract_metadata(directory):
     yaml_files = glob.glob(directory + "/.*.w.yaml", recursive=True)
 
     for yaml_file in yaml_files:
-        #print(yaml_file)
+        # print(yaml_file)
         with open(yaml_file, "r") as stream:
             data = yaml.safe_load(stream)
             # print('data',data)
@@ -53,13 +53,13 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
     short_names = []
     depth_surfaces = []
     depth_picks = []
-    
+
+    points = None
+    pick_name = None
+    wellbore_pick_md = None
+
     if surface:
         pick_name = surface.name
-    else:
-        points = None
-        pick_name = None
-        wellbore_pick_md = None
 
     if not wellbore_info.empty:
         for index, item in wellbore_info.iterrows():
@@ -82,17 +82,18 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
                 print(points.dataframe)
                 wellbore_pick_md = points.dataframe["MD"].values[0]
 
-            rms_names.append(rms_name)
-            short_names.append(short_name)
             depth_surfaces.append(pick_name)
             depth_picks.append(wellbore_pick_md)
+
+            rms_names.append(rms_name)
+            short_names.append(short_name)
 
     else:  # Planned wells
         wellbore_names = []
         wellbore_types = []
         wellbore_fluids = []
         wellbore_files = glob.glob(str(well_directory) + "/*.w")
-        #print("wellbore_files", wellbore_files)
+        # print("wellbore_files", wellbore_files)
 
         for wellbore_file in wellbore_files:
             wellbore = load_wellbore(wellbore_file)
@@ -106,7 +107,6 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
 
             if surface:
                 points = wellbore.get_surface_picks(surface)
-                wellbore_pick_md = None
 
             if points and hasattr(points, "dataframe"):
                 print(points.dataframe)
@@ -130,32 +130,36 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Compile metadata from all wells and extract top reservoir depths"
+    description = "Compile metadata from all wells and extract top reservoir depths"
+    parser = argparse.ArgumentParser(description = description)
+    parser.add_argument(
+        "config_file", help="Enter path to the WebViz-4D configuration file"
     )
-    parser.add_argument("config_file", help="Enter path to the WebViz-4D configuration file")
+    args = parser.parse_args()
+    
+    print(description)
+    print(args)
 
-    args = parser.parse_args()  
     config_file = args.config_file
+    config = common.read_config(config_file)
 
-    #try:
-    well_directory = common.get_config_item(config_file,"wellfolder") 
-    well_directory = common.get_full_path(well_directory) 
-    #except:
-    #    well_directory = None
-            
+    try:
+        well_directory = common.get_config_item(config, "wellfolder")
+        well_directory = common.get_full_path(well_directory)
+    except:
+        well_directory = None
+
     if well_directory:
-        #try:        
-        settings_file = common.get_config_item(config_file,"settings")
-        settings_file = common.get_full_path(settings_file)
-        settings = common.read_config(settings_file)
-        print("settings")
-        print(settings)
-        surface_file = settings["depth_maps"]["top_reservoir"]
-        surface = load_surface(surface_file)
-        #except:
-        #    surface_file = None
-        #    surface = None    
+        try:
+            settings_file = common.get_config_item(config, "settings")
+            settings_file = common.get_full_path(settings_file)
+            settings = common.read_config(settings_file)
+
+            surface_file = settings["depth_maps"]["top_reservoir"]
+            surface = load_surface(surface_file)
+        except:
+            surface_file = None
+            surface = None
 
     print("Well directory", well_directory)
     print("Surface file", surface_file)
@@ -166,7 +170,7 @@ def main():
 
     wellbore_info, intervals = extract_metadata(well_directory)
     pd.set_option("display.max_rows", None)
-    print(wellbore_info)   
+    print(wellbore_info)
 
     wellbore_info = compile_data(surface, well_directory, wellbore_info, WELL_SUFFIX)
 
@@ -174,7 +178,7 @@ def main():
     intervals.to_csv(os.path.join(well_directory, INTERVALS_FILE))
 
     # print(intervals)
-    
+
     print("Metadata stored to " + os.path.join(well_directory, WELLBORE_INFO_FILE))
     print(
         "Completion intervals stored to " + os.path.join(well_directory, INTERVALS_FILE)

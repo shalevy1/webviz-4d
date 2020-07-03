@@ -1,0 +1,29 @@
+title: WebViz-4D 4D attribute maps
+
+shared_settings:
+    fmu_directory: /scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020
+    simulated_maps:       
+        realization_names: [realization-*]
+        iteration_names: [pred]
+        map_directories: [share/results/maps]
+    
+pages:  
+  - title: Front page
+    content:  
+      - Markdown:
+          markdown_file: ./front_page.md
+          
+  - title: Simulated maps
+    content:
+      - SurfaceViewer4D:
+          wellfolder:
+                ../johan_sverdrup/well_data  
+                
+          production_data:
+                ../johan_sverdrup/production_data   
+          
+          settings: ./js_eli_settings.yaml     
+          
+
+           
+
