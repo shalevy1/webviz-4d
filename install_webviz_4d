@@ -1,6 +1,15 @@
 #!/bin/bash 
 #set -x
 
+if [ "$1" != "" ]; then
+    mkdir webviz-4d/"$1"
+    mkdir webviz-4d/"$1"/well_data
+    mkdir webviz-4d/"$1"/production_data
+else
+    mkdir webviz-4d/well_data
+    mkdir webviz-4d/production_data    
+fi
+
 source /prog/res/komodo/testing-py3/enable
 
 if [ -d reper ]; then
@@ -10,9 +19,6 @@ if [ -d reper ]; then
 fi
 
 git clone git@github.com:equinor/reper.git
-
-mkdir webviz-4d/well_data
-mkdir webviz-4d/production_data
 
 python -m venv venv
 source venv/bin/activate
