@@ -12,7 +12,33 @@ import pandas as pd
 from pandas import json_normalize
 import xtgeo
 
+defaults = {"well_suffix" : ".w", "map_suffix" : ".gri", "delimiter" : "--", "surface_metadata" : "surface_metadata.csv"}
 
+
+def get_config_item(config,key):
+    value = None
+    
+    pages = config["pages"]  
+    
+    for page in pages:     
+        content = page["content"]
+        #print("content")
+        #print(content[0])
+        #print(content[0].values()) 
+        
+        try:
+            surface_viewer4d = content[0]["SurfaceViewer4D"] 
+            value = surface_viewer4d[key]
+            return value
+        except:
+            try:
+                value = defaults[key]       
+            except:
+                pass             
+    
+    return value
+    
+    
 def read_config(config_file):
     """ Return the content of a configuration file as a dict """
     config_dict = {}
@@ -35,6 +61,13 @@ def _find_number(surfacepath, txt):
         number = filename[i : i + j]
 
     return number
+    
+    
+def get_dates(interval):
+    date1 = interval[0:10]
+    date2 = interval[11:21]
+    
+    return date1, date2    
 
 
 def find_files(folder, suffix) -> io.BytesIO:
@@ -118,53 +151,6 @@ def extract_well_metadata(directory):
     return well_info_df, depth_df
     
 
-def compose_filename(
-    directory, real, iteration, map_type, name, attribute, interval, delimiter
-):
-    """ Return expected filename based on given metadata """
-    surfacepath = None
-
-    if isinstance(real,int):
-        realization = "realization-" + str(real)
-    else:
-        realization = real
-
-    # if '-' in dates[0]:
-    #    dates = convert_date(dates[0]) + "_" + convert_date(dates[1])
-
-    interval_string = interval.replace("-", "")
-    datestring = interval_string[:8] + "_" + interval_string[8:]
-    # print(directory, realization, iteration, map_type, name, attribute, datestring)
-
-    filename = name + delimiter + attribute + delimiter + datestring + ".gri"
-    # print(filename)
-
-    index = directory.find("realization")
-    if map_type == "results":
-        surfacepath = os.path.join(
-            directory[:index],
-            realization,
-            iteration,
-            "share",
-            map_type,
-            "maps",
-            filename,
-        )
-    elif map_type == "observations":
-        surfacepath = os.path.join(
-            directory[:index],
-            realization,
-            iteration,
-            "share",
-            map_type,
-            "maps",
-            filename,
-        )
-
-    # print('surfacepath ',surfacepath)
-    return surfacepath
-
-
 def decode_filename(file_path, delimiter):
     """ Create metadata from surface file name """
     surfacepath = str(file_path)
@@ -233,15 +219,12 @@ def get_map_defaults(configuration, n_maps):
         date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
         date2 = interval[9:13] + "-" + interval[13:15] + "-" + interval[15:17]
         interval = date1 + "-" + date2
-    print(interval) 
 
     for i in range(0, n_maps):
         key = "map" + str(i + 1) + "_defaults"
         defaults = configuration[key]
         defaults["interval"] = interval       
         map_defaults.append(defaults)
-
-        print(i, defaults)
 
     return map_defaults
 
@@ -259,54 +242,10 @@ def convert_date(date):
     return date_string
 
 
-def all_interval_dates(directory, delimiter, suffix):
-    """ Return all 4D intervals in surface files in a FMU directory """
-    all_dates = []
-
-    files = glob.glob(directory + "/**/*" + suffix, recursive=True)
-
-    for filename in files:
-        (
-            directory,
-            _realization,
-            _iteration,
-            _map_type,
-            _name,
-            _attribute,
-            dates,
-        ) = decode_filename(filename, delimiter)
-
-        if dates[0] and dates[1]:
-            all_dates.append(dates[0])
-            all_dates.append(dates[1])
-
-    list_set = set(all_dates)
-    unique_list = list(list_set)
-    unique_dates = sorted(unique_list)
-    return unique_dates
-
-
 def get_well_colors(settings):
     """ Return well colors from a configuration """   
 
     return settings["well_colors"]
-
-
-def get_all_intervals(metadata_df):
-    """ Return all 4D intervals from a metadata dateframe """
-    intervals = metadata_df[["data.time.t1", "data.time.t2"]].values
-    # print('get_all_intervals ',intervals)
-
-    interval_list = []
-    for interval in intervals:
-        interval_list.append(interval[0] + "-" + interval[1])
-
-    list_set = set(interval_list)
-    unique_list = list(list_set)
-    interval_list = sorted(unique_list)
-    # print(interval_list)
-
-    return interval_list
 
 
 def extract_wellbore_metadata(directory):
@@ -314,7 +253,6 @@ def extract_wellbore_metadata(directory):
     well_info = []
     interval_info = []
 
-    print(str(directory))
     yaml_files = glob.glob(str(directory) + "/.*yaml", recursive=True)
 
     for yaml_file in yaml_files:
@@ -492,28 +430,9 @@ def get_position_data(well_dataframe, md_start):
     return positions
     
     
-def get_config_item(config_file,key):
-    config = read_config(config_file)  
-    pages = config["pages"]  
-    
-    for page in pages:     
-        content = page["content"]
-
-        try:
-            surface_viewer4d = content[0]["SurfaceViewer4D"] 
-            value = surface_viewer4d[key]
-            return value
-        except:
-            pass            
-    
-    return None
-    
-    
 def get_full_path(item):
     path = item 
     full_path = item   
-    
-    print("item",item)
 
     directory = os.getcwd()       
     
@@ -535,22 +454,40 @@ def main():
     # read_config
     config_file = "./examples/reek_4d.yaml"
     config = read_config(config_file)
-    print("config")
-    print(config)
-    outfile = "./test_data/config.json"
-    with open(outfile, 'w') as file:
-        file.write(json.dumps(config))
+    
+    settings_file = get_config_item(config, "settings_file")
+    print("settings_file", settings_file)
+    
+    settings_file = get_full_path(settings_file)
+    print("full_path", settings_file)
+    
+    settings = read_config(settings_file)
+    csv_file = settings["map_settings"]["colormaps_settings"]
+    print("csv_file",csv_file)
+    
+    csv_file = get_full_path(csv_file)
+    print("full_path",csv_file)
+    
+    
+    #get_dates
+    interval = "2005-07-01-1993-01-01" 
+    date1,date2 = get_dates(interval)
+    print("date1,date2")
+    print(date1,date2)
+    
+    
+    #get_config_item
+    config_file = "configurations/config_template.yaml"
+    config = read_config(config_file)
+       
+    surface_metadata = get_config_item(config, "surface_metadata")
+    print("surface_metadata = ", surface_metadata)     
+    
+    delimiter = get_config_item(config, "delimiter")
+    print("delimiter = ", delimiter)  
         
-    #find_files
-    directory = "../webviz-subsurface-testdata/reek_history_match/realization-0/iter-0/share/results/maps"
-    map_files = find_files(directory,".w")
-    print("map_files")
-    print(map_files)
-    
-    
-      
-        
-    
+    dummy = get_config_item(config, "dummy")
+    print("dummy = ", dummy)  
 
 
 if __name__ == "__main__":

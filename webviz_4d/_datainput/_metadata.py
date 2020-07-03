@@ -7,6 +7,7 @@ from pandas import json_normalize
 import yaml
 import re
 import calendar
+from pathlib import Path 
 from webviz_4d._datainput import common
 
 
@@ -15,7 +16,6 @@ def get_map_defaults(configuration, n):
 
     settings_file = configuration["settings"]
     settings_file = common.get_full_path(settings_file)
-    print("settings_file",settings_file)
     
     settings = common.read_config(settings_file)
     interval = settings["map_settings"]["default_interval"]
@@ -24,13 +24,11 @@ def get_map_defaults(configuration, n):
         date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
         date2 = interval[9:13] + "-" + interval[13:15] + "-" + interval[15:17]
         interval = date1 + "-" + date2
-    # print(interval)
 
     for i in range(0, n):
         key = "map" + str(i + 1) + "_defaults"
         defaults = settings["map_settings"][key]
         defaults["interval"] = interval
-        # print(map_def)
         map_defaults.append(defaults)
 
     return map_defaults
@@ -54,11 +52,11 @@ def create_map_settings(
 
 def create_map_defaults(metadata_df, default_interval, observations, simulations):
     observed_attributes = get_attributes(metadata_df, observations)
-    print("observed_attributes", observed_attributes)
+    #print("observed_attributes", observed_attributes)
     observed_names = get_names(metadata_df, observations)
 
     simulated_attributes = get_attributes(metadata_df, simulations)
-    print("simulated_attributes", simulated_attributes)
+    #print("simulated_attributes", simulated_attributes)
     simulated_names = get_names(metadata_df, simulations)
     realizations = get_realizations(metadata_df, simulations)
     ensembles = get_ensembles(metadata_df, simulations)
@@ -70,10 +68,9 @@ def create_map_defaults(metadata_df, default_interval, observations, simulations
 
     if observed_attributes:
         rows = metadata_df.loc[
-            (metadata_df["data.time.t1"] == default_interval[0:10])
-            & (metadata_df["data.time.t2"] == default_interval[11:])
+            (metadata_df["data.time.t2"] == default_interval[0:10])
+            & (metadata_df["data.time.t1"] == default_interval[11:])
         ]
-        #print(rows)
         observed_attribute = observed_attributes[0]
         observed_name = rows["data.name"].values[0]
         
@@ -89,10 +86,10 @@ def create_map_defaults(metadata_df, default_interval, observations, simulations
 
         if simulated_attributes:
             rows = metadata_df.loc[
-                (metadata_df["data.time.t1"] == default_interval[0:10])
-                & (metadata_df["data.time.t2"] == default_interval[11:])
+                (metadata_df["data.time.t2"] == default_interval[0:10])
+                & (metadata_df["data.time.t1"] == default_interval[11:])
             ]
-            print(rows)
+
             simulated_attribute = rows["data.content"].values[0]
             simulated_name = rows["data.name"].values[0]
             
@@ -109,10 +106,10 @@ def create_map_defaults(metadata_df, default_interval, observations, simulations
 
     elif simulated_attributes:
         rows = metadata_df.loc[
-                (metadata_df["data.time.t1"] == default_interval[0:10])
-                & (metadata_df["data.time.t2"] == default_interval[11:])
+                (metadata_df["data.time.t2"] == default_interval[0:10])
+                & (metadata_df["data.time.t1"] == default_interval[11:])
             ]
-        #print(rows)
+
         simulated_attribute = rows["data.content"].values[0]
         simulated_name = rows["data.name"].values[0]
         
@@ -149,64 +146,8 @@ def check_yaml_file(surfacepath):
     status = os.path.isfile(yaml_file)
 
     return status
-
-
-def extract_metadata(fmu_folder):
-    meta_data = []
-    #index = map_file.find("realization")
-
-    yaml_files = glob.glob(fmu_folder + "/**/.*.yaml", recursive=True)
-
-    for yaml_file in yaml_files:
-        with open(yaml_file, "r") as stream:
-            data = yaml.safe_load(stream)
-            meta_data.append(data)
-
-    df = json_normalize(meta_data)
-    df["yaml_file"] = yaml_files
-
-    # df.to_csv('index.csv')
-    # df = pd.read_csv("index.csv")
-
-    new_df = df[
-        [
-            "fmu_id.case",
-            "fmu_id.revision_sub",
-            "fmu_id.revision_main",
-            "fmu_id.iteration",
-            "fmu_id.realization",
-            "fmu_id.user",
-            "data.name",
-            "data.unit",
-            "data.content",
-            "data.domain",
-            "data.subdomain",
-            "data.time.t1",
-            "data.time.t2",
-            "visual_settings.display_name",
-            "visual_settings.subtitle",
-            "visual_settings.colors.colormap",
-            "visual_settings.colors.display_min",
-            "visual_settings.colors.display_max",
-            "yaml_file",
-        ]
-    ].copy()
-
-    df_timelapse = new_df[new_df["data.time.t2"].notnull()]
-
-    time1 = df_timelapse["data.time.t1"].unique()
-    time2 = df_timelapse["data.time.t2"].unique()
-
-    times = list(time1)
-    times.extend(time2)
-
-    list_set = set(times)
-    unique_list = list(list_set)
-    times = sorted(unique_list)
-
-    return df_timelapse, times
-
-
+    
+    
 def find_number(surfacepath, txt):
     filename = str(surfacepath)
     number = None
@@ -217,7 +158,58 @@ def find_number(surfacepath, txt):
         j = filename[i:].find("/")
         number = filename[i : i + j]
 
-    return number
+    return number    
+
+
+def extract_metadata(shared_settings, metadata_file):
+    fmu_directory = shared_settings["fmu_directory"]
+    meta_data = []
+    metadata_df = None
+    
+    map_types = ["observed", "results"]
+    mapping_dict = {"observed" : "observed", "results" : "simulated"}
+    
+    for map_type in map_types:
+        if mapping_dict[map_type] + "_maps" in shared_settings:
+            map_settings = shared_settings[mapping_dict[map_type] + "_maps"]
+            realization_names = map_settings["realization_names"]
+            iteration_names = map_settings["iteration_names"]           
+            map_directories = map_settings["map_directories"]
+            
+            for realization_name in realization_names:
+                for iteration_name in iteration_names:  
+                    for map_directory in map_directories:          
+                        yaml_files = glob.glob(os.path.join(fmu_directory,realization_name,iteration_name,map_directory + "/.*.yaml"))
+                        
+                        if yaml_files is not None:
+                            for yaml_file in yaml_files:
+                                with open(yaml_file, "r") as stream:
+                                    data_stream = yaml.safe_load(stream)
+                                    data = data_stream["data"]
+                                    
+                                    if "time" in data:
+                                        time = data["time"]
+                                        
+                                        if "t2" in time:
+                                            data_stream["map_type"] = map_type
+                                            real_number = data_stream["fmu_id"]["realization"]
+                                            data_stream["fmu_id"]["realization"] = "realization-" + str(real_number)
+                                            
+                                            sub_domain = data_stream["data"]["subdomain"]
+                                            if sub_domain == "rf":
+                                                data_stream["data"]["content"] = data_stream["data"]["content"] + "_" + sub_domain  
+                                                                                         
+                                            data_stream["filename"] = yaml_file
+                                            meta_data.append(data_stream)
+                        else:   
+                            maps_dir = None
+                            print("WARNING: no maps found for", map_type)   
+    
+    if meta_data:    
+        metadata_df = json_normalize(meta_data)    
+
+    print(metadata_df)
+    return metadata_df
 
 
 def convert_date(date):
@@ -228,34 +220,47 @@ def convert_date(date):
         return date[0:4] + date[5:7] + date[8:10]
 
 
-def get_all_intervals(df):
+def get_all_intervals(df, mode):
+    all_intervals_list = []
+    incremental_list = []
+    
     interval_df = df[["data.time.t1", "data.time.t2"]]
     new_df = interval_df.drop_duplicates()
-    sorted_df = new_df.sort_values(
-        by=["data.time.t1", "data.time.t2"], ascending=[True, False]
-    )
-
-    incremental_list = []
-    additional_list = []
-
-    previous_value = None
-    for index, row in sorted_df.iterrows():
-        interval = row["data.time.t1"] + "-" + row["data.time.t2"]
-
-        if index == 0:
-            incremental_list.append(interval)
-            previous_value = row["data.time.t1"]
+    
+    if mode == "reverse":
+        all_intervals = new_df.sort_values(
+            by=["data.time.t2", "data.time.t1"], ascending=[True, False]
+        )
+    else:
+        all_intervals = new_df.sort_values(
+            by=["data.time.t1", "data.time.t2"], ascending=[True, False]
+        )
+    
+    for index, row in all_intervals.iterrows():
+        if mode == "reverse":
+            all_intervals_list.append(row["data.time.t2"] + "-" + row["data.time.t1"]) 
         else:
-            if not row["data.time.t1"] == previous_value:
-                incremental_list.append(interval)
-                previous_value = row["data.time.t1"]
-            else:
-                additional_list.append(interval)
-                previous_value = row["data.time.t1"]
+            all_intervals_list.append(row["data.time.t1"] + "-" + row["data.time.t2"]) 
 
-    incremental_list.extend(additional_list)
+    t1_list = df["data.time.t1"].drop_duplicates().sort_values().tolist()
+    t2_list = df["data.time.t2"].drop_duplicates().sort_values().tolist()
+    all_list = t1_list + t2_list    
+    
+    unique_list = list(set(all_list))
+    unique_list.sort()
+    
+    incremental_list = []
+    
+    for i in range(1,len(unique_list)):
+        if mode == "reverse":
+            interval = unique_list[i] + "-" + unique_list[i-1]
+        else:
+            interval = unique_list[i-1] + "-" + unique_list[i]    
+        
+        if interval in all_intervals_list:
+            incremental_list.append(interval) 
 
-    return incremental_list
+    return all_intervals_list, incremental_list
 
 
 def get_difference_mode(surfacepath, delimiter):
@@ -275,6 +280,15 @@ def get_difference_mode(surfacepath, delimiter):
         difference_mode = "normal"
 
     return difference_mode
+    
+    
+def check_number(string):
+    
+    for i in range(len(string)):
+        if string[i] not in "0123456789":
+            return False
+    
+    return True    
 
 
 def decode_filename(file_path, delimiter):
@@ -308,6 +322,9 @@ def decode_filename(file_path, delimiter):
 
                 if number:
                     iteration = "iter-" + number   
+                    
+    if "pred" in surfacepath:
+        iteration = "pred"                
 
     for m in re.finditer(delimiter, str(surfacepath)):
         ind.append(m.start())
@@ -320,30 +337,35 @@ def decode_filename(file_path, delimiter):
         # print(surfacepath,name,attribute)
 
         if len(ind) == 2 and len(str(surfacepath)) > ind[1] + 19:
-            date = str(surfacepath)[ind[1] + 2 : ind[1] + 10]
-            dates[0] = convert_date(date)
-
-            date = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
-            dates[1] = convert_date(date)
+            date1 = str(surfacepath)[ind[1] + 2 : ind[1] + 10]
+            date2 = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
             
-    if "pred" in surfacepath:
-        iteration = "pred"        
+            if check_number(date1) and check_number(date2):
+                dates[0] = convert_date(date1)
+                dates[1] = convert_date(date2)
+            else:
+                dates = [None, None]            
 
     #print('decode ', surfacepath,realization, iteration, map_type, name, attribute, dates)
     return folder, realization, iteration, map_type, name, attribute, dates
 
 
-def get_metadata(directory, delimiter):
-    metadata_file = os.path.join(directory, "surface_metadata.csv")
+def get_metadata(shared_settings, extension, delimiter, filename):
+    fmu_directory = shared_settings["fmu_directory"]
+    
+    metadata_file = os.path.join(fmu_directory, filename)
     
     if os.path.isfile(metadata_file):
         print("Reading surface metadata file", metadata_file)
         metadata = pd.read_csv(metadata_file)
     else:   
-        try:
-            metadata  = extract_metadata(directory) 
-            print("Metadata files found and compiled")
-        except:    
+        print("Checking if individual metadata files exist ...")
+
+        metadata  = extract_metadata(shared_settings, metadata_file) 
+        
+        if metadata is None:    
+            print("No individual metadata files found")
+            
             print("Creating surface metadata ...")
             realizations = []
             iterations = []
@@ -364,35 +386,44 @@ def get_metadata(directory, delimiter):
                 "filename",
             ]
 
-            all_dates = []
+            surface_types = ["observations", "results"]
+            mapping_dict = {"observations" : "observed", "results" : "simulated"}
             
-            
+            for surface_type in surface_types:
+                map_dir = mapping_dict[surface_type] + "_maps"
+                
+                if map_dir in shared_settings:
+                    map_settings = shared_settings[map_dir]
+                    realization_names = map_settings["realization_names"]
+                    iteration_names = map_settings["iteration_names"]          
+                    map_directories = map_settings["map_directories"]
+                    
+                    for realization_name in realization_names:
+                        for iteration_name in iteration_names: 
+                            for map_directory in map_directories:         
+                                map_files = glob.glob(os.path.join(fmu_directory,realization_name,iteration_name,map_directory + "/*" + extension))
+                                for map_file in map_files:
+                                    (
+                                    folder,
+                                    realization,
+                                    iteration,
+                                    map_type,
+                                    name,
+                                    attribute,
+                                    dates,
+                                    ) = decode_filename(map_file, delimiter)
 
-            files = glob.glob(directory + "/**/*.gri", recursive=True)
-
-            for filename in files:
-                (
-                    folder,
-                    realization,
-                    iteration,
-                    map_type,
-                    name,
-                    attribute,
-                    dates,
-                ) = decode_filename(filename, delimiter)
-
-                if dates[0] and dates[1]:
-                    all_dates.append(dates[0])
-                    all_dates.append(dates[1])
-
-                    realizations.append(realization)
-                    iterations.append(iteration)
-                    map_types.append(map_type)
-                    names.append(name)
-                    attributes.append(attribute)
-                    times1.append(dates[0])
-                    times2.append(dates[1])
-                    filenames.append(filename)
+                                    if dates[0] and dates[1]:
+                                        realizations.append(realization)
+                                        iterations.append(iteration)
+                                        map_types.append(map_type)
+                                        names.append(name)
+                                        attributes.append(attribute)
+                                        times1.append(dates[1])
+                                        times2.append(dates[0])
+                                        filenames.append(map_file)  
+                else:
+                    print("No maps found for", surface_type)
 
             zipped_list = list(
                 zip(
@@ -410,6 +441,7 @@ def get_metadata(directory, delimiter):
             metadata = pd.DataFrame(zipped_list, columns=headers)
             metadata.fillna(value=np.nan, inplace=True)
 
+    if not os.path.isfile(metadata_file) and not metadata.empty:
         metadata.to_csv(metadata_file, index=False)
         print("Surface metadata saved to:", metadata_file)
 
@@ -429,10 +461,11 @@ def get_col_values(df, col_name):
 
 
 def compose_filename(
-    directory, real, iteration, map_type, name, attribute, interval, delimiter
+    shared_settings, real, iteration, map_type, name, attribute, interval, delimiter
 ):
-    # print('compose_filename ',directory, real, iteration, map_type, name, attribute, interval, delimiter)
     surfacepath = None
+    
+    fmu_directory = shared_settings["fmu_directory"]
 
     if type(real) == int:
         realization = "realization-" + str(real)
@@ -444,34 +477,25 @@ def compose_filename(
 
     interval_string = interval.replace("-", "")
     datestring = interval_string[:8] + "_" + interval_string[8:]
-    # print(directory, realization, iteration, map_type, name, attribute, datestring)
+    print("compose_filename",fmu_directory, realization, iteration, map_type, name, attribute, interval, datestring)
 
     filename = name + delimiter + attribute + delimiter + datestring + ".gri"
+    filename = filename.lower()
     # print(filename)
 
-    index = directory.find("realization")
     if map_type == "results":
-        surfacepath = os.path.join(
-            directory[:index],
-            realization,
-            iteration,
-            "share",
-            map_type,
-            "maps",
-            filename,
-        )
-    elif map_type == "observations":
-        surfacepath = os.path.join(
-            directory[:index],
-            realization,
-            iteration,
-            "share",
-            map_type,
-            "maps",
-            filename,
-        )
+        map_directories = shared_settings["simulated_maps"]["map_directories"]
 
-    # print('surfacepath ',surfacepath)
+    elif map_type == "observations":
+        map_directories = shared_settings["observed_maps"]["map_directories"]
+        
+    for map_directory in map_directories:    
+        surfacepath = os.path.join(fmu_directory,real,iteration,map_directory,filename)
+        print('surfacepath ',surfacepath) 
+        
+        if os.path.exists(surfacepath  ):
+            return surfacepath 
+
     return surfacepath
 
 
@@ -741,15 +765,63 @@ def get_update_dates(wellfolder):
 
 
 def main():
-    delimiter = "--"
-    folder = "/scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0"
-    #folder = "/private/ashska/tmp/"
+    config_file = "examples/reek_4d.yaml"
+    config = common.read_config(config_file)
 
-    pd.set_option('display.max_rows', None)
-    metadata = get_metadata(folder,delimiter)
+    print(config_file)
+    print(config)
+    
+    wellfolder = common.get_config_item(config, "wellfolder")
+    print("wellfolder", wellfolder)
+    
+    settings_file = common.get_config_item(config, "settings_file")
+    print("settings_file", settings_file)
+    settings_file = common.get_full_path(settings_file)
+    print("settings_file", settings_file)
 
+    config_file = "configurations/js_test_eli_v2.yaml"
+    config = common.read_config(config_file)
+    shared_settings = config["shared_settings"]
+    print(config_file)
+    print(config)
+    
+    map_suffix = common.get_config_item(config, "map_suffix")
+    delimiter = common.get_config_item(config, "delimiter")
+    metadata_file = common.get_config_item(config, "surface_metadata")
+             
+    metadata = get_metadata(shared_settings, map_suffix, delimiter, metadata_file)
     print(metadata)
-
+    
+    all_intervals, incremental_intervals = get_all_intervals(metadata,"reverse")
+    print("incremental_intervals")
+    print(incremental_intervals)
+    print("all_intervals")
+    print(all_intervals)
+    
+    config_file = "configurations/config_template.yaml"
+    print(config_file)
+    config = common.read_config(config_file) 
+    shared_settings = config["shared_settings"]
+    
+    map_suffix = common.get_config_item(config, "map_suffix")
+    print("map_suffix", map_suffix)
+    
+    delimiter = common.get_config_item(config, "delimiter")
+    print("delimiter", delimiter)
+    
+    metadata_file = common.get_config_item(config, "surface_metadata")
+    print("metadata_file", metadata_file)
+        
+    metadata = get_metadata(shared_settings, map_suffix, delimiter, metadata_file)
+    print(metadata)
+    
+    all_intervals, incremental_intervals = get_all_intervals(metadata,"reverse")
+    print("incremental_intervals")
+    print(incremental_intervals)
+    print("all_intervals")
+    print(all_intervals)
+    
+      
 
 if __name__ == "__main__":
     main()

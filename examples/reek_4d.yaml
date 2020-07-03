@@ -1,23 +1,26 @@
-title: Reek Example
+title: WebViz-4D Reek Example
 
 shared_settings:
-  scratch_ensembles:
-    sens_run: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
-    iter-0: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-0
-    iter-1: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-1  
-    iter-2: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-2
-    iter-3: ../../webviz-subsurface-testdata/reek_history_match/realization-*/iter-3          
+    fmu_directory: /private/ashska/development/webviz-subsurface-testdata/reek_history_match
+    simulated_maps:       
+        realization_names: [realization-*]
+        iteration_names: [iter-*]
+        map_directories: [share/results/maps]
     
 pages:  
-   
-  - title: Simulated and "observed" maps
+  - title: Front page
+    content:  
+      - Markdown:
+          markdown_file: ./front_page.md
+          
+  - title: Simulated maps
     content:
       - SurfaceViewer4D:
-          ensembles:
-            - iter-0
-            - iter-1
-            - iter-2
-            - iter-3
-
           wellfolder:
-                ../../webviz-subsurface-testdata/observed_data/wells 
+                /private/ashska/development/webviz-subsurface-testdata/observed_data/wells 
+                
+          settings_file: /private/ashska/development/webviz-4d/examples/settings_reek.yaml      
+          
+
+           
+

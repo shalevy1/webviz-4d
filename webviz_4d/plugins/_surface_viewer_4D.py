@@ -29,7 +29,6 @@ from webviz_4d._datainput.well import (
 from webviz_4d._private_plugins.surface_selector import SurfaceSelector
 from webviz_4d._datainput._colormaps import load_custom_colormaps
 
-
 from webviz_4d._datainput._metadata import (
     get_metadata,
     compose_filename,
@@ -46,29 +45,31 @@ from webviz_4d._datainput._metadata import (
 
 
 class SurfaceViewer4D(WebvizPluginABC):
-    """### SurfaceViewer4D
-
-"""
+    """### SurfaceViewer4D """
 
     def __init__(
         self,
         app,
-        ensembles: list = None,
         map1_defaults: dict = None,
         map2_defaults: dict = None,
         map3_defaults: dict = None,
         wellfolder: Path = None,
         production_data: Path = None,
+        well_suffix: str = ".w",
+        map_suffix: str = ".gri",
+        delimiter: str = "--",
+        surface_metadata: str = "surface_metadata.csv",
         default_interval: str = None,
         settings: Path = None,
     ):
 
         super().__init__()
-        self.ens_paths = {
-            ens: app.webviz_settings["shared_settings"]["scratch_ensembles"][ens]
-            for ens in ensembles
-        }
-        self.delimiter = "--"
+        self.shared_settings = app.webviz_settings["shared_settings"]
+        self.fmu_directory = self.shared_settings["fmu_directory"]
+        
+        self.map_suffix = map_suffix       
+        self.delimiter = delimiter
+        self.wellfolder = wellfolder
         self.observations = "observations"
         self.simulations = "results"
         self.config = None
@@ -81,21 +82,18 @@ class SurfaceViewer4D(WebvizPluginABC):
         #print("map3_defaults", map3_defaults)
         #print("settings",settings)
 
-        # Find FMU directory
-        keys = list(self.ens_paths.keys())
-        path = self.ens_paths[keys[0]].replace("*", "0")
-
-        self.directory = os.path.dirname(path)
-        self.fmu_info = os.path.dirname(self.directory)
-
-        self.wellfolder = None
+        self.fmu_info = self.fmu_directory
         self.well_update = ''
         self.production_update = ''
 
         self.number_of_maps = 3
 
-        self.metadata = get_metadata(self.fmu_info, self.delimiter)
-        self.intervals = get_all_intervals(self.metadata)
+        self.metadata = get_metadata(self.shared_settings, map_suffix, delimiter, surface_metadata)
+        print("Maps metadata")
+        print(self.metadata)
+        
+        self.intervals, incremental = get_all_intervals(self.metadata,"reverse")
+        print(self.intervals)
         default_interval = self.intervals[-1]
         
         self.surface_layer = None
@@ -128,29 +126,34 @@ class SurfaceViewer4D(WebvizPluginABC):
             except:
                 pass
 
-            #try:
             attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
             
             if attribute_maps_file:
                 attribute_maps_file = get_full_path(attribute_maps_file)
                 self.surface_metadata = pd.read_csv(attribute_maps_file)
                 print("Colormaps settings loaded from file",attribute_maps_file)
-            #except:
-            #    pass
+                print(self.surface_metadata)
 
-        try:
             self.map_defaults = []
+            
+        if map1_defaults is not None:
             map1_defaults["interval"] = default_interval
             self.map_defaults.append(map1_defaults)
+            
+        if map2_defaults is not None:    
             map2_defaults["interval"] = default_interval
             self.map_defaults.append(map2_defaults)
+            
+        if map2_defaults is not None:
             map3_defaults["interval"] = default_interval
             self.map_defaults.append(map3_defaults)
-        except:
+
+        if map1_defaults is None or map2_defaults is None or map3_defaults is None:
             self.map_defaults = create_map_defaults(
                 self.metadata, default_interval, self.observations, self.simulations
             )
 
+        print("map_defaults",self.map_defaults)
         self.selected_intervals = [default_interval, default_interval, default_interval]
 
         self.selected_names = [None, None, None]
@@ -553,7 +556,7 @@ class SurfaceViewer4D(WebvizPluginABC):
     def get_real_runpath(self, data, ensemble, real, map_type):
 
         filepath = compose_filename(
-            self.directory,
+            self.shared_settings,
             real,
             ensemble,
             map_type,
@@ -566,15 +569,6 @@ class SurfaceViewer4D(WebvizPluginABC):
         # print('filepath: ',filepath)
         return filepath
 
-    def get_ens_runpath(self, data, ensemble, map_type):
-        data = make_fmu_filename(data)
-        runpaths = self.ens_df.loc[(self.ens_df["ENSEMBLE"] == ensemble)][
-            "RUNPATH"
-        ].unique()
-        return [
-            str((Path(runpath) / "share" / map_type / "maps" / f"{data}.gri"))
-            for runpath in runpaths
-        ]
 
     def get_heading(self, map_ind, observation_type):
         if self.map_defaults[map_ind]["map_type"] == observation_type:
@@ -608,12 +602,14 @@ class SurfaceViewer4D(WebvizPluginABC):
         attribute_settings = json.loads(attribute_settings)
         map_type = self.map_defaults[map_idx]["map_type"]
 
-        # print(f"loading data {timer()-start}")
         surface_file = self.get_real_runpath(data, ensemble, real, map_type)
         
         if os.path.isfile(surface_file):
             surface = load_surface(surface_file)
-
+            #print(surface)
+            
+            print("self.surface_metadata")
+            print(self.surface_metadata)
             if self.surface_metadata is not None:
                 m_data = self.surface_metadata.loc[
                     self.surface_metadata["map type"] == map_type
@@ -632,8 +628,13 @@ class SurfaceViewer4D(WebvizPluginABC):
                 )
                 i_data = a_data.loc[a_data["interval"] == interval]
                 metadata = i_data[["lower_limit", "upper_limit"]]
+                
+                print("interval",interval)
+                print(a_data)
+                print(i_data)
             else:
                 metadata = None
+            print("metadata",metadata)
 
             surface_layers = [
                 make_surface_layer(
