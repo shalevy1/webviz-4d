@@ -2,12 +2,12 @@
 #set -x
 
 if [ "$1" != "" ]; then
-    mkdir webviz-4d/"$1"
-    mkdir webviz-4d/"$1"/well_data
-    mkdir webviz-4d/"$1"/production_data
+    mkdir webviz_4d/"$1"
+    mkdir webviz_4d/"$1"/well_data
+    mkdir webviz_4d/"$1"/production_data
 else
-    mkdir webviz-4d/well_data
-    mkdir webviz-4d/production_data    
+    mkdir webviz_4d/well_data
+    mkdir webviz_4d/production_data    
 fi
 
 source /prog/res/komodo/testing-py3/enable
