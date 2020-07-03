@@ -14,7 +14,7 @@ if ! [ -f $config_file ]; then
 fi   
 
 unset PYTHONPATH
-source ../venv/bin/activate
+source ./venv/bin/activate
 
 if ! [[ -f ~/.local/share/webviz/ca.crt ]]; then webviz certificate -auto-install; fi 
 

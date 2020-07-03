@@ -31,7 +31,7 @@ pip install webviz-config-equinor
 pip install ruamel.yaml
 pip install requests
 pip install ./reper
-pip install ./webviz_4d
+pip install ./
 
 echo "Installation completed"
 
