@@ -1,39 +1,55 @@
 #!/bin/bash 
 #set -x
 
-if [ "$#" -ne 1 ]; then
-    echo "Field name is missing, must be given as one string"
+if [ "$#" -ne 4 ]; then
+    echo "Field name and/or configuration file is missing"
+    echo "Example: ./update_webviz-4d_project -f 'Johan Sverdrup' -c 'configurations/js_test_eli_v2.yaml'"
     echo "Execution stopped"
     exit
 fi
 
+while getopts ":c:f:" opt; do
+  case $opt in
+    c) config="$OPTARG"
+    ;;
+    f) field="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+printf "Argument field: %s\n" "$field"
+printf "Argument config: %s\n" "$config"
+
 unset PYTHONPATH
 source ./venv/bin/activate
 
-rm -f update_webviz-4d.txt
+field_name="${field// /_}"
+rm -f "$field"_update_webviz-4d.txt
 
 echo "Extract wellbores from REP ..."
-python data_preparation/extract_wellbores_from_rep.py $1
+python data_preparation/extract_wellbores_from_rep.py "$field"
 echo ""
 
 echo "Compile well metadata"
-python data_preparation/compile_well_metadata.py configurations/config_template.yaml > update_webviz-4d.txt
+python data_preparation/compile_well_metadata.py "$config" > "$field_name"_update_webviz-4d.txt
 echo ""
 
 echo "Compile production data"
-python data_preparation/compile_production_data.py configurations/config_template.yaml >> update_webviz-4d.txt
+python data_preparation/compile_production_data.py $config >> "$field_name"_update_webviz-4d.txt
 echo ""
 
 echo "Create production tables" 
-python data_preparation/create_production_tables.py configurations/config_template.yaml >> update_webviz-4d.txt
+python data_preparation/create_production_tables.py "$config" >> "$field_name"_update_webviz-4d.txt
 echo ""
 
 echo "Create well lists"
-python data_preparation/create_well_lists.py configurations/config_template.yaml >> update_webviz-4d.txt
+python data_preparation/create_well_lists.py "$config" >> "$field_name"_update_webviz-4d.txt
 echo ""
 
 echo "Check well lists"
-python data_preparation/check_well_lists.py configurations/config_template.yaml >> update_webviz-4d.txt
+python data_preparation/check_well_lists.py "$config" >> "$field_name"_update_webviz-4d.txt
 echo ""
 
-echo "Log file created: update_webviz-4d.txt"
+printf "Log file created %s\n" "$field_name"_update_webviz-4d.txt
