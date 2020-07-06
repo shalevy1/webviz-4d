@@ -150,7 +150,9 @@ def main():
         well_directory = None
         print("ERROR: Well directory", well_directory, "not found")
         print("Execution stopped")
-
+    
+    print("Well directory", well_directory)
+    
     if well_directory:
         try:
             settings_file = common.get_config_item(config, "settings")
@@ -162,8 +164,10 @@ def main():
         except:
             surface_file = None
             surface = None
-
-    print("Well directory", well_directory)
+    else:        
+        print("ERROR: Well data not found in", well_directory)
+        exit()
+    
     print("Surface file", surface_file)
 
     WELLBORE_INFO_FILE = "wellbore_info.csv"

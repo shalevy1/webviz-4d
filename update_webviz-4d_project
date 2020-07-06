@@ -13,7 +13,7 @@ source ./venv/bin/activate
 rm -f update_webviz-4d.txt
 
 echo "Extract wellbores from REP ..."
-python data_preparation/extract_wellbores_from_rep.py Grane
+python data_preparation/extract_wellbores_from_rep.py $1
 echo ""
 
 echo "Compile well metadata"
