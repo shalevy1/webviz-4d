@@ -19,7 +19,7 @@ pages:
           wellfolder:
                 /private/ashska/development/webviz-subsurface-testdata/observed_data/wells 
                 
-          settings_file: /private/ashska/development/webviz-4d/examples/settings_reek.yaml      
+          settings_file: /private/ashska/development/webviz-4d/configurations/settings_reek.yaml      
           
 
            
