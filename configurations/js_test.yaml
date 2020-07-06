@@ -1,10 +1,10 @@
 title: WebViz-4D Reservoir timelapse maps
 
 shared_settings:
-    fmu_directory: /scratch/johan_sverdrup2/gmcq/2020a_b007p5p0_case_20052020
+    fmu_directory: /scratch/johan_sverdrup2/2020a_r008p0p0_ref/2020a_r008p0p0_ref
     simulated_maps:       
         realization_names: [realization-*]
-        iteration_names: [pred]
+        ensemble_names: [pred]
         map_directories: [share/maps/recoverables]
     
 pages:  
@@ -18,8 +18,7 @@ pages:
       - SurfaceViewer4D:
           wellfolder:
                 ../johan_sverdrup/well_data 
-                
-          map_extension: gri        
+                      
           
 
            

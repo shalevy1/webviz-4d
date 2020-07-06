@@ -4,11 +4,11 @@ shared_settings:
     fmu_directory: /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0
     observed_maps: 
         realization_names: [realization-0]
-        iteration_names: [iter-0]
+        ensemble_names: [iter-0]
         map_directories: [share/observations/maps]
     simulated_maps: 
         realization_names: [realization-*]
-        iteration_names: [iter-*,pred]
+        ensemble_names: [iter-*,pred]
         map_directories: [share/results/maps]
         
     scratch_ensembles:
@@ -26,8 +26,8 @@ pages:
   - title: Observed and simulated maps
     content:
       - SurfaceViewer4D:
-          wellfolder: ../well_data              
-          production_data: ../production_data    
+          wellfolder: ../grane/well_data              
+          production_data: ../grane/production_data    
           
           well_suffix: .w      
           map_suffix: .gri
@@ -77,7 +77,7 @@ pages:
   - title: Production plots  
     content:
         - TablePlotter:
-            csv_file: ../production_data/production_fluid_table.csv
+            csv_file: ../grane/production_data/production_fluid_table.csv
             plot_options:
               x: 4D_interval
               y: Volumes
@@ -99,7 +99,7 @@ pages:
   - title: Injection plots  
     content:
         - TablePlotter:
-            csv_file: ../production_data/injection_fluid_table.csv
+            csv_file: ../grane/production_data/injection_fluid_table.csv
             plot_options:
               x: 4D_interval
               y: Volumes
@@ -120,35 +120,35 @@ pages:
   - title: Oil production volumes 
     content:
       - DataTable:
-          csv_file: ../production_data/BORE_OIL_VOL.csv  
+          csv_file: ../grane/production_data/BORE_OIL_VOL.csv  
           sorting: True
           filtering: True   
           
   - title: Gas production volumes 
     content:
       - DataTable:
-          csv_file: ../production_data/BORE_GAS_VOL.csv  
+          csv_file: ../grane/production_data/BORE_GAS_VOL.csv  
           sorting: True
           filtering: True       
           
   - title: Water production volumes 
     content:
       - DataTable:
-          csv_file: ../production_data/BORE_WAT_VOL.csv  
+          csv_file: ../grane/production_data/BORE_WAT_VOL.csv  
           sorting: True
           filtering: True             
           
   - title: Gas injection volumes 
     content:
       - DataTable:
-          csv_file: ../production_data/BORE_GI_VOL.csv  
+          csv_file: ../grane/production_data/BORE_GI_VOL.csv  
           sorting: True
           filtering: True     
           
   - title: Water injection volumes  
     content:
       - DataTable:
-          csv_file: ../production_data/BORE_WI_VOL.csv  
+          csv_file: ../grane/production_data/BORE_WI_VOL.csv  
           sorting: True
           filtering: True 
           
