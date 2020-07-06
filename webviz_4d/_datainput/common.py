@@ -158,7 +158,7 @@ def decode_filename(file_path, delimiter):
     number = None
     directory = None
     map_type = None
-    iteration = None
+    ensemble = None
     realization = None
     name = None
     attribute = None
@@ -182,7 +182,7 @@ def decode_filename(file_path, delimiter):
                 number = _find_number(surfacepath, "iter")
 
                 if number:
-                    iteration = "iter-" + number
+                    ensemble = "iter-" + number
 
     for m in re.finditer(delimiter, str(surfacepath)):
         ind.append(m.start())
@@ -201,8 +201,8 @@ def decode_filename(file_path, delimiter):
             date = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
             dates[1] = convert_date(date)
 
-    # print('decode ', realization, iteration, map_type, name, attribute, dates)
-    return directory, realization, iteration, map_type, name, attribute, dates
+    # print('decode ', realization, ensemble, map_type, name, attribute, dates)
+    return directory, realization, ensemble, map_type, name, attribute, dates
 
 
 def get_map_defaults(configuration, n_maps):

@@ -173,13 +173,13 @@ def extract_metadata(shared_settings, metadata_file):
         if mapping_dict[map_type] + "_maps" in shared_settings:
             map_settings = shared_settings[mapping_dict[map_type] + "_maps"]
             realization_names = map_settings["realization_names"]
-            iteration_names = map_settings["iteration_names"]           
+            ensemble_names = map_settings["ensemble_names"]           
             map_directories = map_settings["map_directories"]
             
             for realization_name in realization_names:
-                for iteration_name in iteration_names:  
+                for ensemble_name in ensemble_names:  
                     for map_directory in map_directories:          
-                        yaml_files = glob.glob(os.path.join(fmu_directory,realization_name,iteration_name,map_directory + "/.*.yaml"))
+                        yaml_files = glob.glob(os.path.join(fmu_directory,realization_name,ensemble_name,map_directory + "/.*.yaml"))
                         
                         if yaml_files is not None:
                             for yaml_file in yaml_files:
@@ -267,7 +267,7 @@ def get_difference_mode(surfacepath, delimiter):
     (
         directory,
         realization,
-        iteration,
+        ensemble,
         map_type,
         name,
         attribute,
@@ -297,7 +297,7 @@ def decode_filename(file_path, delimiter):
     number = None
     folder = None
     map_type = None
-    iteration = None
+    ensemble = None
     realization = None
     name = None
     attribute = None
@@ -321,10 +321,10 @@ def decode_filename(file_path, delimiter):
                 number = find_number(surfacepath, "iter")
 
                 if number:
-                    iteration = "iter-" + number   
+                    ensemble = "iter-" + number   
                     
     if "pred" in surfacepath:
-        iteration = "pred"                
+        ensemble = "pred"                
 
     for m in re.finditer(delimiter, str(surfacepath)):
         ind.append(m.start())
@@ -346,8 +346,8 @@ def decode_filename(file_path, delimiter):
             else:
                 dates = [None, None]            
 
-    #print('decode ', surfacepath,realization, iteration, map_type, name, attribute, dates)
-    return folder, realization, iteration, map_type, name, attribute, dates
+    #print('decode ', surfacepath,realization, ensemble, map_type, name, attribute, dates)
+    return folder, realization, ensemble, map_type, name, attribute, dates
 
 
 def get_metadata(shared_settings, extension, delimiter, filename):
@@ -368,7 +368,7 @@ def get_metadata(shared_settings, extension, delimiter, filename):
             
             print("Creating surface metadata ...")
             realizations = []
-            iterations = []
+            ensembles = []
             map_types = []
             names = []
             attributes = []
@@ -377,7 +377,7 @@ def get_metadata(shared_settings, extension, delimiter, filename):
             filenames = []
             headers = [
                 "fmu_id.realization",
-                "fmu_id.iteration",
+                "fmu_id.ensemble",
                 "map_type",
                 "data.name",
                 "data.content",
@@ -395,18 +395,18 @@ def get_metadata(shared_settings, extension, delimiter, filename):
                 if map_dir in shared_settings:
                     map_settings = shared_settings[map_dir]
                     realization_names = map_settings["realization_names"]
-                    iteration_names = map_settings["iteration_names"]          
+                    ensemble_names = map_settings["ensemble_names"]          
                     map_directories = map_settings["map_directories"]
                     
                     for realization_name in realization_names:
-                        for iteration_name in iteration_names: 
+                        for ensemble_name in ensemble_names: 
                             for map_directory in map_directories:         
-                                map_files = glob.glob(os.path.join(fmu_directory,realization_name,iteration_name,map_directory + "/*" + extension))
+                                map_files = glob.glob(os.path.join(fmu_directory,realization_name,ensemble_name,map_directory + "/*" + extension))
                                 for map_file in map_files:
                                     (
                                     folder,
                                     realization,
-                                    iteration,
+                                    ensemble,
                                     map_type,
                                     name,
                                     attribute,
@@ -415,7 +415,7 @@ def get_metadata(shared_settings, extension, delimiter, filename):
 
                                     if dates[0] and dates[1]:
                                         realizations.append(realization)
-                                        iterations.append(iteration)
+                                        ensembles.append(ensemble)
                                         map_types.append(map_type)
                                         names.append(name)
                                         attributes.append(attribute)
@@ -428,7 +428,7 @@ def get_metadata(shared_settings, extension, delimiter, filename):
             zipped_list = list(
                 zip(
                     realizations,
-                    iterations,
+                    ensembles,
                     map_types,
                     names,
                     attributes,
@@ -461,7 +461,7 @@ def get_col_values(df, col_name):
 
 
 def compose_filename(
-    shared_settings, real, iteration, map_type, name, attribute, interval, delimiter
+    shared_settings, real, ensemble, map_type, name, attribute, interval, delimiter
 ):
     surfacepath = None
     
@@ -477,7 +477,7 @@ def compose_filename(
 
     interval_string = interval.replace("-", "")
     datestring = interval_string[:8] + "_" + interval_string[8:]
-    print("compose_filename",fmu_directory, realization, iteration, map_type, name, attribute, interval, datestring)
+    print("compose_filename",fmu_directory, realization, ensemble, map_type, name, attribute, interval, datestring)
 
     filename = name + delimiter + attribute + delimiter + datestring + ".gri"
     filename = filename.lower()
@@ -490,7 +490,7 @@ def compose_filename(
         map_directories = shared_settings["observed_maps"]["map_directories"]
         
     for map_directory in map_directories:    
-        surfacepath = os.path.join(fmu_directory,real,iteration,map_directory,filename)
+        surfacepath = os.path.join(fmu_directory,real,ensemble,map_directory,filename)
         print('surfacepath ',surfacepath) 
         
         if os.path.exists(surfacepath  ):
@@ -536,7 +536,7 @@ def get_default_tag_indices(all_dates, surfacepath, delimiter):
     (
         directory,
         realization,
-        iteration,
+        ensemble,
         map_type,
         name,
         attribute,
@@ -593,13 +593,13 @@ def get_map_info(surfacepath, delimiter):
     (
         directory,
         realization,
-        iteration,
+        ensemble,
         map_type,
         name,
         attribute,
         dates,
     ) = decode_filename(str(surfacepath), delimiter)
-    # print(realization, iteration, map_type, name, attribute, dates)
+    # print(realization, ensemble, map_type, name, attribute, dates)
     map_dir = directory
 
     if map_type == "observations":
@@ -765,7 +765,9 @@ def get_update_dates(wellfolder):
 
 
 def main():
-    config_file = "examples/reek_4d.yaml"
+    # Reek data
+    print("Reek")
+    config_file = "./examples/reek_4d.yaml"
     config = common.read_config(config_file)
 
     print(config_file)
@@ -778,7 +780,10 @@ def main():
     print("settings_file", settings_file)
     settings_file = common.get_full_path(settings_file)
     print("settings_file", settings_file)
+    print("")
 
+    # Johan Sverdrup (Eli/Tonje)
+    print("Johan Sverdrup - synthetic 4D maps")
     config_file = "configurations/js_test_eli_v2.yaml"
     config = common.read_config(config_file)
     shared_settings = config["shared_settings"]
@@ -797,7 +802,32 @@ def main():
     print(incremental_intervals)
     print("all_intervals")
     print(all_intervals)
+    print("")
     
+    # Johan Sverdrup (Simulation model)
+    print("Johan Sverdrup - simulation model") 
+    config_file = "configurations/js_test.yaml"
+    config = common.read_config(config_file)
+    shared_settings = config["shared_settings"]
+    print(config_file)
+    print(config)
+    
+    map_suffix = common.get_config_item(config, "map_suffix")
+    delimiter = common.get_config_item(config, "delimiter")
+    metadata_file = common.get_config_item(config, "surface_metadata")
+             
+    metadata = get_metadata(shared_settings, map_suffix, delimiter, metadata_file)
+    print(metadata)
+    
+    all_intervals, incremental_intervals = get_all_intervals(metadata,"reverse")
+    print("incremental_intervals")
+    print(incremental_intervals)
+    print("all_intervals")
+    print(all_intervals)
+    print("")
+    
+    # Grane
+    print("Grane")
     config_file = "configurations/config_template.yaml"
     print(config_file)
     config = common.read_config(config_file) 

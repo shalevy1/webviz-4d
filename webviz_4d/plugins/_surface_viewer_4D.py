@@ -50,17 +50,17 @@ class SurfaceViewer4D(WebvizPluginABC):
     def __init__(
         self,
         app,
+        wellfolder: Path = None,
+        production_data: Path = None,
         map1_defaults: dict = None,
         map2_defaults: dict = None,
         map3_defaults: dict = None,
-        wellfolder: Path = None,
-        production_data: Path = None,
         well_suffix: str = ".w",
         map_suffix: str = ".gri",
-        delimiter: str = "--",
-        surface_metadata: str = "surface_metadata.csv",
         default_interval: str = None,
         settings: Path = None,
+        delimiter: str = "--",
+        surface_metadata: str = "surface_metadata.csv",        
     ):
 
         super().__init__()
@@ -77,10 +77,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.surface_metadata = None
         self.well_base_layers = None
 
-        #print("map1_defaults", map1_defaults)
-        #print("map2_defaults", map2_defaults)
-        #print("map3_defaults", map3_defaults)
-        #print("settings",settings)
+        print("default_interval",default_interval)
 
         self.fmu_info = self.fmu_directory
         self.well_update = ''
@@ -94,7 +91,9 @@ class SurfaceViewer4D(WebvizPluginABC):
         
         self.intervals, incremental = get_all_intervals(self.metadata,"reverse")
         print(self.intervals)
-        default_interval = self.intervals[-1]
+        
+        if default_interval is None:
+            default_interval = self.intervals[-1]
         
         self.surface_layer = None
 
@@ -102,11 +101,6 @@ class SurfaceViewer4D(WebvizPluginABC):
             self.configuration = settings
             self.config = read_config(self.configuration)
             #print(self.config)
-
-            try:
-                default_interval = self.config["map_settings"]["default_interval"]
-            except:
-                pass
 
             try:
                 self.attribute_settings = self.config["map_settings"][
@@ -125,16 +119,17 @@ class SurfaceViewer4D(WebvizPluginABC):
                     load_custom_colormaps(colormaps_folder)
             except:
                 pass
-
-            attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
             
-            if attribute_maps_file:
+            try:
+                attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
                 attribute_maps_file = get_full_path(attribute_maps_file)
                 self.surface_metadata = pd.read_csv(attribute_maps_file)
                 print("Colormaps settings loaded from file",attribute_maps_file)
                 print(self.surface_metadata)
+            except:
+                pass    
 
-            self.map_defaults = []
+        self.map_defaults = []
             
         if map1_defaults is not None:
             map1_defaults["interval"] = default_interval
@@ -147,11 +142,27 @@ class SurfaceViewer4D(WebvizPluginABC):
         if map2_defaults is not None:
             map3_defaults["interval"] = default_interval
             self.map_defaults.append(map3_defaults)
+            
+        print("Default interval", default_interval)
+        print("Map 1 defaults:")
+        print(map1_defaults)
+        print("Map 2 defaults:")
+        print(map2_defaults)
+        print("Map 3 defaults:")
+        print(map3_defaults)    
+        
+        self.map_defaults.append(map1_defaults)
+        self.map_defaults.append(map1_defaults)
 
         if map1_defaults is None or map2_defaults is None or map3_defaults is None:
             self.map_defaults = create_map_defaults(
                 self.metadata, default_interval, self.observations, self.simulations
             )
+        else:
+            self.map_defaults = []
+            self.map_defaults.append(map1_defaults)
+            self.map_defaults.append(map2_defaults)
+            self.map_defaults.append(map3_defaults)
 
         print("map_defaults",self.map_defaults)
         self.selected_intervals = [default_interval, default_interval, default_interval]
