@@ -94,7 +94,7 @@ def main():
     if results_map_dir is not None:
         map_settings = shared_settings[results_map_dir]
         realization_names = map_settings["realization_names"]
-        iteration_names = map_settings["iteration_names"]
+        iteration_names = map_settings["ensemble_names"]
         selected_realization = realization_names[0].replace("*", "0")
         selected_iteration = iteration_names[0].replace("*", "0")
 

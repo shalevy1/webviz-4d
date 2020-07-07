@@ -15,16 +15,24 @@ import xtgeo
 defaults = {"well_suffix" : ".w", "map_suffix" : ".gri", "delimiter" : "--", "surface_metadata" : "surface_metadata.csv"}
 
 
+def read_config(config_file):
+    """ Return the content of a configuration file as a dict """
+    config_dict = {}
+
+    with open(config_file, "r") as stream:
+        config_dict = yaml.safe_load(stream)
+
+    return config_dict
+    
+
 def get_config_item(config,key):
+    """ Get the value of a SurfaceViewer4D key """
     value = None
     
     pages = config["pages"]  
     
     for page in pages:     
         content = page["content"]
-        #print("content")
-        #print(content[0])
-        #print(content[0].values()) 
         
         try:
             surface_viewer4d = content[0]["SurfaceViewer4D"] 
@@ -38,17 +46,61 @@ def get_config_item(config,key):
     
     return value
     
+
+def decode_filename(file_path, delimiter):
+    """ Create metadata from surface file name """
+    surfacepath = str(file_path)
+    ind = []
+    number = None
+    directory = None
+    map_type = None
+    ensemble = None
+    realization = None
+    name = None
+    attribute = None
+    dates = [None, None]
+
+    directory = os.path.dirname(surfacepath)
+
+    if "observations" in str(surfacepath):
+        map_type = "observations"
+
+    if "results" in str(surfacepath):
+        map_type = "results"
+
+        number = _find_number(surfacepath, "realization")
+
+        if number:
+            realization = "realization-" + number
+            number = None
+
+            if realization:
+                number = _find_number(surfacepath, "iter")
+
+                if number:
+                    ensemble = "iter-" + number
+
+    for m in re.finditer(delimiter, str(surfacepath)):
+        ind.append(m.start())
+
+    k = str(surfacepath).rfind("/")
+
+    if len(ind) > 1:
+        name = str(surfacepath)[k + 1 : ind[0]]
+        attribute = str(surfacepath)[ind[0] + 2 : ind[1]]
+        # print(surfacepath,name,attribute)
+
+        if len(ind) == 2 and len(str(surfacepath)) > ind[1] + 19:
+            date = str(surfacepath)[ind[1] + 2 : ind[1] + 10]
+            dates[0] = convert_date(date)
+
+            date = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
+            dates[1] = convert_date(date)
+
+    # print('decode ', realization, ensemble, map_type, name, attribute, dates)
+    return directory, realization, ensemble, map_type, name, attribute, dates
     
-def read_config(config_file):
-    """ Return the content of a configuration file as a dict """
-    config_dict = {}
-
-    with open(config_file, "r") as stream:
-        config_dict = yaml.safe_load(stream)
-
-    return config_dict
-
-
+    
 def _find_number(surfacepath, txt):
     """ Return the first number found in a part of a filename (surface) """
     filename = str(surfacepath)
@@ -150,84 +202,6 @@ def extract_well_metadata(directory):
 
     return well_info_df, depth_df
     
-
-def decode_filename(file_path, delimiter):
-    """ Create metadata from surface file name """
-    surfacepath = str(file_path)
-    ind = []
-    number = None
-    directory = None
-    map_type = None
-    ensemble = None
-    realization = None
-    name = None
-    attribute = None
-    dates = [None, None]
-
-    directory = os.path.dirname(surfacepath)
-
-    if "observations" in str(surfacepath):
-        map_type = "observations"
-
-    if "results" in str(surfacepath):
-        map_type = "results"
-
-        number = _find_number(surfacepath, "realization")
-
-        if number:
-            realization = "realization-" + number
-            number = None
-
-            if realization:
-                number = _find_number(surfacepath, "iter")
-
-                if number:
-                    ensemble = "iter-" + number
-
-    for m in re.finditer(delimiter, str(surfacepath)):
-        ind.append(m.start())
-
-    k = str(surfacepath).rfind("/")
-
-    if len(ind) > 1:
-        name = str(surfacepath)[k + 1 : ind[0]]
-        attribute = str(surfacepath)[ind[0] + 2 : ind[1]]
-        # print(surfacepath,name,attribute)
-
-        if len(ind) == 2 and len(str(surfacepath)) > ind[1] + 19:
-            date = str(surfacepath)[ind[1] + 2 : ind[1] + 10]
-            dates[0] = convert_date(date)
-
-            date = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
-            dates[1] = convert_date(date)
-
-    # print('decode ', realization, ensemble, map_type, name, attribute, dates)
-    return directory, realization, ensemble, map_type, name, attribute, dates
-
-
-def get_map_defaults(configuration, n_maps):
-    """ Return default settings for maps (extracted from configuration file) """
-    map_defaults = []
-    
-    settings_file = configuration["settings"]
-    settings_file = get_full_path(settings_file)
-    settings = read_config(settings_file)
-
-    interval = settings["map_settings"]["default_interval"]
-
-    if not "-" in interval[0:8]:
-        date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
-        date2 = interval[9:13] + "-" + interval[13:15] + "-" + interval[15:17]
-        interval = date1 + "-" + date2
-
-    for i in range(0, n_maps):
-        key = "map" + str(i + 1) + "_defaults"
-        defaults = configuration[key]
-        defaults["interval"] = interval       
-        map_defaults.append(defaults)
-
-    return map_defaults
-
 
 def convert_date(date):
     """ Convert between dates with or without hyphen """

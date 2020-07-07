@@ -208,16 +208,8 @@ def extract_metadata(shared_settings, metadata_file):
     if meta_data:    
         metadata_df = json_normalize(meta_data)    
 
-    print(metadata_df)
+    #print(metadata_df)
     return metadata_df
-
-
-def convert_date(date):
-    if len(date) == 8:
-        return date[0:4] + "-" + date[4:6] + "-" + date[6:8]
-
-    if "-" in date:
-        return date[0:4] + date[5:7] + date[8:10]
 
 
 def get_all_intervals(df, mode):

@@ -2,7 +2,7 @@ depth_maps:
     top_reservoir: /project/grane/resmod/hstruct/2019/r002/share/results/maps/toplowerheimdal--depthsurface.gri
 map_settings:
     colormaps_folder: /private/ashska/development/webviz-4d/colormaps/
-    colormaps_settings: /private/ashska/development/webviz-4d/configurations/attribute_maps.csv
+    colormaps_settings: /project/grane/resmod/hstruct/2019/share/webviz/webviz-4d/configurations/attribute_maps.csv
     default_colormap: viridis
     attribute_settings:     
         maxpos:
