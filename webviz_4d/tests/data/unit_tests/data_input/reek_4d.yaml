@@ -1,0 +1,26 @@
+title: WebViz-4D Reek Example
+
+shared_settings:
+    fmu_directory: ../../../webviz-subsurface-testdata/reek_history_match
+    simulated_maps:       
+        realization_names: [realization-*]
+        iteration_names: [iter-*]
+        map_directories: [share/results/maps]
+    
+pages:  
+  - title: Front page
+    content:  
+      - Markdown:
+          markdown_file: ./front_page.md
+          
+  - title: Simulated maps
+    content:
+      - SurfaceViewer4D:
+          wellfolder:
+                ../../../webviz-subsurface-testdata/observed_data/wells 
+                
+          settings_file: ./settings_reek.yaml      
+          
+
+           
+
