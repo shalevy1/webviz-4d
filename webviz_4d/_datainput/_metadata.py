@@ -11,29 +11,6 @@ from pathlib import Path
 from webviz_4d._datainput import common
 
 
-def get_map_defaults(configuration, n):
-    map_defaults = []
-
-    settings_file = configuration["settings"]
-    settings_file = common.get_full_path(settings_file)
-    
-    settings = common.read_config(settings_file)
-    interval = settings["map_settings"]["default_interval"]
-
-    if not "-" in interval[0:8]:
-        date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
-        date2 = interval[9:13] + "-" + interval[13:15] + "-" + interval[15:17]
-        interval = date1 + "-" + date2
-
-    for i in range(0, n):
-        key = "map" + str(i + 1) + "_defaults"
-        defaults = settings["map_settings"][key]
-        defaults["interval"] = interval
-        map_defaults.append(defaults)
-
-    return map_defaults
-
-
 def create_map_settings(
     attribute, name, map_type, ensemble, realization, default_interval
 ):
@@ -128,15 +105,6 @@ def create_map_defaults(metadata_df, default_interval, observations, simulations
     return map_defaults
 
 
-def get_well_colors(configuration):
-    try:
-        well_colors = configuration["well_colors"]
-    except:
-        well_colors = None
-
-    return well_colors
-
-
 def check_yaml_file(surfacepath):
     mapfile_name = str(surfacepath)
 
@@ -145,20 +113,7 @@ def check_yaml_file(surfacepath):
     )
     status = os.path.isfile(yaml_file)
 
-    return status
-    
-    
-def find_number(surfacepath, txt):
-    filename = str(surfacepath)
-    number = None
-    index = str(filename).find(txt)
-
-    if index > 0:
-        i = index + len(txt) + 1
-        j = filename[i:].find("/")
-        number = filename[i : i + j]
-
-    return number    
+    return status   
 
 
 def extract_metadata(shared_settings, metadata_file):
@@ -271,16 +226,7 @@ def get_difference_mode(surfacepath, delimiter):
     else:
         difference_mode = "normal"
 
-    return difference_mode
-    
-    
-def check_number(string):
-    
-    for i in range(len(string)):
-        if string[i] not in "0123456789":
-            return False
-    
-    return True    
+    return difference_mode   
 
 
 def decode_filename(file_path, delimiter):
@@ -332,7 +278,7 @@ def decode_filename(file_path, delimiter):
             date1 = str(surfacepath)[ind[1] + 2 : ind[1] + 10]
             date2 = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
             
-            if check_number(date1) and check_number(date2):
+            if common.check_number(date1) and common.check_number(date2):
                 dates[0] = convert_date(date1)
                 dates[1] = convert_date(date2)
             else:
@@ -602,65 +548,6 @@ def get_map_info(surfacepath, delimiter):
     return map_dir, map_label, attribute
 
 
-def get_plot_label(configuration, interval):
-    difference_mode = "normal"
-    labels = []
-
-    dates = [
-        interval[:4] + interval[5:7] + interval[8:10],
-        interval[11:15] + interval[16:18] + interval[19:21],
-    ]
-
-    for date in dates:
-        # date = convert_date(date)
-        try:
-            labels_dict = configuration["date_labels"]
-            label = labels_dict[int(date)]
-        except:
-            label = date[:4] + "-" + date[4:6] + "-" + date[6:8]
-
-        labels.append(label)
-
-    if difference_mode == "normal":
-        label = labels[0] + " - " + labels[1]
-    else:
-        label = labels[1] + " - " + labels[0]
-
-    return label
-
-
-def read_config(config_file):
-
-    config_dict = {}
-
-    with open(config_file, "r") as stream:
-        config_dict = yaml.safe_load(stream)
-
-    # print(config_dict)
-    return config_dict
-
-
-def get_colormap(configuration, attribute):
-    colormap = None
-    minval = None
-    maxval = None
-
-    try:
-        attribute_dict = configuration[attribute]
-        # print("attribute_dict", attribute_dict)
-        colormap = attribute_dict["colormap"]
-        minval = attribute_dict["min_value"]
-        minval = attribute_dict["max_value"]
-    except:
-        try:
-            map_settings = configuration("map_settings")
-            colormap = map_settings("default_colormap")
-        except:
-            print("No default colormaps found for ", attribute)
-
-    return colormap, minval, maxval
-
-
 def sort_realizations(realizations):
     numbers = []
     sorted_list = []
@@ -720,41 +607,6 @@ def get_ensembles(metadata, map_type):
 
     return sorted(ensembles)
     
-    
-def get_update_dates(wellfolder):
-    update_dates = {}
-    
-    try:
-        well_date_file = os.path.join(wellfolder,".welldata_update.yaml")
-
-        with open(well_date_file, "r") as stream:
-            well_meta_data = yaml.safe_load(stream)
-            
-        well_update = well_meta_data[0]["welldata"]["update_time"]
-        update_dates["well_update_date"] = well_update.strftime("%Y-%m-%d %H:%M:%S")
-    except:
-        update_dates["well_update_date"] = ''
-    
-    try:
-        prod_date_file = os.path.join(wellfolder,".production_update.yaml")
-
-        with open(prod_date_file, "r") as stream:
-            production_meta_data = yaml.safe_load(stream)
-          
-        #print(production_meta_data)
-        first_date = production_meta_data[0]["production"]["start_date"].strftime("%Y-%m-%d")
-        last_date = production_meta_data[0]["production"]["last_date"].strftime("%Y-%m-%d")
-        
-        update_dates["production_first_date"] = first_date           
-        update_dates["production_last_date"] = last_date   
-    except:  
-        update_dates["production_first_date"] = ''           
-        update_dates["production_last_date"] = ''  
-        
-    #print("Update dates", update_dates)        
-    
-    return update_dates    
-
 
 def main():
     # Reek data

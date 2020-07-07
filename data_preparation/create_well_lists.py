@@ -10,8 +10,6 @@ import pandas as pd
 from webviz_4d._datainput import common
 from webviz_4d._datainput import well
 from webviz_4d._datainput._metadata import (
-    get_update_dates,
-    get_map_defaults,
     get_metadata,
     get_all_intervals,
 )
@@ -295,7 +293,7 @@ def main():
     prod_info_dir = common.get_full_path(prod_info_dir)
     update_metadata_file = os.path.join(prod_info_dir, ".production_update.yaml")
 
-    update_dates = get_update_dates(well_directory)
+    update_dates = common.get_update_dates(well_directory)
     production_update = update_dates["production_last_date"]
     print("Production data update", production_update)
 

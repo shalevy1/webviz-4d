@@ -21,7 +21,14 @@ from webviz_subsurface_components import LayeredMap
 
 from webviz_4d._datainput.fmu_input import get_realizations, find_surfaces
 from webviz_4d._datainput.surface import make_surface_layer, load_surface
-from webviz_4d._datainput.common import get_full_path
+from webviz_4d._datainput.common import (
+    get_full_path, 
+    read_config,
+    get_map_defaults,
+    get_well_colors,
+    get_update_dates,
+    get_plot_label,
+)    
 from webviz_4d._datainput.well import (
     load_all_wells,
     make_new_well_layer,
@@ -33,14 +40,9 @@ from webviz_4d._datainput._metadata import (
     get_metadata,
     compose_filename,
     get_col_values,
-    get_all_intervals,
-    get_map_defaults,
+    get_all_intervals,    
     create_map_defaults,
-    get_well_colors,
-    read_config,
-    sort_realizations,
-    get_plot_label,
-    get_update_dates,
+    sort_realizations,   
 )
 
 
