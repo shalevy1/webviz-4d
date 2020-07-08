@@ -22,13 +22,13 @@ from webviz_subsurface_components import LayeredMap
 from webviz_4d._datainput.fmu_input import get_realizations, find_surfaces
 from webviz_4d._datainput.surface import make_surface_layer, load_surface
 from webviz_4d._datainput.common import (
-    get_full_path, 
+    get_full_path,
     read_config,
     get_map_defaults,
     get_well_colors,
     get_update_dates,
     get_plot_label,
-)    
+)
 from webviz_4d._datainput.well import (
     load_all_wells,
     make_new_well_layer,
@@ -40,9 +40,9 @@ from webviz_4d._datainput._metadata import (
     get_metadata,
     compose_filename,
     get_col_values,
-    get_all_intervals,    
+    get_all_intervals,
     create_map_defaults,
-    sort_realizations,   
+    sort_realizations,
 )
 
 
@@ -62,14 +62,14 @@ class SurfaceViewer4D(WebvizPluginABC):
         default_interval: str = None,
         settings: Path = None,
         delimiter: str = "--",
-        surface_metadata: str = "surface_metadata.csv",        
+        surface_metadata: str = "surface_metadata.csv",
     ):
 
         super().__init__()
         self.shared_settings = app.webviz_settings["shared_settings"]
         self.fmu_directory = self.shared_settings["fmu_directory"]
-        
-        self.map_suffix = map_suffix       
+
+        self.map_suffix = map_suffix
         self.delimiter = delimiter
         self.wellfolder = wellfolder
         self.observations = "observations"
@@ -79,30 +79,32 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.surface_metadata = None
         self.well_base_layers = None
 
-        print("default_interval",default_interval)
+        print("default_interval", default_interval)
 
         self.fmu_info = self.fmu_directory
-        self.well_update = ''
-        self.production_update = ''
+        self.well_update = ""
+        self.production_update = ""
 
         self.number_of_maps = 3
 
-        self.metadata = get_metadata(self.shared_settings, map_suffix, delimiter, surface_metadata)
+        self.metadata = get_metadata(
+            self.shared_settings, map_suffix, delimiter, surface_metadata
+        )
         print("Maps metadata")
         print(self.metadata)
-        
-        self.intervals, incremental = get_all_intervals(self.metadata,"reverse")
+
+        self.intervals, incremental = get_all_intervals(self.metadata, "reverse")
         print(self.intervals)
-        
+
         if default_interval is None:
             default_interval = self.intervals[-1]
-        
+
         self.surface_layer = None
 
         if settings:
             self.configuration = settings
             self.config = read_config(self.configuration)
-            #print(self.config)
+            # print(self.config)
 
             try:
                 self.attribute_settings = self.config["map_settings"][
@@ -116,43 +118,43 @@ class SurfaceViewer4D(WebvizPluginABC):
 
                 if colormaps_folder:
                     colormaps_folder = get_full_path(colormaps_folder)
-                        
+
                     print("Reading custom colormaps from:", colormaps_folder)
                     load_custom_colormaps(colormaps_folder)
             except:
                 pass
-            
+
             try:
                 attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
                 attribute_maps_file = get_full_path(attribute_maps_file)
                 self.surface_metadata = pd.read_csv(attribute_maps_file)
-                print("Colormaps settings loaded from file",attribute_maps_file)
+                print("Colormaps settings loaded from file", attribute_maps_file)
                 print(self.surface_metadata)
             except:
-                pass    
+                pass
 
         self.map_defaults = []
-            
+
         if map1_defaults is not None:
             map1_defaults["interval"] = default_interval
             self.map_defaults.append(map1_defaults)
-            
-        if map2_defaults is not None:    
+
+        if map2_defaults is not None:
             map2_defaults["interval"] = default_interval
             self.map_defaults.append(map2_defaults)
-            
+
         if map2_defaults is not None:
             map3_defaults["interval"] = default_interval
             self.map_defaults.append(map3_defaults)
-            
+
         print("Default interval", default_interval)
         print("Map 1 defaults:")
         print(map1_defaults)
         print("Map 2 defaults:")
         print(map2_defaults)
         print("Map 3 defaults:")
-        print(map3_defaults)    
-        
+        print(map3_defaults)
+
         self.map_defaults.append(map1_defaults)
         self.map_defaults.append(map1_defaults)
 
@@ -166,7 +168,7 @@ class SurfaceViewer4D(WebvizPluginABC):
             self.map_defaults.append(map2_defaults)
             self.map_defaults.append(map3_defaults)
 
-        print("map_defaults",self.map_defaults)
+        print("map_defaults", self.map_defaults)
         self.selected_intervals = [default_interval, default_interval, default_interval]
 
         self.selected_names = [None, None, None]
@@ -174,7 +176,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.selected_ensembles = [None, None, None]
         self.selected_realizations = [None, None, None]
         self.wellsuffix = ".w"
-        
+
         self.well_base_layers = []
         self.colors = get_well_colors(self.config)
 
@@ -183,14 +185,14 @@ class SurfaceViewer4D(WebvizPluginABC):
             update_dates = get_update_dates(wellfolder)
             self.well_update = update_dates["well_update_date"]
             self.production_update = update_dates["production_last_date"]
-            
+
             (
                 self.drilled_well_df,
                 self.drilled_well_info,
                 self.interval_df,
             ) = load_all_wells(wellfolder, self.wellsuffix)
-            
-            if self.drilled_well_df is not None:           
+
+            if self.drilled_well_df is not None:
 
                 self.well_base_layers.append(
                     make_new_well_layer(
@@ -212,14 +214,14 @@ class SurfaceViewer4D(WebvizPluginABC):
                         label="Reservoir sections",
                     )
                 )
-            
+
             planned_wells_dir = [f.path for f in os.scandir(wellfolder) if f.is_dir()]
 
             for folder in planned_wells_dir:
                 planned_well_df, planned_well_info, dummy_df = load_all_wells(
                     folder, self.wellsuffix
                 )
-                
+
                 if planned_well_df is not None:
                     self.well_base_layers.append(
                         make_new_well_layer(
@@ -232,9 +234,8 @@ class SurfaceViewer4D(WebvizPluginABC):
                             label=os.path.basename(folder),
                         )
                     )
-        elif wellfolder and not os.path.isdir(wellfolder): 
-            print("ERROR: Folder", wellfolder,"doesn't exist. No wells loaded")   
-
+        elif wellfolder and not os.path.isdir(wellfolder):
+            print("ERROR: Folder", wellfolder, "doesn't exist. No wells loaded")
 
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
@@ -582,7 +583,6 @@ class SurfaceViewer4D(WebvizPluginABC):
         # print('filepath: ',filepath)
         return filepath
 
-
     def get_heading(self, map_ind, observation_type):
         if self.map_defaults[map_ind]["map_type"] == observation_type:
             txt = "Observed map: "
@@ -609,18 +609,18 @@ class SurfaceViewer4D(WebvizPluginABC):
         return heading, sim_info, label
 
     def make_map(self, data, ensemble, real, attribute_settings, map_idx):
-        #print(data, ensemble, real, attribute_settings, map_idx)
+        # print(data, ensemble, real, attribute_settings, map_idx)
         start = timer()
         data = json.loads(data)
         attribute_settings = json.loads(attribute_settings)
         map_type = self.map_defaults[map_idx]["map_type"]
 
         surface_file = self.get_real_runpath(data, ensemble, real, map_type)
-        
+
         if os.path.isfile(surface_file):
             surface = load_surface(surface_file)
-            #print(surface)
-            
+            # print(surface)
+
             print("self.surface_metadata")
             print(self.surface_metadata)
             if self.surface_metadata is not None:
@@ -641,19 +641,21 @@ class SurfaceViewer4D(WebvizPluginABC):
                 )
                 i_data = a_data.loc[a_data["interval"] == interval]
                 metadata = i_data[["lower_limit", "upper_limit"]]
-                
-                print("interval",interval)
+
+                print("interval", interval)
                 print(a_data)
                 print(i_data)
             else:
                 metadata = None
-            print("metadata",metadata)
+            print("metadata", metadata)
 
             surface_layers = [
                 make_surface_layer(
                     surface,
                     name=data["attr"],
-                    color=attribute_settings.get(data["attr"], {}).get("color", "inferno"),
+                    color=attribute_settings.get(data["attr"], {}).get(
+                        "color", "inferno"
+                    ),
                     min_val=attribute_settings.get(data["attr"], {}).get("min", None),
                     max_val=attribute_settings.get(data["attr"], {}).get("max", None),
                     unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
@@ -705,10 +707,10 @@ class SurfaceViewer4D(WebvizPluginABC):
         else:
             print("WARNING: File", surface_file, "doesn't exist")
             heading = "Selected map doesn't exist"
-            sim_info = '-'
+            sim_info = "-"
             surface_layers = []
-            label = '-'
-            
+            label = "-"
+
         return (
             heading,
             sim_info,
