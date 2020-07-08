@@ -89,7 +89,7 @@ pages:
               - 4D_interval
               - Fluid  
             filter_defaults: 
-              Well_name: [G-1Y1]  
+              Well_name: [NO25/11-G-1Y1]  
             column_color_discrete_maps:
               Fluid:
                  Oil_[Sm3]: '#00ff00'
@@ -111,7 +111,7 @@ pages:
               - 4D_interval
               - Fluid  
             filter_defaults: 
-              Well_name: [G-4]  
+              Well_name: [NO25/11-G-4]  
             column_color_discrete_maps:
               Fluid:
                  Injected_Gas_[kSm3]: '#fa0000'
