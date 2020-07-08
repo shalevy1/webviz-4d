@@ -1,4 +1,4 @@
-""" Collection of common functions """
+""" Collection of some functions used by the 4D viewer or data preparation scripts """
 
 import os
 import io
@@ -12,6 +12,13 @@ import pandas as pd
 from pandas import json_normalize
 import xtgeo
 
+defaults = {
+    "well_suffix": ".w",
+    "map_suffix": ".gri",
+    "delimiter": "--",
+    "surface_metadata": "surface_metadata.csv",
+}
+
 
 def read_config(config_file):
     """ Return the content of a configuration file as a dict """
@@ -23,146 +30,49 @@ def read_config(config_file):
     return config_dict
 
 
-def _find_number(surfacepath, txt):
-    """ Return the first number found in a part of a filename (surface) """
-    filename = str(surfacepath)
-    number = None
-    index = str(filename).find(txt)
+def get_config_item(config, key):
+    """ Get the value of a SurfaceViewer4D key """
+    value = None
 
-    if index > 0:
-        i = index + len(txt) + 1
-        j = filename[i:].find("/")
-        number = filename[i : i + j]
+    pages = config["pages"]
 
-    return number
+    for page in pages:
+        content = page["content"]
 
-
-def find_files(folder, suffix) -> io.BytesIO:
-    """ Return a sorted list of all files in a folder with a specified suffix  """
-    return io.BytesIO(
-        json.dumps(
-            sorted([str(filename) for filename in Path(folder).glob(f"*{suffix}")])
-        ).encode()
-    )
-
-
-def load_well(well_path):
-    """ Return a well object (xtgeo) for a given file (RMS ascii format) """
-    return xtgeo.Well(well_path,mdlogname = "MD")
-
-
-def load_all_wells(wellfolder, wellsuffix):
-    """ For all wells in a folder return
-        - a list of dataframes with the well trajectories
-        - dataframe with metadata for all the wells 
-        - a dataframe with production/injection depths (screens or perforated) """
-    all_wells_list = []
-
-    print("Loading wells from " + str(wellfolder) + " ...")
-
-    wellfiles = (
-        json.load(find_files(wellfolder, wellsuffix))
-        if wellfolder is not None
-        else None
-    )
-
-    if not wellfiles:
-        raise Exception("No wellfiles found")
-
-    for wellfile in wellfiles:
-        # print(wellfile + " ...")
         try:
-            well = load_well(wellfile)
-            # print("    - loaded")
-        except ValueError:
-            continue
-        well.dataframe = well.dataframe[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]
-        well.dataframe["WELLBORE_NAME"] = well.name
-        all_wells_list.append(well.dataframe)
+            surface_viewer4d = content[0]["SurfaceViewer4D"]
+            value = surface_viewer4d[key]
+            return value
+        except:
+            try:
+                value = defaults[key]
+            except:
+                pass
 
-    all_wells_df = pd.concat(all_wells_list)
-
-    _well_info, depths_df = extract_well_metadata(wellfolder)
-    metadata_file = os.path.join(wellfolder, "wellbore_info.csv")
-    metadata = pd.read_csv(metadata_file)
-    # print('load_all_wells ',metadata)
-
-    return (all_wells_df, metadata, depths_df)
+    return value
 
 
-def extract_well_metadata(directory):
-    """ Compile all metadata for wells in a given folder (+ sub-folders) """
-    well_info = []
-    depth_info = []
+def get_map_defaults(configuration, n):
+    map_defaults = []
 
-    yaml_files = glob.glob(str(directory) + "/**/.*.yaml", recursive=True)
+    settings_file = configuration["settings"]
+    settings_file = get_full_path(settings_file)
 
-    for yaml_file in yaml_files:
-        with open(yaml_file, "r") as stream:
-            data = yaml.safe_load(stream)
-            # print('data',data)
+    settings = read_config(settings_file)
+    interval = settings["map_settings"]["default_interval"]
 
-            well_info.append(data[0])
+    if not "-" in interval[0:8]:
+        date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
+        date2 = interval[9:13] + "-" + interval[13:15] + "-" + interval[15:17]
+        interval = date1 + "-" + date2
 
-            if len(data) > 1 and data[1]:
-                for item in data[1:]:
-                    depth_info.append(item)
+    for i in range(0, n):
+        key = "map" + str(i + 1) + "_defaults"
+        defaults = settings["map_settings"][key]
+        defaults["interval"] = interval
+        map_defaults.append(defaults)
 
-    well_info_df = json_normalize(well_info)
-
-    depth_df = json_normalize(depth_info)
-
-    if not depth_df.empty:
-        depth_df.sort_values(by=["interval.wellbore", "interval.mdTop"], inplace=True)
-
-    return well_info_df, depth_df
-    
-
-def compose_filename(
-    directory, real, iteration, map_type, name, attribute, interval, delimiter
-):
-    """ Return expected filename based on given metadata """
-    surfacepath = None
-
-    if isinstance(real,int):
-        realization = "realization-" + str(real)
-    else:
-        realization = real
-
-    # if '-' in dates[0]:
-    #    dates = convert_date(dates[0]) + "_" + convert_date(dates[1])
-
-    interval_string = interval.replace("-", "")
-    datestring = interval_string[:8] + "_" + interval_string[8:]
-    # print(directory, realization, iteration, map_type, name, attribute, datestring)
-
-    filename = name + delimiter + attribute + delimiter + datestring + ".gri"
-    # print(filename)
-
-    index = directory.find("realization")
-    if map_type == "results":
-        surfacepath = os.path.join(
-            directory[:index],
-            realization,
-            iteration,
-            "share",
-            map_type,
-            "maps",
-            filename,
-        )
-    elif map_type == "observations":
-        surfacepath = os.path.join(
-            directory[:index],
-            realization,
-            iteration,
-            "share",
-            map_type,
-            "maps",
-            filename,
-        )
-
-    # print('surfacepath ',surfacepath)
-    return surfacepath
+    return map_defaults
 
 
 def decode_filename(file_path, delimiter):
@@ -172,7 +82,7 @@ def decode_filename(file_path, delimiter):
     number = None
     directory = None
     map_type = None
-    iteration = None
+    ensemble = None
     realization = None
     name = None
     attribute = None
@@ -196,7 +106,7 @@ def decode_filename(file_path, delimiter):
                 number = _find_number(surfacepath, "iter")
 
                 if number:
-                    iteration = "iter-" + number
+                    ensemble = "iter-" + number
 
     for m in re.finditer(delimiter, str(surfacepath)):
         ind.append(m.start())
@@ -215,35 +125,47 @@ def decode_filename(file_path, delimiter):
             date = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
             dates[1] = convert_date(date)
 
-    # print('decode ', realization, iteration, map_type, name, attribute, dates)
-    return directory, realization, iteration, map_type, name, attribute, dates
+    # print('decode ', realization, ensemble, map_type, name, attribute, dates)
+    return directory, realization, ensemble, map_type, name, attribute, dates
 
 
-def get_map_defaults(configuration, n_maps):
-    """ Return default settings for maps (extracted from configuration file) """
-    map_defaults = []
-    
-    settings_file = configuration["settings"]
-    settings_file = get_full_path(settings_file)
-    settings = read_config(settings_file)
+def _find_number(surfacepath, txt):
+    """ Return the first number found in a part of a filename (surface) """
+    filename = str(surfacepath)
+    number = None
+    index = str(filename).find(txt)
 
-    interval = settings["map_settings"]["default_interval"]
+    if index > 0:
+        i = index + len(txt) + 1
+        j = filename[i:].find("/")
+        number = filename[i : i + j]
 
-    if not "-" in interval[0:8]:
-        date1 = interval[0:4] + "-" + interval[4:6] + "-" + interval[6:8]
-        date2 = interval[9:13] + "-" + interval[13:15] + "-" + interval[15:17]
-        interval = date1 + "-" + date2
-    print(interval) 
+    return number
 
-    for i in range(0, n_maps):
-        key = "map" + str(i + 1) + "_defaults"
-        defaults = configuration[key]
-        defaults["interval"] = interval       
-        map_defaults.append(defaults)
 
-        print(i, defaults)
+def check_number(string):
 
-    return map_defaults
+    for i in range(len(string)):
+        if string[i] not in "0123456789":
+            return False
+
+    return True
+
+
+def get_dates(interval):
+    date1 = interval[0:10]
+    date2 = interval[11:21]
+
+    return date1, date2
+
+
+def find_files(folder, suffix) -> io.BytesIO:
+    """ Return a sorted list of all files in a folder with a specified suffix  """
+    return io.BytesIO(
+        json.dumps(
+            sorted([str(filename) for filename in Path(folder).glob(f"*{suffix}")])
+        ).encode()
+    )
 
 
 def convert_date(date):
@@ -259,85 +181,49 @@ def convert_date(date):
     return date_string
 
 
-def all_interval_dates(directory, delimiter, suffix):
-    """ Return all 4D intervals in surface files in a FMU directory """
-    all_dates = []
-
-    files = glob.glob(directory + "/**/*" + suffix, recursive=True)
-
-    for filename in files:
-        (
-            directory,
-            _realization,
-            _iteration,
-            _map_type,
-            _name,
-            _attribute,
-            dates,
-        ) = decode_filename(filename, delimiter)
-
-        if dates[0] and dates[1]:
-            all_dates.append(dates[0])
-            all_dates.append(dates[1])
-
-    list_set = set(all_dates)
-    unique_list = list(list_set)
-    unique_dates = sorted(unique_list)
-    return unique_dates
-
-
 def get_well_colors(settings):
-    """ Return well colors from a configuration """   
+    """ Return well colors from a configuration """
 
     return settings["well_colors"]
 
 
-def get_all_intervals(metadata_df):
-    """ Return all 4D intervals from a metadata dateframe """
-    intervals = metadata_df[["data.time.t1", "data.time.t2"]].values
-    # print('get_all_intervals ',intervals)
+def get_update_dates(wellfolder):
+    update_dates = {}
 
-    interval_list = []
-    for interval in intervals:
-        interval_list.append(interval[0] + "-" + interval[1])
+    try:
+        well_date_file = os.path.join(wellfolder, ".welldata_update.yaml")
 
-    list_set = set(interval_list)
-    unique_list = list(list_set)
-    interval_list = sorted(unique_list)
-    # print(interval_list)
+        with open(well_date_file, "r") as stream:
+            well_meta_data = yaml.safe_load(stream)
 
-    return interval_list
+        well_update = well_meta_data[0]["welldata"]["update_time"]
+        update_dates["well_update_date"] = well_update.strftime("%Y-%m-%d %H:%M:%S")
+    except:
+        update_dates["well_update_date"] = ""
 
+    try:
+        prod_date_file = os.path.join(wellfolder, ".production_update.yaml")
 
-def extract_wellbore_metadata(directory):
-    """ Return all well metadata found in yaml files in a given folder """
-    well_info = []
-    interval_info = []
+        with open(prod_date_file, "r") as stream:
+            production_meta_data = yaml.safe_load(stream)
 
-    print(str(directory))
-    yaml_files = glob.glob(str(directory) + "/.*yaml", recursive=True)
-
-    for yaml_file in yaml_files:
-        with open(yaml_file, "r") as stream:
-            data = yaml.safe_load(stream)
-            # print('data',data)
-
-            well_info.append(data[0])
-
-            if len(data) > 1 and data[1]:
-                for item in data[1:]:
-                    interval_info.append(item)
-
-    well_info_df = json_normalize(well_info)
-
-    interval_df = json_normalize(interval_info)
-
-    if not interval_df.empty:
-        interval_df.sort_values(
-            by=["interval.wellbore", "interval.mdTop"], inplace=True
+        # print(production_meta_data)
+        first_date = production_meta_data[0]["production"]["start_date"].strftime(
+            "%Y-%m-%d"
+        )
+        last_date = production_meta_data[0]["production"]["last_date"].strftime(
+            "%Y-%m-%d"
         )
 
-    return well_info_df, interval_df
+        update_dates["production_first_date"] = first_date
+        update_dates["production_last_date"] = last_date
+    except:
+        update_dates["production_first_date"] = ""
+        update_dates["production_last_date"] = ""
+
+    # print("Update dates", update_dates)
+
+    return update_dates
 
 
 def get_well_metadata(metadata_df, wellbore_name, item):
@@ -365,7 +251,7 @@ def get_mother_wells(metadata_df, slot_name):
     mother_well = slot_name
     mother_wells = [slot_name]
 
-    wellbores = get_wellbores(metadata_df, slot_name) # All wellbores with same slot
+    wellbores = get_wellbores(metadata_df, slot_name)  # All wellbores with same slot
 
     for wellbore in wellbores:
         if not wellbore == mother_well and not wellbore[-2] == "T":
@@ -490,73 +376,113 @@ def get_position_data(well_dataframe, md_start):
     positions = well_dataframe[["X_UTME", "Y_UTMN"]].values
 
     return positions
-    
-    
-def get_config_item(config_file,key):
-    config = read_config(config_file)  
-    pages = config["pages"]  
-    
-    for page in pages:     
-        content = page["content"]
 
-        try:
-            surface_viewer4d = content[0]["SurfaceViewer4D"] 
-            value = surface_viewer4d[key]
-            return value
-        except:
-            pass            
-    
-    return None
-    
-    
+
 def get_full_path(item):
-    path = item 
-    full_path = item   
-    
-    print("item",item)
+    path = item
+    full_path = item
 
-    directory = os.getcwd()       
-    
+    directory = os.getcwd()
+
     if path[0:3] == "../":
         path = path[3:]
-        full_path = os.path.join(directory,path)  
+        full_path = os.path.join(directory, path)
     elif path[0:2] == "./":
-        path = path[2:]                 
-        full_path = os.path.join(directory,"configurations",path)  
-        
+        path = path[2:]
+        full_path = os.path.join(directory, "configurations", path)
+
     if not os.path.exists(full_path):
         print("ERROR: Configuration must contain absolute paths for", item)
-        full_path = None    
-        
-    return full_path 
-    
-    
+        full_path = None
+
+    return full_path
+
+
+def get_plot_label(configuration, interval):
+    difference_mode = "normal"
+    labels = []
+
+    dates = [
+        interval[:4] + interval[5:7] + interval[8:10],
+        interval[11:15] + interval[16:18] + interval[19:21],
+    ]
+
+    for date in dates:
+        # date = convert_date(date)
+        try:
+            labels_dict = configuration["date_labels"]
+            label = labels_dict[int(date)]
+        except:
+            label = date[:4] + "-" + date[4:6] + "-" + date[6:8]
+
+        labels.append(label)
+
+    if difference_mode == "normal":
+        label = labels[0] + " - " + labels[1]
+    else:
+        label = labels[1] + " - " + labels[0]
+
+    return label
+
+
+def get_colormap(configuration, attribute):
+    colormap = None
+    minval = None
+    maxval = None
+
+    try:
+        attribute_dict = configuration[attribute]
+        # print("attribute_dict", attribute_dict)
+        colormap = attribute_dict["colormap"]
+        minval = attribute_dict["min_value"]
+        minval = attribute_dict["max_value"]
+    except:
+        try:
+            map_settings = configuration("map_settings")
+            colormap = map_settings("default_colormap")
+        except:
+            print("No default colormaps found for ", attribute)
+
+    return colormap, minval, maxval
+
+
 def main():
     # read_config
     config_file = "./examples/reek_4d.yaml"
     config = read_config(config_file)
-    print("config")
-    print(config)
-    outfile = "./test_data/config.json"
-    with open(outfile, 'w') as file:
-        file.write(json.dumps(config))
-        
-    #find_files
-    directory = "../webviz-subsurface-testdata/reek_history_match/realization-0/iter-0/share/results/maps"
-    map_files = find_files(directory,".w")
-    print("map_files")
-    print(map_files)
-    
-    
-      
-        
-    
+
+    settings_file = get_config_item(config, "settings_file")
+    print("settings_file", settings_file)
+
+    settings_file = get_full_path(settings_file)
+    print("full_path", settings_file)
+
+    settings = read_config(settings_file)
+    csv_file = settings["map_settings"]["colormaps_settings"]
+    print("csv_file", csv_file)
+
+    csv_file = get_full_path(csv_file)
+    print("full_path", csv_file)
+
+    # get_dates
+    interval = "2005-07-01-1993-01-01"
+    date1, date2 = get_dates(interval)
+    print("date1,date2")
+    print(date1, date2)
+
+    # get_config_item
+    config_file = "configurations/config_template.yaml"
+    config = read_config(config_file)
+
+    surface_metadata = get_config_item(config, "surface_metadata")
+    print("surface_metadata = ", surface_metadata)
+
+    delimiter = get_config_item(config, "delimiter")
+    print("delimiter = ", delimiter)
+
+    dummy = get_config_item(config, "dummy")
+    print("dummy = ", dummy)
 
 
 if __name__ == "__main__":
     main()
-
-
-    
-    
-
