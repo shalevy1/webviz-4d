@@ -20,7 +20,7 @@ import webviz_core_components as wcc
 from webviz_subsurface_components import LayeredMap
 
 from webviz_4d._datainput.fmu_input import get_realizations, find_surfaces
-from webviz_4d._datainput.surface import make_surface_layer, load_surface
+from webviz_4d._datainput._surface import make_surface_layer, load_surface
 from webviz_4d._datainput.common import (
     get_full_path,
     read_config,
