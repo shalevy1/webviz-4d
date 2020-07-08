@@ -1,10 +1,9 @@
 depth_maps:
-    top_reservoir: /private/ashska/development/grane/maps/toplowerheimdal--depthsurface.gri
+    top_reservoir: /project/grane/resmod/hstruct/2019/r002/share/results/maps/toplowerheimdal--depthsurface.gri
 map_settings:
     colormaps_folder: /private/ashska/development/webviz-4d/colormaps/
     colormaps_settings: /private/ashska/development/webviz-4d/configurations/attribute_maps.csv
     default_colormap: viridis
-    default_interval: 2019-09-15-2019-05-15
     attribute_settings:     
         maxpos:
             color:   dsg_spectrum
