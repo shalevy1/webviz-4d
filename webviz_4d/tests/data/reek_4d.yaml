@@ -1,7 +1,7 @@
 title: WebViz-4D Reek Example
 
 shared_settings:
-    fmu_directory: /private/ashska/development/webviz-subsurface-testdata/reek_history_match
+    fmu_directory: ../../../webviz-subsurface-testdata/reek_history_match
     simulated_maps:       
         realization_names: [realization-*]
         iteration_names: [iter-*]
@@ -17,9 +17,9 @@ pages:
     content:
       - SurfaceViewer4D:
           wellfolder:
-                /private/ashska/development/webviz-subsurface-testdata/observed_data/wells 
+                ../../../webviz-subsurface-testdata/observed_data/wells 
                 
-          settings_file: /private/ashska/development/webviz-4d/configurations/settings_reek.yaml      
+          settings_file: ./settings_reek.yaml      
           
 
            

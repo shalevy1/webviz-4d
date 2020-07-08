@@ -1,28 +1,27 @@
 depth_maps:
-    top_reservoir: /project/grane/resmod/hstruct/2019/r002/share/results/maps/toplowerheimdal--depthsurface.gri
+    top_reservoir: /scratch/johan_sverdrup2/eza/2020a_b007_0_0_08052020/realization-0/pred/share/results/maps/aasgard_fm_top--depthsurface_final.gri
 map_settings:
     colormaps_folder: /private/ashska/development/webviz-4d/colormaps/
-    colormaps_settings: /project/grane/resmod/hstruct/2019/share/webviz/webviz-4d/configurations/attribute_maps.csv
     default_colormap: viridis
     attribute_settings:     
-        maxpos:
-            color:   dsg_spectrum
-            min:    0.0
-            max:    0.15
-        maxneg:
+        4d_max:
             color:   geoprobe
-            min: -0.05
-            max:  0.05
-        gasthickness:
-            color:   seismic  
-            min:   -5
-            max:    5     
-        oilthickness:
-            color:   seismic
-            min:    -5
-            max:     5
+            min:    -0.02
+            max:    0.02
+        4d_rms:
+            color:   dsg_spectrum
+            min:  0
+            max:  0.02
+        4d_min:
+            color:   geoprobe
+            min:   -0.02
+            max:   0    
+        4d_mean:
+            color:   geoprobe  
+            min:   
+            max:   0.02     
         timeshift:
-            color:   seismic 
+            color:   geoprobe 
             min: -2.0
             max:  2.0    
         

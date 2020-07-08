@@ -73,27 +73,16 @@ another_property:
 
     @property
     def attrs(self):
-        current_name = self.current_selections["name"]
-        current_type = self.current_selections["map_type"]
-        df = self.metadata.loc[
-            (self.metadata["data.name"] == current_name)
-            & (self.metadata["map_type"] == current_type)
-        ]
-        attributes = unique_values(df["data.content"].values)
+        attributes = unique_values(self.metadata["data.content"].values)
 
         return attributes
 
-    def _names_in_attr(self, attribute):
-        current_attribute = self.current_selections["attribute"]
-        df = self.metadata.loc[self.metadata["data.content"] == current_attribute]
-        names = unique_values(df["data.name"].values)
-
-        if not names:
-            names = unique_values(self.metadata["data.name"].values)
+    def _names_in_attr(self):
+        names = unique_values(self.metadata["data.name"].values)
 
         return names
 
-    def _interval_in_attr(self, attribute):
+    def _interval_in_attr(self):
         intervals = self.intervals
         if intervals is not None and intervals == [np.nan]:
             return None
@@ -249,7 +238,7 @@ another_property:
 
             if ctx is None:
                 raise PreventUpdate
-            names = self._names_in_attr(attr)
+            names = self._names_in_attr()
 
             if not names:
                 return None, None, {"visibility": "hidden"}
@@ -282,7 +271,7 @@ another_property:
 
             if ctx is None:
                 raise PreventUpdate
-            interval = self._interval_in_attr(attr)
+            interval = self._interval_in_attr()
 
             if not interval or not interval[0]:
                 return [], None, {"visibility": "hidden"}
@@ -315,9 +304,9 @@ another_property:
 
             # Preventing update if selections are not valid (waiting for the other callbacks)
 
-            if not name in self._names_in_attr(attr):
+            if not name in self._names_in_attr():
                 raise PreventUpdate
-            if date and not date in self._interval_in_attr(attr):
+            if date and not date in self._interval_in_attr():
                 raise PreventUpdate
 
             return json.dumps({"name": name, "attr": attr, "date": date})

@@ -8,22 +8,52 @@ import os
 from pandas import json_normalize
 from webviz_config.common_cache import CACHE
 from pathlib import Path
+from webviz_4d._datainput.common import find_files
 
 
-@CACHE.memoize(timeout=CACHE.TIMEOUT)
 def load_well(well_path):
     """ Return a well object (xtgeo) for a given file (RMS ascii format) """
-    return xtgeo.Well(well_path,mdlogname = "MD")
+    return xtgeo.Well(well_path, mdlogname="MD")
+    
+    
+def load_all_wells(wellfolder, wellsuffix):
+    """ For all wells in a folder return
+        - a list of dataframes with the well trajectories
+        - dataframe with metadata for all the wells 
+        - a dataframe with production/injection depths (screens or perforated) """
+    all_wells_list = []
 
+    print("Loading wells from " + str(wellfolder) + " ...")
 
-def find_files(folder, suffix) -> io.BytesIO:
-    """ Return a sorted list of all files in a folder with a specified suffix  """
-    return io.BytesIO(
-        json.dumps(
-            sorted([str(filename) for filename in Path(folder).glob(f"*{suffix}")])
-        ).encode()
+    wellfiles = (
+        json.load(find_files(wellfolder, wellsuffix))
+        if wellfolder is not None
+        else None
     )
 
+    if not wellfiles:
+        raise Exception("No wellfiles found")
+
+    for wellfile in wellfiles:
+        # print(wellfile + " ...")
+        try:
+            well = load_well(wellfile)
+            # print("    - loaded")
+        except ValueError:
+            continue
+        well.dataframe = well.dataframe[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]
+        well.dataframe["WELLBORE_NAME"] = well.name
+        all_wells_list.append(well.dataframe)
+
+    all_wells_df = pd.concat(all_wells_list)
+
+    _well_info, depths_df = extract_well_metadata(wellfolder)
+    metadata_file = os.path.join(wellfolder, "wellbore_info.csv")
+    metadata = pd.read_csv(metadata_file)
+    # print('load_all_wells ',metadata)
+
+    return (all_wells_df, metadata, depths_df)
+    
 
 def extract_well_metadata(directory):
     """ Compile all metadata for wells in a given folder (+ sub-folders) """
@@ -63,7 +93,7 @@ def load_all_wells(wellfolder, wellsuffix):
     )
 
     if not wellfiles:
-        print("ERROR: No well files found in folder",wellfolder)
+        print("ERROR: No well files found in folder", wellfolder)
         return None, None, None
 
     print("Loading wells from " + str(wellfolder) + " ...")
@@ -72,19 +102,19 @@ def load_all_wells(wellfolder, wellsuffix):
             well = load_well(wellfile)
         except ValueError:
             continue
-        
+
         if "MD" in well.dataframe.columns:
-            well.new_df = well.dataframe[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]    
+            well.new_df = well.dataframe[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]
         else:
             qc = well.geometrics()
-            
-            if qc:    
-                well.new_df = well.dataframe.rename(columns={"Q_MDEPTH":"MD"})
+
+            if qc:
+                well.new_df = well.dataframe.rename(columns={"Q_MDEPTH": "MD"})
             else:
-                print("ERROR: Measured depth values not found in well:",well.name)
-                well.new_df= pd.DataFrame()
-            
-        if not well.new_df.empty:                        
+                print("ERROR: Measured depth values not found in well:", well.name)
+                well.new_df = pd.DataFrame()
+
+        if not well.new_df.empty:
             well.dataframe = well.new_df[["X_UTME", "Y_UTMN", "Z_TVDSS", "MD"]]
             well.dataframe["WELLBORE_NAME"] = well.name
             all_wells_list.append(well.dataframe)
@@ -92,12 +122,12 @@ def load_all_wells(wellfolder, wellsuffix):
     all_wells_df = pd.concat(all_wells_list)
 
     well_info, interval_df = extract_well_metadata(wellfolder)
-    
+
     try:
         metadata_file = os.path.join(wellfolder, "wellbore_info.csv")
         metadata = pd.read_csv(metadata_file)
     except:
-        metadata = None    
+        metadata = None
     # print('load_all_wells ',metadata)
 
     return (all_wells_df, metadata, interval_df)
@@ -195,18 +225,18 @@ def make_new_well_layer(
     unique_wellbores = list(list_set)
 
     for wellbore in unique_wellbores:
-        #print('wellbore ',wellbore)
+        # print('wellbore ',wellbore)
         md_start = 0
-        info = ''
+        info = ""
         short_name = wellbore
-        well_type = ''
+        well_type = ""
         polyline_data = None
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
-        
+
         if not metadata_df is None:
             well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
-            #print(well_metadata)
+            # print(well_metadata)
 
             md_top_res = well_metadata["wellbore.pick_md"].values
             if selection and len(md_top_res) > 0:
@@ -221,7 +251,7 @@ def make_new_well_layer(
                 well_type = well_type[0]
 
             if well_type == "planned":
-                #info = well_metadata["wellbore.list_name"].values
+                # info = well_metadata["wellbore.list_name"].values
                 info = ""
                 start_date = None
                 stop_date = None
