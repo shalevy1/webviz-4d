@@ -1,23 +1,17 @@
 #!/usr/bin/env python3
 import os
 import glob
+import argparse
 import yaml
 import pandas as pd
 from pandas import json_normalize
-import xtgeo
-import argparse
 from webviz_4d._datainput import common
-
-
-def load_surface(surface_path):
-    return xtgeo.RegularSurface(surface_path)
-
-
-def load_wellbore(well_path):
-    return xtgeo.Well(well_path, mdlogname="MD")
+from webviz_4d._datainput.surface import load_surface
+from webviz_4d._datainput.well import load_well
 
 
 def extract_metadata(directory):
+    """ Read and compile well metadata (from yaml files) """
     well_info = []
     interval_info = []
 
@@ -48,6 +42,7 @@ def extract_metadata(directory):
 
 
 def compile_data(surface, well_directory, wellbore_info, well_suffix):
+    """ Extract MD of the well's intersection with the provided depth surface """
     rms_names = []
     well_names = []
     short_names = []
@@ -62,7 +57,7 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
         pick_name = surface.name
 
     if not wellbore_info.empty:
-        for index, item in wellbore_info.iterrows():
+        for _index, item in wellbore_info.iterrows():
             wellbore_name = item["wellbore.name"]
             rms_name = (
                 wellbore_name.replace("/", "_").replace("NO ", "").replace(" ", "_")
@@ -71,7 +66,7 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
             well_names.append(well_name)
 
             wellbore_file = os.path.join(well_directory, rms_name) + well_suffix
-            wellbore = load_wellbore(wellbore_file)
+            wellbore = load_well(wellbore_file)
             short_name = wellbore.shortwellname
 
             if surface:
@@ -96,7 +91,7 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
         # print("wellbore_files", wellbore_files)
 
         for wellbore_file in wellbore_files:
-            wellbore = load_wellbore(wellbore_file)
+            wellbore = load_well(wellbore_file)
             wellbore_name = wellbore.name.split("/")[0]
             wellbore_names.append(wellbore_name)
             well_names.append(wellbore_name)
@@ -130,13 +125,14 @@ def compile_data(surface, well_directory, wellbore_info, well_suffix):
 
 
 def main():
+    """ Compile metadata from all wells and extract top reservoir depths """
     description = "Compile metadata from all wells and extract top reservoir depths"
-    parser = argparse.ArgumentParser(description = description)
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "config_file", help="Enter path to the WebViz-4D configuration file"
     )
     args = parser.parse_args()
-    
+
     print(description)
     print(args)
 
@@ -150,9 +146,9 @@ def main():
         well_directory = None
         print("ERROR: Well directory", well_directory, "not found")
         print("Execution stopped")
-    
+
     print("Well directory", well_directory)
-    
+
     if well_directory:
         try:
             settings_file = common.get_config_item(config, "settings")
@@ -164,10 +160,10 @@ def main():
         except:
             surface_file = None
             surface = None
-    else:        
+    else:
         print("ERROR: Well data not found in", well_directory)
         exit()
-    
+
     print("Surface file", surface_file)
 
     WELLBORE_INFO_FILE = "wellbore_info.csv"

@@ -1,11 +1,9 @@
 """ Create well layers for production and injection files """
 
-from pathlib import Path
 import os
 import argparse
 import pickle
 import math
-import yaml
 import pandas as pd
 from webviz_4d._datainput import common
 from webviz_4d._datainput import well
@@ -67,16 +65,12 @@ def get_column_list(columns, pdm_column, interval):
 def extract_production_info(well_prod_info, interval, selection):
     """ Return well and production information/status for a selected 
     interval for production/injection wells """
-    wellbore = well_prod_info["wellbore.name"].values
     well_type = None
     fluid = None
     start_date = None
     stop_date = None
     info = None
     plot = False
-
-    # pd.set_option('display.max_columns', None)
-    # print(well_prod_info)
 
     if selection == "production":
         column = OIL_PRODUCTION_FILE + "_" + interval
@@ -276,7 +270,7 @@ def main():
     args = parser.parse_args()
     print(description)
     print(args)
-    
+
     config_file = args.config_file
     config = common.read_config(config_file)
 
@@ -301,7 +295,7 @@ def main():
         settings_file = common.get_config_item(config, "settings")
         settings_file = common.get_full_path(settings_file)
         settings = common.read_config(settings_file)
-        interval = common.get_config_item(config,"default_interval")
+        interval = common.get_config_item(config, "default_interval")
     except:
         settings_file = None
         settings = None
@@ -327,7 +321,7 @@ def main():
 
         prod_info_list.append(prod_info)
 
-    drilled_well_df, drilled_well_info, interval_df = common.load_all_wells(
+    drilled_well_df, drilled_well_info, interval_df = well.load_all_wells(
         well_directory, well_suffix
     )
     # print("drilled_well_info")

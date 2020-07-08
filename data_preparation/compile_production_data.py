@@ -12,6 +12,7 @@ from webviz_4d._datainput import common, _metadata
 
 
 def get_prod_dates(well_prod_data):
+    """ Get first and last production dates """
     first_date = well_prod_data["DATEPRD"].values.min()
     last_date = well_prod_data["DATEPRD"].values.max()
 
@@ -19,6 +20,7 @@ def get_prod_dates(well_prod_data):
 
 
 def get_start_stop_dates(well_prod_data, prod_file_update, volume_code):
+    """ Get start and stop production dates """
     well_prod_data.replace(" 00:00:00", "", regex=True, inplace=True)
     # print("prod_file_update", prod_file_update)
 
@@ -37,6 +39,7 @@ def get_start_stop_dates(well_prod_data, prod_file_update, volume_code):
 
 
 def check_production_wells(sorted_production_wells, well_info, pdm_names_file):
+    """ Check if a the name of a production well is included in the well list from REP """
     well_names = []
 
     # print(sorted_production_wells)
@@ -64,20 +67,18 @@ def check_production_wells(sorted_production_wells, well_info, pdm_names_file):
 
 ## Main program
 def main():
-    description = "Extract production data"
+    """ Compile production data """
+    description = "Compile production data"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "config_file", help="Enter path to the WebViz-4D configuration file"
     )
 
     args = parser.parse_args()
-    
+
     print(description)
     print(args)
 
-    delimiter = "--"
-    extension = "gri"
-    version = ""
     WELLBORE_INFO_FILE = "wellbore_info.csv"
 
     today = date.today()
@@ -86,7 +87,7 @@ def main():
     config_file = args.config_file
     config = common.read_config(config_file)
     shared_settings = config["shared_settings"]
-    
+
     map_suffix = common.get_config_item(config, "map_suffix")
     delimiter = common.get_config_item(config, "delimiter")
     metadata_file = common.get_config_item(config, "surface_metadata")
@@ -106,7 +107,8 @@ def main():
     if production_data:
         production_file = os.path.join(production_data, "prod_data.csv")
 
-        surface_metadata = _metadata.get_metadata(shared_settings, map_suffix, delimiter, metadata_file
+        surface_metadata = _metadata.get_metadata(
+            shared_settings, map_suffix, delimiter, metadata_file
         )
         # print(surface_metadata)
 
@@ -128,7 +130,7 @@ def main():
             sorted_production_wells, well_info, pdm_names_file
         )
 
-        all_4d, incremental_4d = _metadata.get_all_intervals(surface_metadata, "normal")
+        _all_4d, incremental_4d = _metadata.get_all_intervals(surface_metadata, "normal")
         incremental_4d.sort()
 
         actual_intervals = []
@@ -188,7 +190,7 @@ def main():
                 # Change heading in last actual interval
                 intervals[-1] = intervals[-1][0:10] + "-now"
 
-                date1_first, date2_first = common.get_dates(actual_intervals[0])
+                date1_first, _date2_first = common.get_dates(actual_intervals[0])
                 total = date1_first + "-now"
                 intervals.append(total)
                 volumes[index, i + 1] = well_prod_data.loc[
@@ -217,11 +219,11 @@ def main():
             print("Production start and last date:", first_date, last_date)
 
             outfile = os.path.join(well_directory, ".production_update.yaml")
-            f = open(outfile, "w")
-            f.write("- production:\n")
-            f.write("   start_date: " + first_date[0:10] + "\n")
-            f.write("   last_date: " + last_date[0:10] + "\n")
-            f.close()
+            file_object = open(outfile, "w")
+            file_object.write("- production:\n")
+            file_object.write("   start_date: " + first_date[0:10] + "\n")
+            file_object.write("   last_date: " + last_date[0:10] + "\n")
+            file_object.close()
 
             print("Metadata exported to file " + outfile)
     else:

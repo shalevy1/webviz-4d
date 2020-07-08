@@ -1,9 +1,10 @@
-import pyodbc
-import pandas as pd
 import argparse
+import pandas as pd
+import pyodbc
 
 
 def main():
+    """ Extract production data from PDM (OMNIA) """
     parser = argparse.ArgumentParser(
         description="Extract production data from PDM (OMNIA)"
     )

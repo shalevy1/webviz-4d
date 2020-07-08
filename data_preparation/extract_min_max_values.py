@@ -1,31 +1,15 @@
 import os
-import glob
-import numpy as np
 import argparse
-from xtgeo import RegularSurface
+import numpy as np
 import pandas as pd
 from webviz_4d._datainput import common
 from webviz_4d._datainput import _metadata
+from webviz_4d._datainput.surface import load_surface, get_surface_arr
 
 
-def load_surface(surface_path):
-    return RegularSurface(surface_path)
-
-
-def get_surface_arr(surface, unrotate=True, flip=True):
-    if unrotate:
-        surface.unrotate()
-    x, y, z = surface.get_xyz_values()
-    if flip:
-        x = np.flip(x.transpose(), axis=0)
-        y = np.flip(y.transpose(), axis=0)
-        z = np.flip(z.transpose(), axis=0)
-    z.filled(np.nan)
-    return [x, y, z]
-    
-    
 def get_plot_limits(df, map_type, surface_name, attribute, interval):
-    if df is not None:                   
+    """ Extract plot limits from dataframe """
+    if df is not None:
         selected_rows = df.loc[
             (df["map type"] == map_type)
             & (df["name"] == surface_name)
@@ -40,12 +24,13 @@ def get_plot_limits(df, map_type, surface_name, attribute, interval):
             upper_limit = np.nan
     else:
         lower_limit = np.nan
-        upper_limit = np.nan  
-        
-    return lower_limit, upper_limit    
+        upper_limit = np.nan
+
+    return lower_limit, upper_limit
 
 
 def main():
+    """ Extract min-/max-values for all maps """
     parser = argparse.ArgumentParser(description="Extract min-/max-values for all maps")
     parser.add_argument(
         "config_file", help="Enter path to the WebViz-4D configuration file"
@@ -77,9 +62,9 @@ def main():
         print(" - file loaded")
         print(old_map_df)
     else:
-        old_map_df = None    
-        
-    csv_file = settings["map_settings"]["colormaps_settings"]    
+        old_map_df = None
+
+    csv_file = settings["map_settings"]["colormaps_settings"]
 
     surface_metadata = _metadata.get_metadata(
         shared_settings, map_suffix, delimiter, metadata_file
@@ -124,7 +109,7 @@ def main():
     surface_files = surface_metadata["filename"]
     surface_files = surface_files.replace("/.", "/").replace(".yaml", "")
 
-    for index, row in surface_metadata.iterrows():
+    for _index, row in surface_metadata.iterrows():
         # print(row)
         map_type = row["map_type"]
         surface_name = row["data.name"]
@@ -136,16 +121,19 @@ def main():
         )
         surface_file = row["filename"]
         surface_file = surface_file.replace("/.", "/").replace(".yaml", "")
-        #print(surface_file)
-        print(map_type,surface_name,attribute,interval)
+        # print(surface_file)
+        print(map_type, surface_name, attribute, interval)
 
         if not mode == "Full":
             realization = row["fmu_id.realization"]
             iteration = row["fmu_id.iteration"]
-            #print(realization, iteration)
-            
+            # print(realization, iteration)
+
             if map_type == "results":
-                if realization == selected_realization and iteration == selected_iteration:
+                if (
+                    realization == selected_realization
+                    and iteration == selected_iteration
+                ):
                     surface = load_surface(surface_file)
 
                     map_types.append(map_type)
@@ -160,12 +148,14 @@ def main():
                     min_values.append(min_val)
                     max_values.append(max_val)
                     map_files.append(surface_file)
-                    
-                    lower_limit, upper_limit = get_plot_limits(old_map_df, map_type, surface_name, attribute, interval)     
-                        
+
+                    lower_limit, upper_limit = get_plot_limits(
+                        old_map_df, map_type, surface_name, attribute, interval
+                    )
+
                     lower_limits.append(lower_limit)
-                    upper_limits.append(upper_limit)        
-            else:  
+                    upper_limits.append(upper_limit)
+            else:
                 surface = load_surface(surface_file)
 
                 map_types.append(map_type)
@@ -179,13 +169,15 @@ def main():
 
                 min_values.append(min_val)
                 max_values.append(max_val)
-                map_files.append(surface_file) 
-                
-                lower_limit, upper_limit = get_plot_limits(old_map_df, map_type, surface_name, attribute, interval) 
-                
+                map_files.append(surface_file)
+
+                lower_limit, upper_limit = get_plot_limits(
+                    old_map_df, map_type, surface_name, attribute, interval
+                )
+
                 lower_limits.append(lower_limit)
-                upper_limits.append(upper_limit)         
-             
+                upper_limits.append(upper_limit)
+
         else:
             surface = load_surface(surface_file)
 
@@ -200,13 +192,15 @@ def main():
 
             min_values.append(min_val)
             max_values.append(max_val)
-            map_files.append(surface_file)               
-        
-            lower_limit, upper_limit = get_plot_limits(old_map_df, map_type, surface_name, attribute, interval) 
-            
+            map_files.append(surface_file)
+
+            lower_limit, upper_limit = get_plot_limits(
+                old_map_df, map_type, surface_name, attribute, interval
+            )
+
             lower_limits.append(lower_limit)
-            upper_limits.append(upper_limit)         
-            
+            upper_limits.append(upper_limit)
+
     map_df[headers[0]] = map_types
     map_df[headers[1]] = surface_names
     map_df[headers[2]] = attributes

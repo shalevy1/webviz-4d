@@ -1,16 +1,17 @@
 """ Script that extracts trajectories, well logs and some
     metadata for alldrilled wellbores in the REP database """
+import sys
 import os
 import glob
 import argparse
 import math
+import datetime
 import pandas as pd
 from pandas import json_normalize
 import yaml
 import numpy as np
-import datetime
 from reper import wrappers
-from webviz_4d._datainput.common import load_well, read_config
+from webviz_4d._datainput.well import load_well
 
 
 def write_rms_wellbore(wellbore_name, wellbore_df, rkb, export_dir):
@@ -29,35 +30,35 @@ def write_rms_wellbore(wellbore_name, wellbore_df, rkb, export_dir):
 
     outfile = os.path.join(export_dir, name + ".w")
 
-    f = open(outfile, "w")
-    f.write("1.0\n")
-    f.write("LOCATION\n")
-    f.write("%-15s %10.2f %12.2f %5.2f\n" % (name, xutm, yutm, rkb))
+    file_object = open(outfile, "w")
+    file_object.write("1.0\n")
+    file_object.write("LOCATION\n")
+    file_object.write("%-15s %10.2f %12.2f %5.2f\n" % (name, xutm, yutm, rkb))
 
     n_columns = len(wellbore_df.columns)
     n_logs = n_columns - 3
-    f.write(str(n_logs) + "\n")
+    file_object.write(str(n_logs) + "\n")
 
     columns = wellbore_df.columns
 
-    f.write(columns[0] + "   UNK    lin\n")  # MD column (first "log")
+    file_object.write(columns[0] + "   UNK    lin\n")  # MD column (first "log")
 
     for i in range(4, n_columns):
-        f.write("%10s" % (columns[i] + "   UNK    lin\n"))
+        file_object.write("%10s" % (columns[i] + "   UNK    lin\n"))
 
-    for index, row in wellbore_df.iterrows():
+    for _index, row in wellbore_df.iterrows():
 
-        f.write("%12.2f" % (row[2]))  # XUTM
-        f.write("%12.2f" % (row[3]))  # YUTM
-        f.write("%12.2f" % (row[1]))  # TVDMSL
-        f.write("%12.2f" % (row[0]))  # MD
+        file_object.write("%12.2f" % (row[2]))  # XUTM
+        file_object.write("%12.2f" % (row[3]))  # YUTM
+        file_object.write("%12.2f" % (row[1]))  # TVDMSL
+        file_object.write("%12.2f" % (row[0]))  # MD
 
         for i in range(4, len(wellbore_df.columns)):
-            f.write("%12.2f" % (row[i]))
+            file_object.write("%12.2f" % (row[i]))
 
-        f.write("\n")
+        file_object.write("\n")
 
-    f.close()
+    file_object.close()
 
     # print("Well data exported to ", outfile)
 
@@ -81,18 +82,18 @@ def write_metadata(
     rms_name = wellbore_name.replace("/", "_").replace("NO ", "").replace(" ", "_")
     outfile = os.path.join(export_dir, "." + rms_name + ".w.yaml")
 
-    f = open(outfile, "w")
-    f.write("- wellbore:\n")
-    f.write("   name: " + wellbore_name + "\n")
-    f.write("   rms_name: " + rms_name + "\n")
-    f.write("   short_name: " + short_name + "\n")
-    f.write("   slot_name: " + slot_name + "\n")
-    f.write("   field: " + field + "\n")
-    f.write("   type: " + wellbore_type + "\n")
-    f.write("   rkb: " + str(rkb) + "\n")
-    f.write("   drilling_end_date: " + end_date + "\n")
-    f.write("   fluids: " + fluids + "\n")
-    f.close()
+    file_object = open(outfile, "w")
+    file_object.write("- wellbore:\n")
+    file_object.write("   name: " + wellbore_name + "\n")
+    file_object.write("   rms_name: " + rms_name + "\n")
+    file_object.write("   short_name: " + short_name + "\n")
+    file_object.write("   slot_name: " + slot_name + "\n")
+    file_object.write("   field: " + field + "\n")
+    file_object.write("   type: " + wellbore_type + "\n")
+    file_object.write("   rkb: " + str(rkb) + "\n")
+    file_object.write("   drilling_end_date: " + end_date + "\n")
+    file_object.write("   fluids: " + fluids + "\n")
+    file_object.close()
 
     if intervals:
         with open(outfile, "a") as yamlfile:
@@ -154,29 +155,29 @@ def main():
     EQUIPMENT_NAMES = ["Screen", "Perforations"]
 
     export_dir = field.lower().replace(" ", "_") + "/well_data/"
-    
+
     if os.path.isdir(export_dir):
-        print("Wells will be stored in", export_dir)        
-    else:    
-        export_dir =  "./well_data/"
-        
+        print("Wells will be stored in", export_dir)
+    else:
+        export_dir = "./well_data/"
+
         if os.path.isdir(export_dir):
-            print("Well data will be stored in", export_dir)  
+            print("Well data will be stored in", export_dir)
         else:
             print("ERROR: Well directory", export_dir, "not found")
-            exit()       
+            sys.exit()
 
     # Remove existing wells (not planned wells) and all metadata
     if os.path.isdir(export_dir):
         files = glob.glob(export_dir + "*.w")
 
-        for f in files:
-            os.remove(f)
+        for file_object in files:
+            os.remove(file_object)
 
         files = glob.glob(export_dir + ".*.yaml", recursive=True)
 
-        for f in files:
-            os.remove(f)
+        for file_object in files:
+            os.remove(file_object)
 
     wellbores = sorted(wrappers.Field(field).get_wellbore_names())
 
@@ -291,10 +292,10 @@ def main():
     print("Update time", now.strftime("%Y-%m-%d %H:%M:%S"))
 
     outfile = os.path.join(export_dir, ".welldata_update.yaml")
-    f = open(outfile, "w")
-    f.write("- welldata:\n")
-    f.write("   update_time: " + now.strftime("%Y-%m-%d %H:%M:%S") + "\n")
-    f.close()
+    file_object = open(outfile, "w")
+    file_object.write("- welldata:\n")
+    file_object.write("   update_time: " + now.strftime("%Y-%m-%d %H:%M:%S") + "\n")
+    file_object.close()
 
     print("Wellbores exported to", export_dir)
     print("Metadata exported to file", outfile)

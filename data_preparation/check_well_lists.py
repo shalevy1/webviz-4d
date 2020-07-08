@@ -24,7 +24,7 @@ def main():
     args = parser.parse_args()
     print(description)
     print(args)
-    
+
     config_file = args.config_file
     config = common.read_config(config_file)
 
@@ -35,8 +35,8 @@ def main():
     pickle_files = glob.glob(wellfolder + "/*.pkl")
 
     for pickle_file in pickle_files:
-        f = open(pickle_file, "rb")
-        info = pickle.load(f)
+        file_object = open(pickle_file, "rb")
+        info = pickle.load(file_object)
 
         print(pickle_file)
         data = info[0]["data"]
