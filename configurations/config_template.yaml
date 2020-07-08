@@ -4,11 +4,11 @@ shared_settings:
     fmu_directory: /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0
     observed_maps: 
         realization_names: [realization-0]
-        iteration_names: [iter-0]
+        ensemble_names: [iter-0]
         map_directories: [share/observations/maps]
     simulated_maps: 
         realization_names: [realization-*]
-        iteration_names: [iter-*,pred]
+        ensemble_names: [iter-*,pred]
         map_directories: [share/results/maps]
         
     scratch_ensembles:
