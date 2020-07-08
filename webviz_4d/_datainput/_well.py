@@ -27,6 +27,3 @@ def make_well_layer(well, name="well", zmin=0):
             }
         ],
     }
-
-
-
