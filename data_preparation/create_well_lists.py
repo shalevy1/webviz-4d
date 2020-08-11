@@ -11,6 +11,7 @@ from webviz_4d._datainput._metadata import (
     get_metadata,
     get_all_intervals,
 )
+import webviz_4d.wells as wdf
 
 
 OIL_PRODUCTION_FILE = "BORE_OIL_VOL.csv"
@@ -89,7 +90,7 @@ def extract_production_info(well_prod_info, interval, selection):
             volume = selected_df.sum(axis=1).values
 
             try:
-                volume = volume[0]
+                volume = volume[0]/1000
             except:
                 pass
 
@@ -98,7 +99,7 @@ def extract_production_info(well_prod_info, interval, selection):
             fluid = "oil"
             start_date = well_prod_info[OIL_PRODUCTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[OIL_PRODUCTION_FILE + "_Stop date"].values[0]
-            info = fluid
+            info = fluid + "{:.0f}".format(numvar) + " kSm3"
             plot = True
 
     elif selection == "injection":
@@ -117,7 +118,7 @@ def extract_production_info(well_prod_info, interval, selection):
             volume_gas = selected_df.sum(axis=1).values
 
             try:
-                volume_gas = volume_gas[0]
+                volume_gas = volume_gas[0]/1000000
             except:
                 pass
 
@@ -126,7 +127,7 @@ def extract_production_info(well_prod_info, interval, selection):
             fluid = "gas"
             start_date = well_prod_info[GAS_INJECTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[GAS_INJECTION_FILE + "_Stop date"].values[0]
-            info = fluid
+            info = fluid + "{:.0f}".format(numvar) + " kSm3"
             plot = True
 
         column = WATER_INJECTION_FILE + "_" + interval
@@ -141,7 +142,7 @@ def extract_production_info(well_prod_info, interval, selection):
             volume_water = selected_df.sum(axis=1).values
 
             try:
-                volume_water = volume_water[0]
+                volume_water = volume_water[0]/1000
             except:
                 pass
 
@@ -150,10 +151,11 @@ def extract_production_info(well_prod_info, interval, selection):
             fluid = "water"
             start_date = well_prod_info[WATER_INJECTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[WATER_INJECTION_FILE + "_Stop date"].values[0]
-            info = fluid
+            info = fluid + "{:.0f}".format(numvar) + " kSm3"
             plot = True
-
-    # print(wellbore, fluid, start_date, stop_date, info, plot)
+    
+    wellbore = well_prod_info["wellbore.name"].values
+    print(wellbore, info)
     return well_type, fluid, start_date, stop_date, info, plot
 
 
@@ -161,7 +163,6 @@ def make_new_well_layer(
     interval_4d,
     wells_df,
     metadata_df,
-    interval_df,
     prod_info_list,
     colors=None,
     selection=None,
@@ -257,6 +258,45 @@ def make_new_well_layer(
             data.append(polyline_data)
 
     return {"name": label, "checked": False, "base_layer": False, "data": data}
+    
+    
+def add_production_volumes(drilled_well_info,prod_info_list):
+    wellbores = drilled_well_info["wellbore.name"].unique()
+    names = drilled_well_info[["wellbore.name", "wellbore.well_name"]]
+
+    print("Looping through all production information ...")
+    for prod_info in prod_info_list:
+        for column in prod_info.columns:
+            values = []
+            header = prod_info.name + "_" + column
+
+            for wellbore in wellbores:
+                well_name = names[names["wellbore.name"] == wellbore][
+                    "wellbore.well_name"
+                ].values[0]
+
+                try:
+                    value = prod_info[prod_info["Well name"] == well_name][
+                        column
+                    ].values[0]
+                except:
+                    value = None
+                # print(wellbore,value)
+                values.append(value)
+
+            # Add column with volume in 4D interval to dataframe
+            drilled_well_info[header] = values
+            
+    return drilled_well_info    
+
+
+def store_well_layer(well_layer, well_directory, label, interval_4d):
+    well_layer_file = os.path.join(well_directory, label + interval_4d + ".pkl")
+
+    dbfile = open(well_layer_file, "wb")
+    pickle.dump(well_layer, dbfile)
+    dbfile.close()
+    print("Well layer stored to " + well_layer_file)
 
 
 def main():
@@ -308,6 +348,9 @@ def main():
     metadata = get_metadata(shared_settings, delimiter, map_suffix, metadata_file)
     intervals_4d, incremental = get_all_intervals(metadata, "reverse")
     colors = common.get_well_colors(settings)
+    
+    print("intervals_4d")
+    print(intervals_4d)
 
     prod_info_files = [os.path.join(prod_info_dir, OIL_PRODUCTION_FILE)]
     prod_info_files.append(os.path.join(prod_info_dir, GAS_INJECTION_FILE))
@@ -322,44 +365,15 @@ def main():
         prod_info_list.append(prod_info)
 
     drilled_well_df, drilled_well_info, interval_df = well.load_all_wells(
-        well_directory, well_suffix
-    )
-    # print("drilled_well_info")
-    # print(drilled_well_info)
-
-    wellbores = drilled_well_info["wellbore.name"].unique()
-
-    names = drilled_well_info[["wellbore.name", "wellbore.well_name"]]
-    # print(names)
-
-    print("Looping through all production information ...")
-    for prod_info in prod_info_list:
-        for column in prod_info.columns:
-            values = []
-            header = prod_info.name + "_" + column
-
-            for wellbore in wellbores:
-                well_name = names[names["wellbore.name"] == wellbore][
-                    "wellbore.well_name"
-                ].values[0]
-
-                try:
-                    value = prod_info[prod_info["Well name"] == well_name][
-                        column
-                    ].values[0]
-                except:
-                    value = None
-                # print(wellbore,value)
-                values.append(value)
-
-            # Add column with volume in 4D interval to dataframe
-            drilled_well_info[header] = values
-
-    print("intervals_4d")
-    print(intervals_4d)
-
-    print("drilled_well_info")
-    print(drilled_well_info)
+        well_directory, well_suffix)
+    
+    drilled_well_info = add_production_volumes(drilled_well_info,prod_info_list)
+    well_info = wdf.WellDataFrame(drilled_well_info)
+    
+    wellbores = drilled_well_info["wellbore.name"].unique()  
+  
+    print("well_info.data_frame")
+    print(well_info.data_frame)
 
     print("Last production update", production_update)
     print("Looping through all 4D intervals ...")
@@ -367,47 +381,30 @@ def main():
         print("4D interval:", interval_4d)
 
         if interval_4d[0:10] <= production_update:
-            well_layers = []
-            well_layers.append(
-                make_new_well_layer(
-                    interval_4d,
-                    drilled_well_df,
-                    drilled_well_info,
-                    interval_df,
-                    prod_info_list,
-                    colors,
-                    selection="production",
-                    label="Producers",
-                )
+            well_layer =  make_new_well_layer(
+                interval_4d,
+                drilled_well_df,
+                drilled_well_info,
+                prod_info_list,
+                colors,
+                selection="production",
+                label="Producers",
             )
-            well_layers_file = os.path.join(
-                well_directory, "production_well_layers_" + interval_4d + ".pkl"
-            )
-            dbfile = open(well_layers_file, "wb")
-            pickle.dump(well_layers, dbfile)
-            dbfile.close()
-            print("Well layers stored to " + well_layers_file)
+            label = "production_well_layer_"
+            store_well_layer(well_layer, well_directory, label, interval_4d)
 
-            well_layers = []
-            well_layers.append(
-                make_new_well_layer(
-                    interval_4d,
-                    drilled_well_df,
-                    drilled_well_info,
-                    interval_df,
-                    prod_info_list,
-                    colors,
-                    selection="injection",
-                    label="Injectors",
-                )
+            well_layer = make_new_well_layer(
+                interval_4d,
+                drilled_well_df,
+                drilled_well_info,
+                prod_info_list,
+                colors,
+                selection="injection",
+                label="Injectors",
             )
-            well_layers_file = os.path.join(
-                well_directory, "injection_well_layers_" + interval_4d + ".pkl"
-            )
-            dbfile = open(well_layers_file, "wb")
-            pickle.dump(well_layers, dbfile)
-            dbfile.close()
-            print("Well layers stored to " + well_layers_file)
+            
+            label = "injection_well_layer_"
+            store_well_layer(well_layer, well_directory, label, interval_4d)
         else:
             print("  - no production data for this time interval")
 
