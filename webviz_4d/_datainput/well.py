@@ -142,7 +142,7 @@ def get_position_data(well_dataframe, md_start):
 
 
 def get_well_polyline(
-    wellbore, short_name, well_dataframe, well_type, fluid, md_start, selection, colors
+    wellbore, short_name, well_dataframe, well_type, fluid, info, md_start, selection, colors
 ):
     """ Extract polyline data - well trajectory, color and tooltip """
     color = "black"
@@ -154,7 +154,7 @@ def get_well_polyline(
     status = False
 
     if fluid and not pd.isna(fluid):
-        tooltip = tooltip + " (" + fluid + ")"
+        tooltip = tooltip + " (" + info + ")"
 
     if selection:
         if (
@@ -212,9 +212,6 @@ def make_new_well_layer(
     label="Drilled wells",
 ):
     """Make layeredmap wells layer"""
-    from timeit import default_timer as timer
-
-    start = timer()
     data = []
     if not colors:
         color = "black"
@@ -227,6 +224,7 @@ def make_new_well_layer(
     for wellbore in unique_wellbores:
         # print('wellbore ',wellbore)
         md_start = 0
+        fluid = ""
         info = ""
         short_name = wellbore
         well_type = ""
@@ -284,6 +282,7 @@ def make_new_well_layer(
                         short_name,
                         well_dataframe,
                         well_type,
+                        fluid,
                         info,
                         md_start,
                         selection,
@@ -295,6 +294,7 @@ def make_new_well_layer(
                 short_name,
                 well_dataframe,
                 well_type,
+                fluid,
                 info,
                 md_start,
                 selection,
@@ -306,6 +306,7 @@ def make_new_well_layer(
                 short_name,
                 well_dataframe,
                 well_type,
+                fluid,
                 info,
                 md_start,
                 selection,

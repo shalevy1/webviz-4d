@@ -439,17 +439,6 @@ def compose_filename(
 
     interval_string = interval.replace("-", "")
     datestring = interval_string[:8] + "_" + interval_string[8:]
-    print(
-        "compose_filename",
-        fmu_directory,
-        realization,
-        ensemble,
-        map_type,
-        name,
-        attribute,
-        interval,
-        datestring,
-    )
 
     filename = name + delimiter + attribute + delimiter + datestring + ".gri"
     filename = filename.lower()
@@ -465,7 +454,7 @@ def compose_filename(
         surfacepath = os.path.join(
             fmu_directory, real, ensemble, map_directory, filename
         )
-        print("surfacepath ", surfacepath)
+        #print("surfacepath ", surfacepath)
 
         if os.path.exists(surfacepath):
             return surfacepath
@@ -725,7 +714,7 @@ def main():
     metadata = get_metadata(shared_settings, map_suffix, delimiter, metadata_file)
     print(metadata)
 
-    all_intervals, incremental_intervals = get_all_intervals(metadata, "reverse")
+    all_intervals, incremental_intervals = get_all_intervals(metadata, "normal")
     print("incremental_intervals")
     print(incremental_intervals)
     print("all_intervals")
