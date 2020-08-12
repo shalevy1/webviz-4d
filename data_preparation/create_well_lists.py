@@ -102,7 +102,7 @@ def extract_production_info(well_prod_info, interval, selection):
             else:
                 stop_date = str(stop_date[0:-3])
                     
-            print(start_date, stop_date)
+            #print(start_date, stop_date)
             info = (
                 fluid
                 + " {:.0f}".format(volume)
