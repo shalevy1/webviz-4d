@@ -69,7 +69,7 @@ def extract_production_info(well_prod_info, interval, selection):
     well_type = None
     fluid = None
     start_date = None
-    stop_date = None 
+    stop_date = None
     info = None
     plot = False
 
@@ -78,7 +78,7 @@ def extract_production_info(well_prod_info, interval, selection):
         pd.set_option("display.max_columns", None)
 
         try:
-            volume = well_prod_info[column].values[0]/1000
+            volume = well_prod_info[column].values[0] / 1000
 
             if math.isnan(volume):
                 volume = None
@@ -89,21 +89,35 @@ def extract_production_info(well_prod_info, interval, selection):
             selected_df = well_prod_info[selected_columns].copy()
             volume = selected_df.sum(axis=1).values
 
-            volume = volume[0]/1000
+            volume = volume[0] / 1000
 
         if volume and volume > 0:
             well_type = "production"
             fluid = "oil"
             start_date = well_prod_info[OIL_PRODUCTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[OIL_PRODUCTION_FILE + "_Stop date"].values[0]
-            info = fluid + " {:.0f}".format(volume) + " [kSm3]"
+            
+            if isinstance(stop_date,float):
+                stop_date = "---"
+            else:
+                stop_date = str(stop_date[0:-3])
+                    
+            print(start_date, stop_date)
+            info = (
+                fluid
+                + " {:.0f}".format(volume)
+                + " [kSm3] Start: "
+                + str(start_date[0:-3])
+                + " Stop: "
+                + stop_date
+            )
             plot = True
 
     elif selection == "injection":
         column = GAS_INJECTION_FILE + "_" + interval
 
         try:
-            volume_gas = well_prod_info[column].values[0]/1000000
+            volume_gas = well_prod_info[column].values[0] / 1000000
 
             if math.isnan(volume_gas):
                 volume_gas = None
@@ -114,7 +128,7 @@ def extract_production_info(well_prod_info, interval, selection):
             selected_df = well_prod_info[selected_columns].copy()
             volume_gas = selected_df.sum(axis=1).values
 
-            volume_gas = volume_gas[0]/1000000
+            volume_gas = volume_gas[0] / 1000000
 
         if volume_gas and volume_gas > 0:
             well_type = "injection"
@@ -127,7 +141,7 @@ def extract_production_info(well_prod_info, interval, selection):
         column = WATER_INJECTION_FILE + "_" + interval
 
         try:
-            volume_water = well_prod_info[column].values[0]/1000
+            volume_water = well_prod_info[column].values[0] / 1000
         except:
             columns = well_prod_info.columns
             selected_columns = get_column_list(columns, column, interval)
@@ -135,7 +149,7 @@ def extract_production_info(well_prod_info, interval, selection):
 
             volume_water = selected_df.sum(axis=1).values
 
-            volume_water = volume_water[0]/1000
+            volume_water = volume_water[0] / 1000
 
         if volume_water and volume_water > 0:
             well_type = "injection"
@@ -144,11 +158,11 @@ def extract_production_info(well_prod_info, interval, selection):
             stop_date = well_prod_info[WATER_INJECTION_FILE + "_Stop date"].values[0]
             info = fluid + " {:.0f}".format(volume_water) + " [kSm3]"
             plot = True
-    
+
     if plot:
         wellbore = well_prod_info["wellbore.name"].values
         print(wellbore, info)
-        
+
     return well_type, fluid, start_date, stop_date, info, plot
 
 
@@ -191,7 +205,7 @@ def make_new_well_layer(
 
         well_type = well_metadata["wellbore.type"].values
         if well_type:
-            well_type = well_type[0]  
+            well_type = well_type[0]
 
         if well_type == "planned":
             # info = well_metadata["wellbore.list_name"].values
@@ -255,9 +269,9 @@ def make_new_well_layer(
             data.append(polyline_data)
 
     return {"name": label, "checked": False, "base_layer": False, "data": data}
-    
-    
-def add_production_volumes(drilled_well_info,prod_info_list):
+
+
+def add_production_volumes(drilled_well_info, prod_info_list):
     wellbores = drilled_well_info["wellbore.name"].unique()
     names = drilled_well_info[["wellbore.name", "wellbore.well_name"]]
 
@@ -283,8 +297,8 @@ def add_production_volumes(drilled_well_info,prod_info_list):
 
             # Add column with volume in 4D interval to dataframe
             drilled_well_info[header] = values
-            
-    return drilled_well_info    
+
+    return drilled_well_info
 
 
 def store_well_layer(well_layer, well_directory, label, interval_4d):
@@ -345,7 +359,7 @@ def main():
     metadata = get_metadata(shared_settings, delimiter, map_suffix, metadata_file)
     intervals_4d, incremental = get_all_intervals(metadata, "reverse")
     colors = common.get_well_colors(settings)
-    
+
     print("intervals_4d")
     print(intervals_4d)
 
@@ -362,15 +376,16 @@ def main():
         prod_info_list.append(prod_info)
 
     drilled_well_df, drilled_well_info, interval_df = well.load_all_wells(
-        well_directory, well_suffix)
-    
-    drilled_well_info = add_production_volumes(drilled_well_info,prod_info_list)
-    #well_info = WellDataFrame(drilled_well_info)
-    
-    wellbores = drilled_well_info["wellbore.name"].unique()  
-  
-    #print("well_info.data_frame")
-    #print(well_info.data_frame)
+        well_directory, well_suffix
+    )
+
+    drilled_well_info = add_production_volumes(drilled_well_info, prod_info_list)
+    # well_info = WellDataFrame(drilled_well_info)
+
+    wellbores = drilled_well_info["wellbore.name"].unique()
+
+    # print("well_info.data_frame")
+    # print(well_info.data_frame)
 
     print("Last production update", production_update)
     print("Looping through all 4D intervals ...")
@@ -378,7 +393,7 @@ def main():
         print("4D interval:", interval_4d)
 
         if interval_4d[0:10] <= production_update:
-            well_layer =  make_new_well_layer(
+            well_layer = make_new_well_layer(
                 interval_4d,
                 drilled_well_df,
                 drilled_well_info,
@@ -399,7 +414,7 @@ def main():
                 selection="injection",
                 label="Injectors",
             )
-            
+
             label = "injection_well_layer_"
             store_well_layer(well_layer, well_directory, label, interval_4d)
         else:

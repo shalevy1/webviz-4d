@@ -130,7 +130,9 @@ def main():
             sorted_production_wells, well_info, pdm_names_file
         )
 
-        _all_4d, incremental_4d = _metadata.get_all_intervals(surface_metadata, "normal")
+        _all_4d, incremental_4d = _metadata.get_all_intervals(
+            surface_metadata, "normal"
+        )
         incremental_4d.sort()
 
         actual_intervals = []
