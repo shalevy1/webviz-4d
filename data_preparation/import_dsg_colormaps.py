@@ -54,14 +54,15 @@ def import_colormaps(folder, suffix):
                 file_object = open(pickle_file, "wb")
                 pickle.dump(color_map, file_object)
                 file_object.close()
-                print("Colormap " + name + " stored as " + pickle_file)
+                print("  - Colormap " + name + " stored as " + pickle_file)
 
                 color_map_r = color_map.reversed()
                 pickle_file = cmap_file.replace(suffix, "_r.pkl")
                 file_object = open(pickle_file, "wb")
                 pickle.dump(color_map_r, file_object)
                 file_object.close()
-                print("Colormap " + name + "_r stored as " + pickle_file)
+                print("  - Colormap " + name + "_r stored as " + pickle_file)
+                print("")
 
             else:
                 print("ERROR: " + suffix + " not supported")
@@ -76,8 +77,10 @@ def main():
 
     args = parser.parse_args()
     config_file = args.config_file
+    config = common.read_config(config_file)
 
-    settings_file = common.get_config_item(config_file, "settings")
+    settings_file = common.get_config_item(config, "settings")
+    settings_file = common.get_full_path(settings_file)
     settings = common.read_config(settings_file)
 
     folder = settings["map_settings"]["colormaps_folder"]
