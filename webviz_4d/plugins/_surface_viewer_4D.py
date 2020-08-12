@@ -79,7 +79,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.surface_metadata = None
         self.well_base_layers = None
 
-        print("default_interval", default_interval)
+        #print("default_interval", default_interval)
 
         self.fmu_info = self.fmu_directory
         self.well_update = ""
@@ -90,11 +90,11 @@ class SurfaceViewer4D(WebvizPluginABC):
         self.metadata = get_metadata(
             self.shared_settings, map_suffix, delimiter, surface_metadata
         )
-        print("Maps metadata")
-        print(self.metadata)
+        #print("Maps metadata")
+        #print(self.metadata)
 
         self.intervals, incremental = get_all_intervals(self.metadata, "reverse")
-        print(self.intervals)
+        #print(self.intervals)
 
         if default_interval is None:
             default_interval = self.intervals[-1]
@@ -129,7 +129,7 @@ class SurfaceViewer4D(WebvizPluginABC):
                 attribute_maps_file = get_full_path(attribute_maps_file)
                 self.surface_metadata = pd.read_csv(attribute_maps_file)
                 print("Colormaps settings loaded from file", attribute_maps_file)
-                print(self.surface_metadata)
+                #print(self.surface_metadata)
             except:
                 pass
 
@@ -148,12 +148,12 @@ class SurfaceViewer4D(WebvizPluginABC):
             self.map_defaults.append(map3_defaults)
 
         print("Default interval", default_interval)
-        print("Map 1 defaults:")
-        print(map1_defaults)
-        print("Map 2 defaults:")
-        print(map2_defaults)
-        print("Map 3 defaults:")
-        print(map3_defaults)
+        #print("Map 1 defaults:")
+        #print(map1_defaults)
+        #print("Map 2 defaults:")
+        #print(map2_defaults)
+        #print("Map 3 defaults:")
+        #print(map3_defaults)
 
         self.map_defaults.append(map1_defaults)
         self.map_defaults.append(map1_defaults)
@@ -168,7 +168,7 @@ class SurfaceViewer4D(WebvizPluginABC):
             self.map_defaults.append(map2_defaults)
             self.map_defaults.append(map3_defaults)
 
-        print("map_defaults", self.map_defaults)
+        #print("map_defaults", self.map_defaults)
         self.selected_intervals = [default_interval, default_interval, default_interval]
 
         self.selected_names = [None, None, None]
@@ -621,8 +621,8 @@ class SurfaceViewer4D(WebvizPluginABC):
             surface = load_surface(surface_file)
             # print(surface)
 
-            print("self.surface_metadata")
-            print(self.surface_metadata)
+            #print("self.surface_metadata")
+            #print(self.surface_metadata)
             if self.surface_metadata is not None:
                 m_data = self.surface_metadata.loc[
                     self.surface_metadata["map type"] == map_type
@@ -642,12 +642,12 @@ class SurfaceViewer4D(WebvizPluginABC):
                 i_data = a_data.loc[a_data["interval"] == interval]
                 metadata = i_data[["lower_limit", "upper_limit"]]
 
-                print("interval", interval)
-                print(a_data)
-                print(i_data)
+                #print("interval", interval)
+                #print(a_data)
+                #print(i_data)
             else:
                 metadata = None
-            print("metadata", metadata)
+            #print("metadata", metadata)
 
             surface_layers = [
                 make_surface_layer(
@@ -675,22 +675,22 @@ class SurfaceViewer4D(WebvizPluginABC):
                 try:
                     interval_file = os.path.join(
                         self.wellfolder,
-                        "production_well_layers_"
+                        "production_well_layer_"
                         + self.selected_intervals[map_idx]
                         + ".pkl",
                     )
                     interval_layer = pickle.load(open(interval_file, "rb"))
-                    surface_layers.append(interval_layer[0])
+                    surface_layers.append(interval_layer)
                     # print(interval_layer[0]["name"])
 
                     interval_file = os.path.join(
                         self.wellfolder,
-                        "injection_well_layers_"
+                        "injection_well_layer_"
                         + self.selected_intervals[map_idx]
                         + ".pkl",
                     )
                     interval_layer = pickle.load(open(interval_file, "rb"))
-                    surface_layers.append(interval_layer[0])
+                    surface_layers.append(interval_layer)
                     # print(interval_layer[0]["name"])
                 except:
                     print(
