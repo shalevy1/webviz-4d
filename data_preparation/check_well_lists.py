@@ -39,7 +39,7 @@ def main():
         info = pickle.load(file_object)
 
         print(pickle_file)
-        data = info[0]["data"]
+        data = info["data"]
 
         if len(data) > 0:
             for item in data:

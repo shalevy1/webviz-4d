@@ -11,7 +11,7 @@ from webviz_4d._datainput._metadata import (
     get_metadata,
     get_all_intervals,
 )
-import webviz_4d.wells as wdf
+from webviz_4d.wells.well_data_frame import WellDataFrame
 
 
 OIL_PRODUCTION_FILE = "BORE_OIL_VOL.csv"
@@ -69,7 +69,7 @@ def extract_production_info(well_prod_info, interval, selection):
     well_type = None
     fluid = None
     start_date = None
-    stop_date = None
+    stop_date = None 
     info = None
     plot = False
 
@@ -78,7 +78,7 @@ def extract_production_info(well_prod_info, interval, selection):
         pd.set_option("display.max_columns", None)
 
         try:
-            volume = well_prod_info[column].values[0]
+            volume = well_prod_info[column].values[0]/1000
 
             if math.isnan(volume):
                 volume = None
@@ -89,24 +89,21 @@ def extract_production_info(well_prod_info, interval, selection):
             selected_df = well_prod_info[selected_columns].copy()
             volume = selected_df.sum(axis=1).values
 
-            try:
-                volume = volume[0]/1000
-            except:
-                pass
+            volume = volume[0]/1000
 
         if volume and volume > 0:
             well_type = "production"
             fluid = "oil"
             start_date = well_prod_info[OIL_PRODUCTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[OIL_PRODUCTION_FILE + "_Stop date"].values[0]
-            info = fluid + "{:.0f}".format(numvar) + " kSm3"
+            info = fluid + " {:.0f}".format(volume) + " [kSm3]"
             plot = True
 
     elif selection == "injection":
         column = GAS_INJECTION_FILE + "_" + interval
 
         try:
-            volume_gas = well_prod_info[column].values[0]
+            volume_gas = well_prod_info[column].values[0]/1000000
 
             if math.isnan(volume_gas):
                 volume_gas = None
@@ -117,23 +114,20 @@ def extract_production_info(well_prod_info, interval, selection):
             selected_df = well_prod_info[selected_columns].copy()
             volume_gas = selected_df.sum(axis=1).values
 
-            try:
-                volume_gas = volume_gas[0]/1000000
-            except:
-                pass
+            volume_gas = volume_gas[0]/1000000
 
         if volume_gas and volume_gas > 0:
             well_type = "injection"
             fluid = "gas"
             start_date = well_prod_info[GAS_INJECTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[GAS_INJECTION_FILE + "_Stop date"].values[0]
-            info = fluid + "{:.0f}".format(numvar) + " kSm3"
+            info = fluid + " {:.0f}".format(volume_gas) + " [MSm3]"
             plot = True
 
         column = WATER_INJECTION_FILE + "_" + interval
 
         try:
-            volume_water = well_prod_info[column].values[0]
+            volume_water = well_prod_info[column].values[0]/1000
         except:
             columns = well_prod_info.columns
             selected_columns = get_column_list(columns, column, interval)
@@ -141,21 +135,20 @@ def extract_production_info(well_prod_info, interval, selection):
 
             volume_water = selected_df.sum(axis=1).values
 
-            try:
-                volume_water = volume_water[0]/1000
-            except:
-                pass
+            volume_water = volume_water[0]/1000
 
         if volume_water and volume_water > 0:
             well_type = "injection"
             fluid = "water"
             start_date = well_prod_info[WATER_INJECTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[WATER_INJECTION_FILE + "_Stop date"].values[0]
-            info = fluid + "{:.0f}".format(numvar) + " kSm3"
+            info = fluid + " {:.0f}".format(volume_water) + " [kSm3]"
             plot = True
     
-    wellbore = well_prod_info["wellbore.name"].values
-    print(wellbore, info)
+    if plot:
+        wellbore = well_prod_info["wellbore.name"].values
+        print(wellbore, info)
+        
     return well_type, fluid, start_date, stop_date, info, plot
 
 
@@ -185,6 +178,7 @@ def make_new_well_layer(
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
         well_metadata = metadata_df[metadata_df["wellbore.rms_name"] == wellbore]
+
         wellbore_name = well_metadata["wellbore.name"].values[0]
 
         md_top_res = well_metadata["wellbore.pick_md"].values
@@ -196,12 +190,12 @@ def make_new_well_layer(
             short_name = short_name[0]
 
         well_type = well_metadata["wellbore.type"].values
-
         if well_type:
-            well_type = well_type[0]
+            well_type = well_type[0]  
 
         if well_type == "planned":
             # info = well_metadata["wellbore.list_name"].values
+            fluid = ""
             info = ""
             start_date = None
             stop_date = None
@@ -212,6 +206,7 @@ def make_new_well_layer(
                 short_name,
                 well_dataframe,
                 well_type,
+                fluid,
                 info,
                 md_start,
                 selection,
@@ -223,6 +218,7 @@ def make_new_well_layer(
                 short_name,
                 well_dataframe,
                 well_type,
+                fluid,
                 info,
                 md_start,
                 selection,
@@ -248,6 +244,7 @@ def make_new_well_layer(
                 short_name,
                 well_dataframe,
                 well_type,
+                fluid,
                 info,
                 md_start,
                 selection,
@@ -368,12 +365,12 @@ def main():
         well_directory, well_suffix)
     
     drilled_well_info = add_production_volumes(drilled_well_info,prod_info_list)
-    well_info = wdf.WellDataFrame(drilled_well_info)
+    #well_info = WellDataFrame(drilled_well_info)
     
     wellbores = drilled_well_info["wellbore.name"].unique()  
   
-    print("well_info.data_frame")
-    print(well_info.data_frame)
+    #print("well_info.data_frame")
+    #print(well_info.data_frame)
 
     print("Last production update", production_update)
     print("Looping through all 4D intervals ...")
