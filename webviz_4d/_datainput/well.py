@@ -187,6 +187,10 @@ def get_well_polyline(
         elif pd.isna(fluid):
             positions = get_position_data(well_dataframe, md_start)
             status = True
+            
+        elif selection == "active": 
+            positions =get_position_data(well_dataframe, md_start)
+            status = True  
 
     else:
         positions = get_position_data(well_dataframe, md_start)
