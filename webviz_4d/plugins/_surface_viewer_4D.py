@@ -8,6 +8,7 @@ import pandas as pd
 import xtgeo
 import dash
 import pickle
+import glob
 
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -681,7 +682,6 @@ class SurfaceViewer4D(WebvizPluginABC):
                     )
                     interval_layer = pickle.load(open(interval_file, "rb"))
                     surface_layers.append(interval_layer)
-                    # print(interval_layer[0]["name"])
 
                     interval_file = os.path.join(
                         self.wellfolder,
@@ -691,12 +691,16 @@ class SurfaceViewer4D(WebvizPluginABC):
                     )
                     interval_layer = pickle.load(open(interval_file, "rb"))
                     surface_layers.append(interval_layer)
-                    # print(interval_layer[0]["name"])
+                    
+                    search_txt = os.path.join(
+                        self.wellfolder,
+                        "active_well_layer_*")   
+                    search = glob.glob(search_txt)  
+                    active_file = search[0]   
+                    active_layer = pickle.load(open(active_file, "rb"))
+                    surface_layers.append(active_layer)
                 except:
-                    print(
-                        "WARNING: No production/injection wells found for 4D interval:",
-                        self.selected_intervals[map_idx],
-                    )
+                    print("WARNING: Something went wrong when looking for production/injection well lists")
 
             self.selected_names[map_idx] = data["name"]
             self.selected_attributes[map_idx] = data["attr"]

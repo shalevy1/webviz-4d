@@ -73,7 +73,7 @@ def extract_production_info(well_prod_info, interval, selection):
     info = None
     plot = False
 
-    if selection == "production":
+    if selection == "production" or selection == "active":
         column = OIL_PRODUCTION_FILE + "_" + interval
         pd.set_option("display.max_columns", None)
 
@@ -113,7 +113,7 @@ def extract_production_info(well_prod_info, interval, selection):
             )
             plot = True
 
-    elif selection == "injection":
+    elif selection == "injection"or selection == "active":
         column = GAS_INJECTION_FILE + "_" + interval
 
         try:
@@ -135,9 +135,22 @@ def extract_production_info(well_prod_info, interval, selection):
             fluid = "gas"
             start_date = well_prod_info[GAS_INJECTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[GAS_INJECTION_FILE + "_Stop date"].values[0]
-            info = fluid + " {:.0f}".format(volume_gas) + " [MSm3]"
+            
+            if isinstance(stop_date,float):
+                stop_date = "---"
+            else:
+                stop_date = str(stop_date[0:-3])
+                    
+            #print(start_date, stop_date)
+            info = (
+                fluid
+                + " {:.0f}".format(volume_gas)
+                + " [MSm3] Start: "
+                + str(start_date[0:-3])
+                + " Stop: "
+                + stop_date
+            )
             plot = True
-
         column = WATER_INJECTION_FILE + "_" + interval
 
         try:
@@ -156,12 +169,22 @@ def extract_production_info(well_prod_info, interval, selection):
             fluid = "water"
             start_date = well_prod_info[WATER_INJECTION_FILE + "_Start date"].values[0]
             stop_date = well_prod_info[WATER_INJECTION_FILE + "_Stop date"].values[0]
-            info = fluid + " {:.0f}".format(volume_water) + " [kSm3]"
+            
+            if isinstance(stop_date,float):
+                stop_date = "---"
+            else:
+                stop_date = str(stop_date[0:-3])
+                    
+            #print(start_date, stop_date)
+            info = (
+                fluid
+                + " {:.0f}".format(volume_water)
+                + " [kSm3] Start: "
+                + str(start_date[0:-3])
+                + " Stop: "
+                + stop_date
+            )
             plot = True
-
-    if plot:
-        wellbore = well_prod_info["wellbore.name"].values
-        print(wellbore, info)
 
     return well_type, fluid, start_date, stop_date, info, plot
 
@@ -251,8 +274,15 @@ def make_new_well_layer(
                 info,
                 plot,
             ) = extract_production_info(well_metadata, interval, selection)
+            
+            if selection == "active":
+                if stop_date == "---":
+                    plot = True
+                else:
+                    plot = False    
 
         if plot:
+            print(short_name, info)
             polyline_data = well.get_well_polyline(
                 wellbore,
                 short_name,
@@ -419,7 +449,26 @@ def main():
             store_well_layer(well_layer, well_directory, label, interval_4d)
         else:
             print("  - no production data for this time interval")
-
+    
+    prod_headers = prod_info.columns
+    last_header = prod_headers[-1]
+    interval_4d = last_header
+ 
+    well_layer = make_new_well_layer(
+                interval_4d,
+                drilled_well_df,
+                drilled_well_info,
+                prod_info_list,
+                colors,
+                selection="active",
+                label="Active wells",
+            )
+    print("active well layer")
+    print(well_layer)        
+    
+    if well_layer:
+        label = "active_well_layer_"
+        store_well_layer(well_layer, well_directory, label, interval_4d)        
 
 if __name__ == "__main__":
     main()
