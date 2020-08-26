@@ -1,8 +1,8 @@
 depth_maps:
-    top_reservoir: /project/grane/resmod/hstruct/2019/r002/share/results/maps/toplowerheimdal--depthsurface.gri
+    top_reservoir: /project/grane/resmod/hstruct/2019/r003/share/results/maps/toplowerheimdal--depthsurface.gri
 map_settings:
     colormaps_folder: /private/ashska/development/webviz-4d/colormaps/
-    colormaps_settings: /project/grane/resmod/hstruct/2019/share/webviz/webviz-4d/configurations/attribute_maps.csv
+    colormaps_settings: /private/ashska/development/webviz-4d_fork/webviz-4d/configurations/attribute_maps.csv
     default_colormap: viridis
     attribute_settings:     
         maxpos:
@@ -23,8 +23,8 @@ map_settings:
             max:     5
         timeshift:
             color:   seismic 
-            min: -2.0
-            max:  2.0    
+            min: -5.0
+            max:  5.0    
         
 well_colors:
     default: black
@@ -49,6 +49,12 @@ date_labels:
     20180915: PRM8
     20190515: PRM9
     20190915: PRM10
+    20200515: PRM11
+    
+
+    
+    
+
     
 
     
