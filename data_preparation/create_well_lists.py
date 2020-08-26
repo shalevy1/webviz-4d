@@ -72,8 +72,11 @@ def extract_production_info(well_prod_info, interval, selection):
     stop_date = None
     info = None
     plot = False
+    
+    production_selections = ["production", "production_start", "production_completed", "active"]
+    injection_selections = ["injection", "injection_start", "injection_completed", "active"]
 
-    if selection == "production" or selection == "active":
+    if selection in production_selections:
         column = OIL_PRODUCTION_FILE + "_" + interval
         pd.set_option("display.max_columns", None)
 
@@ -113,7 +116,7 @@ def extract_production_info(well_prod_info, interval, selection):
             )
             plot = True
 
-    elif selection == "injection"or selection == "active":
+    elif selection in injection_selections:
         column = GAS_INJECTION_FILE + "_" + interval
 
         try:
@@ -193,12 +196,16 @@ def make_new_well_layer(
     interval_4d,
     wells_df,
     metadata_df,
+    completion_df,
     prod_info_list,
     colors=None,
     selection=None,
     label="Drilled wells",
 ):
     """Make layeredmap wells layer"""
+    interval_start = interval_4d[11:]
+    interval_end = interval_4d[0:10]
+    
     data = []
 
     # print(interval_4d,wells_df,metadata_df,interval_df,prod_info_list,colors,selection,label)
@@ -211,6 +218,7 @@ def make_new_well_layer(
     for wellbore in unique_wellbores:
         plot = True
         md_start = 0
+        md_end = None
         polyline_data = None
 
         well_dataframe = wells_df[wells_df["WELLBORE_NAME"] == wellbore]
@@ -279,10 +287,41 @@ def make_new_well_layer(
                 if stop_date == "---":
                     plot = True
                 else:
-                    plot = False    
-
+                    plot = False  
+                            
+            if start_date and (selection == "production_start" or selection == "injection_start"):
+                # print(wellbore, start_date, interval_start, selection)
+                if start_date >= interval_start and start_date < interval_end:
+                    plot = True
+                else:                   
+                    plot = False
+                    
+            if plot and (selection == "production_completed" or selection == "injection_completed"):
+                try:
+                    top_md = completion_df[completion_df["interval.wellbore"] == wellbore_name][
+                        "interval.mdTop"
+                    ].values[0]
+                except:
+                    top_md = None   
+                
+                try:
+                    base_md = completion_df[completion_df["interval.wellbore"] == wellbore_name][
+                        "interval.mdBottom"
+                    ].values[-1]
+                except:
+                    base_md = None
+                    
+                #print(top_md, base_md)
+                    
+                if top_md and base_md:     
+                    md_start = top_md
+                    md_end =  base_md
+                    plot = True
+                else:
+                    plot = False
+                    
         if plot:
-            print(short_name, info)
+            print(short_name, info, selection)
             polyline_data = well.get_well_polyline(
                 wellbore,
                 short_name,
@@ -291,10 +330,11 @@ def make_new_well_layer(
                 fluid,
                 info,
                 md_start,
+                md_end,
                 selection,
                 colors,
             )
-
+            
         if polyline_data:
             data.append(polyline_data)
 
@@ -390,9 +430,6 @@ def main():
     intervals_4d, incremental = get_all_intervals(metadata, "reverse")
     colors = common.get_well_colors(settings)
 
-    print("intervals_4d")
-    print(intervals_4d)
-
     prod_info_files = [os.path.join(prod_info_dir, OIL_PRODUCTION_FILE)]
     prod_info_files.append(os.path.join(prod_info_dir, GAS_INJECTION_FILE))
     prod_info_files.append(os.path.join(prod_info_dir, WATER_INJECTION_FILE))
@@ -410,12 +447,11 @@ def main():
     )
 
     drilled_well_info = add_production_volumes(drilled_well_info, prod_info_list)
-    # well_info = WellDataFrame(drilled_well_info)
+    #well_info = WellDataFrame(drilled_well_info)
 
     wellbores = drilled_well_info["wellbore.name"].unique()
 
     # print("well_info.data_frame")
-    # print(well_info.data_frame)
 
     print("Last production update", production_update)
     print("Looping through all 4D intervals ...")
@@ -427,6 +463,7 @@ def main():
                 interval_4d,
                 drilled_well_df,
                 drilled_well_info,
+                interval_df,
                 prod_info_list,
                 colors,
                 selection="production",
@@ -434,11 +471,38 @@ def main():
             )
             label = "production_well_layer_"
             store_well_layer(well_layer, well_directory, label, interval_4d)
+            
+            well_layer = make_new_well_layer(
+                interval_4d,
+                drilled_well_df,
+                drilled_well_info,
+                interval_df,
+                prod_info_list,
+                colors,
+                selection="production_start",
+                label="Producers - started",
+            )
+            label = "production_start_well_layer_"
+            store_well_layer(well_layer, well_directory, label, interval_4d)
+            
+            well_layer = make_new_well_layer(
+                interval_4d,
+                drilled_well_df,
+                drilled_well_info,
+                interval_df,
+                prod_info_list,
+                colors,
+                selection="production_completed",
+                label="Producers - completed",
+            )
+            label = "production_completed_well_layer_"
+            store_well_layer(well_layer, well_directory, label, interval_4d)
 
             well_layer = make_new_well_layer(
                 interval_4d,
                 drilled_well_df,
                 drilled_well_info,
+                interval_df,
                 prod_info_list,
                 colors,
                 selection="injection",
@@ -446,6 +510,32 @@ def main():
             )
 
             label = "injection_well_layer_"
+            store_well_layer(well_layer, well_directory, label, interval_4d)
+            
+            well_layer = make_new_well_layer(
+                interval_4d,
+                drilled_well_df,
+                drilled_well_info,
+                interval_df,
+                prod_info_list,
+                colors,
+                selection="injection_start",
+                label="Injectors - started",
+            )
+            label = "injection_start_well_layer_"
+            store_well_layer(well_layer, well_directory, label, interval_4d)
+            
+            well_layer = make_new_well_layer(
+                interval_4d,
+                drilled_well_df,
+                drilled_well_info,
+                interval_df,
+                prod_info_list,
+                colors,
+                selection="injection_completed",
+                label="Injectors - completed",
+            )
+            label = "injection_completed_well_layer_"
             store_well_layer(well_layer, well_directory, label, interval_4d)
         else:
             print("  - no production data for this time interval")
@@ -458,13 +548,12 @@ def main():
                 interval_4d,
                 drilled_well_df,
                 drilled_well_info,
+                interval_df,
                 prod_info_list,
                 colors,
                 selection="active",
                 label="Active wells",
-            )
-    print("active well layer")
-    print(well_layer)        
+            )      
     
     if well_layer:
         label = "active_well_layer_"

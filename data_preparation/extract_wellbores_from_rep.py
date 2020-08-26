@@ -80,6 +80,10 @@ def write_metadata(
         os.mkdir(export_dir)
 
     rms_name = wellbore_name.replace("/", "_").replace("NO ", "").replace(" ", "_")
+    
+    if end_date:
+        end_date = end_date[0:10]
+        
     outfile = os.path.join(export_dir, "." + rms_name + ".w.yaml")
 
     file_object = open(outfile, "w")
@@ -227,6 +231,13 @@ def main():
                         }
                         completion_dict = {"interval": completion}
                         completions.append(completion_dict)
+        
+        if wellbore == "NO 16/2-E-1 H":                
+            casing_list = wrappers.Wellbore(
+                field, wellbore
+            ).get_wellbore_casing_data() 
+            for item in casing_list:
+                print(item)       
 
         md_wellbore = df_trajectory["md"]
         tvd_wellbore = df_trajectory["tvd"]

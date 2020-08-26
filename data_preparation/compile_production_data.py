@@ -48,14 +48,14 @@ def check_production_wells(sorted_production_wells, well_info, pdm_names_file):
         well_name = common.get_wellname(well_info, pdm_well)
 
         if not well_name:
-            print("ERROR: " + pdm_well + " not found in REP database")
+            print("WARNING: " + pdm_well + " not found in REP database")
 
             try:
                 pdm_names = pd.read_csv(pdm_names_file)
                 row = pdm_names[pdm_names["PDM well name"] == pdm_well]
                 correct_name = row["Well name"][0]
                 well_name = common.get_wellname(well_info, correct_name)
-                print("Alias name found in " + pdm_names_file, pdm_well, well_name)
+                print("   - Alias name found in " + pdm_names_file, pdm_well, well_name)
             except:
                 print("ERROR: Alias should be defined in " + pdm_names_file)
                 well_name = None
@@ -139,7 +139,7 @@ def main():
         for interval in incremental_4d:
             date1, date2 = common.get_dates(interval)
 
-            if date1 < today_str:
+            if date2 < today_str:
                 actual_intervals.append(interval)
 
         volume_codes = [
@@ -157,7 +157,7 @@ def main():
             stop_dates = []
             intervals = []
             volumes = np.zeros(
-                (len(sorted_production_wells), len(actual_intervals) + 1)
+                (len(sorted_production_wells), len(actual_intervals) + 2)
             )
 
             print(volume_code)
@@ -188,18 +188,25 @@ def main():
                         & (well_prod_data["DATEPRD"] < date2),
                         volume_code,
                     ].sum()
-
-                # Change heading in last actual interval
-                intervals[-1] = intervals[-1][0:10] + "-now"
-
+                
+                # Add a last incremental interval - from last to now     
+                last_interval = date2 + "-now"
+                intervals.append(last_interval)
+                volumes[index, i+1] = well_prod_data.loc[
+                        (well_prod_data["DATEPRD"] >= date2),
+                        volume_code,
+                ].sum()
+                
+                # Add a column with accumulated total production
                 date1_first, _date2_first = common.get_dates(actual_intervals[0])
                 total = date1_first + "-now"
                 intervals.append(total)
-                volumes[index, i + 1] = well_prod_data.loc[
+                volumes[index, i + 2] = well_prod_data.loc[
                     (well_prod_data["DATEPRD"] >= date1_first), volume_code,
                 ].sum()
 
                 index = index + 1
+                
 
             volume_df["PDM well name"] = pdm_names
             volume_df["Well name"] = well_names
@@ -209,8 +216,9 @@ def main():
             pd.set_option("display.max_columns", None)
             pd.set_option("display.max_rows", None)
 
-            for i in range(0, len(actual_intervals) + 1):
+            for i in range(0, len(actual_intervals) + 2):
                 volume_df[intervals[i]] = volumes[:, i]
+                print(intervals[i])
 
             volume_df_actual = volume_df[volume_df[total] > 0]
 

@@ -69,6 +69,7 @@ def main():
     surface_metadata = _metadata.get_metadata(
         shared_settings, map_suffix, delimiter, metadata_file
     )
+    print("surface_metadata")
     print(surface_metadata)
 
     surface_types = ["observations", "results"]
@@ -110,7 +111,7 @@ def main():
     surface_files = surface_files.replace("/.", "/").replace(".yaml", "")
 
     for _index, row in surface_metadata.iterrows():
-        # print(row)
+        #print(row)
         map_type = row["map_type"]
         surface_name = row["data.name"]
         attribute = row["data.content"]
@@ -126,7 +127,7 @@ def main():
 
         if not mode == "Full":
             realization = row["fmu_id.realization"]
-            iteration = row["fmu_id.iteration"]
+            iteration = row["fmu_id.ensemble"]
             # print(realization, iteration)
 
             if map_type == "results":
