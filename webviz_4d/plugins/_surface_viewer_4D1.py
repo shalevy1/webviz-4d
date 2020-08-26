@@ -8,6 +8,7 @@ import pandas as pd
 import xtgeo
 import dash
 import pickle
+import glob
 
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -32,8 +33,10 @@ from webviz_4d._datainput.common import (
 from webviz_4d._datainput.well import (
     load_all_wells,
     make_new_well_layer,
+    filter_well_layer,
 )
 from webviz_4d._private_plugins.surface_selector import SurfaceSelector
+from webviz_4d._private_plugins.selector import Selector
 from webviz_4d._datainput._colormaps import load_custom_colormaps
 
 from webviz_4d._datainput._metadata import (
@@ -47,128 +50,174 @@ from webviz_4d._datainput._metadata import (
 
 
 class SurfaceViewer4D1(WebvizPluginABC):
-    """### SurfaceViewerFMU
-
-A plugin to covisualize surfaces from an ensemble.
-There are 3 separate map views. 2 views can be set independently, while
-the 3rd view displays the resulting map by combining the other maps e.g.
-by taking the difference or summing the values.
-
-There is flexibility in which combinations of surfaces that are displayed
-and calculated, such that surfaces can e.g. be compared across ensembles.
-
-The available maps are gathered from the `share/results/maps/` folder
-for each realization. Statistical calculations across the ensemble(s) are
-done on the fly. If the ensemble or surfaces have a large size it is recommended
-to run webviz in `portable` mode so that the statistical surfaces are pre-calculated
-and available for instant viewing.
-
-* `ensembles`: Which ensembles in `shared_settings` to visualize.
-* `attributes`: List of surface attributes to include, if not given
-                all surface attributes will be included.
-* `attribute_settings`: Dictionary with setting for each attribute.
-                Available settings are 'min' and 'max' to truncate colorscale,
-                'color' to set the colormap (default is viridis) and `unit` as
-                displayed label.
-* `wellfolder`: Folder with RMS wells
-* `wellsuffix`: File suffix for wells in well folder.
-"""
+    """### SurfaceViewer4D """
 
     def __init__(
         self,
         app,
-        ensembles: list,
-        attributes: list = None,
-        attribute_settings: dict = None,
         wellfolder: Path = None,
-        configuration: Path = None,
+        production_data: Path = None,
+        map1_defaults: dict = None,
+        well_suffix: str = ".w",
+        map_suffix: str = ".gri",
+        default_interval: str = None,
+        settings: Path = None,
+        delimiter: str = "--",
+        surface_metadata: str = "surface_metadata.csv",
     ):
 
         super().__init__()
-        self.ens_paths = {
-            ens: app.webviz_settings["shared_settings"]["scratch_ensembles"][ens]
-            for ens in ensembles
-        }
-        self.delimiter = "--"
-        self.observation = "observations"
-        self.attribute_settings = attribute_settings if attribute_settings else {}
+        self.shared_settings = app.webviz_settings["shared_settings"]
+        self.fmu_directory = self.shared_settings["fmu_directory"]
 
-        # Find FMU directory
-        keys = list(self.ens_paths.keys())
-        path = self.ens_paths[keys[0]]
-        # print(path)
+        self.map_suffix = map_suffix
+        self.delimiter = delimiter
+        self.wellfolder = wellfolder
+        self.observations = "observations"
+        self.simulations = "results"
+        self.config = None
+        self.attribute_settings = {}
+        self.surface_metadata = None
+        self.well_base_layers = None
 
-        self.directory = os.path.dirname(path).replace("*", "0")
-        self.fmu_info = os.path.dirname(self.directory)
-        # print(directory)
+        #print("default_interval", default_interval)
+
+        self.fmu_info = self.fmu_directory
+        self.well_update = ""
+        self.production_update = ""
 
         self.number_of_maps = 1
-        self.configuration = configuration
-        self.config = read_config(self.configuration)
-        default_interval = self.config["map_settings"]["default_interval"]
-        self.selected_intervals = [default_interval, default_interval, default_interval]
-        # print(self.config)
-        self.map_defaults = get_map_defaults(self.config, self.number_of_maps)
-        # print('self.map_defaults ',self.map_defaults)
 
-        self.metadata, self.dates = get_metadata(
-            self.directory, self.map_defaults[0], self.delimiter
+        self.metadata = get_metadata(
+            self.shared_settings, map_suffix, delimiter, surface_metadata
         )
-        # print(self.metadata)
-        # print("")
+        #print("Maps metadata")
+        #print(self.metadata)
 
-        self.intervals = get_all_intervals(self.metadata)
-        # print("self.intervals ", self.intervals)
+        self.intervals, incremental = get_all_intervals(self.metadata, "reverse")
+        #print(self.intervals)
 
-        self.selected_names = [None, None, None]
-        self.selected_attributes = [None, None, None]
-        self.selected_ensembles = [None, None, None]
-        self.selected_realizations = [None, None, None]
+        if default_interval is None:
+            default_interval = self.intervals[-1]
+
+        self.surface_layer = None
+
+        if settings:
+            self.configuration = settings
+            self.config = read_config(self.configuration)
+            # print(self.config)
+
+            try:
+                self.attribute_settings = self.config["map_settings"][
+                    "attribute_settings"
+                ]
+            except:
+                pass
+
+            try:
+                colormaps_folder = self.config["map_settings"]["colormaps_folder"]
+
+                if colormaps_folder:
+                    colormaps_folder = get_full_path(colormaps_folder)
+
+                    print("Reading custom colormaps from:", colormaps_folder)
+                    load_custom_colormaps(colormaps_folder)
+            except:
+                pass
+
+            try:
+                attribute_maps_file = self.config["map_settings"]["colormaps_settings"]
+                attribute_maps_file = get_full_path(attribute_maps_file)
+                self.surface_metadata = pd.read_csv(attribute_maps_file)
+                print("Colormaps settings loaded from file", attribute_maps_file)
+                #print(self.surface_metadata)
+            except:
+                pass
+
+        self.map_defaults = []
+
+        if map1_defaults is not None:
+            map1_defaults["interval"] = default_interval
+            self.map_defaults.append(map1_defaults)
+
+        print("Default interval", default_interval)
+        #print("Map 1 defaults:")
+        #print(map1_defaults)
+
+
+        if map1_defaults is None:
+            self.map_defaults = create_map_defaults(
+                self.metadata, default_interval, self.observations, self.simulations
+            )
+        else:
+            self.map_defaults = []
+            self.map_defaults.append(map1_defaults)
+
+        #print("map_defaults", self.map_defaults)
+        self.selected_interval = default_interval
+
+        self.selected_name = None
+        self.selected_attribute = None
+        self.selected_ensemble = None
+        self.selected_realization = None
         self.wellsuffix = ".w"
 
-        self.drilled_well_df, self.drilled_well_info, self.interval_df = load_all_wells(
-            wellfolder, self.wellsuffix
-        )
-        planned_wells_dir = [f.path for f in os.scandir(wellfolder) if f.is_dir()]
-
+        self.well_base_layers = []
         self.colors = get_well_colors(self.config)
 
-        self.well_base_layer = []
-        self.well_base_layer.append(
-            make_new_well_layer(
-                self.selected_intervals[0],
-                self.drilled_well_df,
-                self.drilled_well_info,
-                self.interval_df,
-            )
-        )
-        self.well_base_layer.append(
-            make_new_well_layer(
-                self.selected_intervals[0],
-                self.drilled_well_df,
-                self.drilled_well_info,
-                self.interval_df,
-                self.colors,
-                selection="reservoir_section",
-                label="Reservoir sections",
-            )
-        )
+        if wellfolder and os.path.isdir(wellfolder):
+            self.wellfolder = wellfolder
+            update_dates = get_update_dates(wellfolder)
+            self.well_update = update_dates["well_update_date"]
+            self.production_update = update_dates["production_last_date"]
 
-        for folder in planned_wells_dir:
-            planned_well_df, planned_well_info, dummy_df = load_all_wells(
-                folder, self.wellsuffix
-            )
-            self.well_base_layer.append(
-                make_new_well_layer(
-                    self.selected_intervals[0],
-                    planned_well_df,
-                    planned_well_info,
-                    dummy_df,
-                    self.colors,
-                    selection="planned",
-                    label=os.path.basename(folder),
+            (
+                self.drilled_well_df,
+                self.drilled_well_info,
+                self.interval_df,
+            ) = load_all_wells(wellfolder, self.wellsuffix)
+
+            if self.drilled_well_df is not None:
+
+                self.well_base_layers.append(
+                    make_new_well_layer(
+                        self.selected_interval,
+                        self.drilled_well_df,
+                        self.drilled_well_info,
+                    )
                 )
-            )
+
+                self.well_base_layers.append(
+                    make_new_well_layer(
+                        self.selected_interval,
+                        self.drilled_well_df,
+                        self.drilled_well_info,
+                        colors=self.colors,
+                        selection="reservoir_section",
+                        label="Reservoir sections",
+                    )
+                )
+
+            planned_wells_dir = [f.path for f in os.scandir(wellfolder) if f.is_dir()]
+
+            for folder in planned_wells_dir:
+                planned_well_df, planned_well_info, dummy_df = load_all_wells(
+                    folder, self.wellsuffix
+                )
+
+                if planned_well_df is not None:
+                    self.well_base_layers.append(
+                        make_new_well_layer(
+                            self.selected_interval,
+                            planned_well_df,
+                            planned_well_info,
+                            self.colors,
+                            selection="planned",
+                            label=os.path.basename(folder),
+                        )
+                    )
+        elif wellfolder and not os.path.isdir(wellfolder):
+            print("ERROR: Folder", wellfolder, "doesn't exist. No wells loaded")
 
         self.selector = SurfaceSelector(
             app, self.metadata, self.intervals, self.map_defaults[0]
@@ -178,7 +227,10 @@ and available for instant viewing.
 
     @property
     def ensembles(self):
-        return get_col_values(self.metadata, "fmu_id.iteration")
+        try:
+            return get_col_values(self.metadata, "fmu_id.ensemble")
+        except:
+            return get_col_values(self.metadata, "fmu_id.iteration")   
 
     def realizations(self, ensemble):
         sorted_realizations = sort_realizations(
@@ -196,14 +248,6 @@ and available for instant viewing.
             {
                 "id": self.uuid("settings-view1"),
                 "content": ("Settings for the first map view"),
-            },
-            {
-                "id": self.uuid("settings-view2"),
-                "content": ("Settings for the second map view"),
-            },
-            {
-                "id": self.uuid("settings-view3"),
-                "content": ("Settings for the third map view"),
             },
         ]
 
@@ -231,7 +275,7 @@ and available for instant viewing.
                 html.Div(
                     [
                         html.Label(
-                            "Ensemble/Iteration",
+                            "Ensemble / Iteration",
                             style={"fontSize": 15, "fontWeight": "bold"},
                         ),
                         html.Div(
@@ -319,6 +363,8 @@ and available for instant viewing.
             id=self.uuid("layout"),
             children=[
                 html.H3("WebViz-4D " + self.fmu_info),
+                html.H6("Well data update: " + self.well_update),
+                html.H6("Production data update: " + self.production_update),
                 wcc.FlexBox(
                     style={"fontSize": "1rem"},
                     children=[
@@ -338,7 +384,7 @@ and available for instant viewing.
                                 ),
                             ],
                         ),
-                    ],
+                    ]        
                 ),
                 wcc.FlexBox(
                     style={"fontSize": "1rem"},
@@ -363,9 +409,9 @@ and available for instant viewing.
                                     },
                                 ),
                                 LayeredMap(
-                                    sync_ids=[],
+                                    #sync_ids=[self.uuid("map2"), self.uuid("map3")],
                                     id=self.uuid("map"),
-                                    height=600,
+                                    height=1000,
                                     layers=[],
                                     hillShading=False,
                                 ),
@@ -389,11 +435,9 @@ and available for instant viewing.
         )
 
     def get_real_runpath(self, data, ensemble, real, map_type):
-        # print("get_real_runpath ", data, ensemble, real, map_type)
-        # print('self.intervals',self.intervals)
 
         filepath = compose_filename(
-            self.directory,
+            self.shared_settings,
             real,
             ensemble,
             map_type,
@@ -406,16 +450,6 @@ and available for instant viewing.
         # print('filepath: ',filepath)
         return filepath
 
-    def get_ens_runpath(self, data, ensemble, map_type):
-        data = make_fmu_filename(data)
-        runpaths = self.ens_df.loc[(self.ens_df["ENSEMBLE"] == ensemble)][
-            "RUNPATH"
-        ].unique()
-        return [
-            str((Path(runpath) / "share" / map_type / "maps" / f"{data}.gri"))
-            for runpath in runpaths
-        ]
-
     def get_heading(self, map_ind, observation_type):
         if self.map_defaults[map_ind]["map_type"] == observation_type:
             txt = "Observed map: "
@@ -423,25 +457,178 @@ and available for instant viewing.
         else:
             txt = "Simulated map: "
             info = (
-                self.selected_ensembles[map_ind]
+                self.selected_ensemble
                 + " "
-                + self.selected_realizations[map_ind]
+                + self.selected_realization
             )
 
         heading = (
             txt
-            + self.selected_attributes[map_ind]
+            + self.selected_attribute
             + " ("
-            + self.selected_names[map_ind]
+            + self.selected_name
             + ")"
         )
 
         sim_info = info
-        print("self.selected_intervals[map_ind] ", self.selected_intervals[map_ind])
-        print("self.config ", self.config)
-        label = get_plot_label(self.config, self.selected_intervals[map_ind])
+        label = get_plot_label(self.config, self.selected_interval)
 
         return heading, sim_info, label
+
+    def make_map(self, data, ensemble, real, attribute_settings, map_idx):
+        # print(data, ensemble, real, attribute_settings, map_idx)
+        start = timer()
+        data = json.loads(data)
+        attribute_settings = json.loads(attribute_settings)
+        map_type = self.map_defaults[map_idx]["map_type"]
+
+        surface_file = self.get_real_runpath(data, ensemble, real, map_type)
+
+        if os.path.isfile(surface_file):
+            surface = load_surface(surface_file)
+            # print(surface)
+
+            #print("self.surface_metadata")
+            #print(self.surface_metadata)
+            if self.surface_metadata is not None:
+                m_data = self.surface_metadata.loc[
+                    self.surface_metadata["map type"] == map_type
+                ]
+
+                a_data = m_data.loc[m_data["attribute"] == data["attr"]]
+
+                interval = (
+                    data["date"][0:4]
+                    + data["date"][5:7]
+                    + data["date"][8:10]
+                    + "_"
+                    + data["date"][11:15]
+                    + data["date"][16:18]
+                    + data["date"][19:21]
+                )
+                i_data = a_data.loc[a_data["interval"] == interval]
+                metadata = i_data[["lower_limit", "upper_limit"]]
+
+                #print("interval", interval)
+                #print(a_data)
+                #print(i_data)
+            else:
+                metadata = None
+            #print("metadata", metadata)
+
+            surface_layers = [
+                make_surface_layer(
+                    surface,
+                    name=data["attr"],
+                    color=attribute_settings.get(data["attr"], {}).get(
+                        "color", "inferno"
+                    ),
+                    min_val=attribute_settings.get(data["attr"], {}).get("min", None),
+                    max_val=attribute_settings.get(data["attr"], {}).get("max", None),
+                    unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
+                    hillshading=False,
+                    min_max_df=metadata,
+                )
+            ]
+
+            # print(f"make surface layer {timer()-start}")
+            self.selected_interval = data["date"]
+
+            if self.well_base_layers:
+                for well_layer in self.well_base_layers:
+                    # print(well_layer["name"])
+                    surface_layers.append(well_layer)
+
+                try:
+                    interval_file = os.path.join(
+                        self.wellfolder,
+                        "production_well_layer_"
+                        + self.selected_interval
+                        + ".pkl",
+                    )
+                    interval_layer = pickle.load(open(interval_file, "rb"))
+                    surface_layers.append(interval_layer)
+                    
+                    #filtered_well_layer = filter_well_layer(interval_layer,84)
+                    #surface_layers.append(filtered_well_layer)
+                    
+                    prod_start_file = os.path.join(
+                        self.wellfolder,
+                        "production_start_well_layer_"
+                        + self.selected_interval
+                        + ".pkl",
+                    )
+                    prod_start_layer = pickle.load(open(prod_start_file, "rb"))
+                    surface_layers.append(prod_start_layer)
+                    
+                    prod_completed_file = os.path.join(
+                        self.wellfolder,
+                        "production_completed_well_layer_"
+                        + self.selected_interval
+                        + ".pkl",
+                    )
+                    prod_completed_layer = pickle.load(open(prod_completed_file, "rb"))
+                    surface_layers.append(prod_completed_layer)
+
+                    interval_file = os.path.join(
+                        self.wellfolder,
+                        "injection_well_layer_"
+                        + self.selected_interval
+                        + ".pkl",
+                    )
+                    interval_layer = pickle.load(open(interval_file, "rb"))
+                    surface_layers.append(interval_layer)
+                    
+                    inject_start_file = os.path.join(
+                        self.wellfolder,
+                        "injection_start_well_layer_"
+                        + self.selected_interval
+                        + ".pkl",
+                    )
+                    inject_start_layer = pickle.load(open(inject_start_file, "rb"))
+                    surface_layers.append(inject_start_layer)
+                    
+                    inject_completed_file = os.path.join(
+                        self.wellfolder,
+                        "injection_completed_well_layer_"
+                        + self.selected_interval
+                        + ".pkl",
+                    )
+                    inject_completed_layer = pickle.load(open(inject_completed_file, "rb"))
+                    surface_layers.append(inject_completed_layer)
+                    
+                    search_txt = os.path.join(
+                        self.wellfolder,
+                        "active_well_layer_*")   
+                    search = glob.glob(search_txt)  
+                    active_file = search[0]   
+                    active_layer = pickle.load(open(active_file, "rb"))
+                    surface_layers.append(active_layer)
+                except Exception as e:
+                    if hasattr(e, 'message'):
+                        print(e.message)
+                    else:
+                        print(e)
+
+            self.selected_name = data["name"]
+            self.selected_attribute = data["attr"]
+            self.selected_ensemble = ensemble
+            self.selected_realization = real
+
+            heading, sim_info, label = self.get_heading(map_idx, self.observations)
+        else:
+            print("WARNING: File", surface_file, "doesn't exist")
+            heading = "Selected map doesn't exist"
+            sim_info = "-"
+            surface_layers = []
+            label = "-"
+
+        return (
+            heading,
+            sim_info,
+            surface_layers,
+            label,
+        )
 
     def set_callbacks(self, app):
         # First map
@@ -463,80 +650,9 @@ and available for instant viewing.
         def _set_base_layer(
             data, ensemble, real, attribute_settings,
         ):
-            print("data ", data)
-            start = timer()
-            data = json.loads(data)
-            attribute_settings = json.loads(attribute_settings)
-            map_type1 = self.map_defaults[0]["map_type"]
 
-            print(f"loading data {timer()-start}")
-            start = timer()
-            surface = load_surface(
-                self.get_real_runpath(data, ensemble, real, map_type1)
-            )
-            print(f"loading surface {timer()-start}")
-            start = timer()
-            surface_layers = [
-                make_surface_layer(
-                    surface,
-                    name="surface",
-                    color=attribute_settings.get(data["attr"], {}).get(
-                        "color", "viridis"
-                    ),
-                    min_val=attribute_settings.get(data["attr"], {}).get("min", None),
-                    max_val=attribute_settings.get(data["attr"], {}).get("max", None),
-                    unit=attribute_settings.get(data["attr"], {}).get("unit", ""),
-                    hillshading=False,
-                )
-            ]
-            print(f"make surface layer {timer()-start}")
-            self.selected_intervals[0] = data["date"]
+            return self.make_map(data, ensemble, real, attribute_settings, 0)
 
-            start2 = timer()
-            well_layers = self.well_base_layer.copy()
-            print(f"copy well layer {timer()-start2}")
-            well_layers.append(
-                make_new_well_layer(
-                    self.selected_intervals[0],
-                    self.drilled_well_df,
-                    self.drilled_well_info,
-                    self.interval_df,
-                    self.colors,
-                    selection="production",
-                    label="Producers",
-                )
-            )
-            well_layers.append(
-                make_new_well_layer(
-                    self.selected_intervals[0],
-                    self.drilled_well_df,
-                    self.drilled_well_info,
-                    self.interval_df,
-                    self.colors,
-                    selection="injection",
-                    label="Injectors",
-                )
-            )
-
-            for well_layer in well_layers:
-                surface_layers.append(well_layer)
-            print(f"Well data {timer()-start}")
-
-            self.selected_names[0] = data["name"]
-            self.selected_attributes[0] = data["attr"]
-            self.selected_ensembles[0] = ensemble
-            self.selected_realizations[0] = real
-
-            map_ind = 0
-            heading, sim_info, label = self.get_heading(map_ind, self.observation)
-            print(heading, sim_info, label)
-            print(f"remaining {timer()-start}")
-            return (
-                heading,
-                sim_info,
-                surface_layers,
-                label,
-            )
 
         def _update_from_btn(_n_prev, _n_next, current_value, options):
             """Updates dropdown value if previous/next btn is clicked"""
@@ -556,6 +672,10 @@ and available for instant viewing.
         for btn_name in [
             "ensemble",
             "realization",
+            "ensemble2",
+            "realization2",
+            "ensemble3",
+            "realization3",
         ]:
             app.callback(
                 Output(self.uuid(f"{btn_name}"), "value"),
@@ -635,6 +755,26 @@ and available for instant viewing.
         return store_functions
 
 
+@CACHE.memoize(timeout=CACHE.TIMEOUT)
+def calculate_surface(fns, statistic):
+    return surface_from_json(json.load(save_surface(fns, statistic)))
+
+
+def surface_to_json(surface):
+    return json.dumps(
+        {
+            "ncol": surface.ncol,
+            "nrow": surface.nrow,
+            "xori": surface.xori,
+            "yori": surface.yori,
+            "rotation": surface.rotation,
+            "xinc": surface.xinc,
+            "yinc": surface.yinc,
+            "values": surface.values.copy().filled(np.nan).tolist(),
+        }
+    )
+
+
 def surface_from_json(surfaceobj):
     return xtgeo.RegularSurface(**surfaceobj)
 
@@ -685,3 +825,10 @@ def find_files(folder, suffix) -> io.BytesIO:
             sorted([str(filename) for filename in folder.glob(f"*{suffix}")])
         ).encode()
     )
+
+
+def make_fmu_filename(data):
+    filename = f"{data['name']}--{data['attr']}"
+    if data["date"] is not None:
+        filename += f"--{data['date']}"
+    return filename

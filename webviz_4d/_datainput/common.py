@@ -96,14 +96,14 @@ def decode_filename(file_path, delimiter):
     if "results" in str(surfacepath):
         map_type = "results"
 
-        number = _find_number(surfacepath, "realization")
+        number = find_number(surfacepath, "realization")
 
         if number:
             realization = "realization-" + number
             number = None
 
             if realization:
-                number = _find_number(surfacepath, "iter")
+                number = find_number(surfacepath, "iter")
 
                 if number:
                     ensemble = "iter-" + number
@@ -129,7 +129,7 @@ def decode_filename(file_path, delimiter):
     return directory, realization, ensemble, map_type, name, attribute, dates
 
 
-def _find_number(surfacepath, txt):
+def find_number(surfacepath, txt):
     """ Return the first number found in a part of a filename (surface) """
     filename = str(surfacepath)
     number = None
@@ -383,6 +383,7 @@ def get_full_path(item):
     full_path = item
 
     directory = os.getcwd()
+    print("get_full_path:",item,directory)
 
     if path[0:3] == "../":
         path = path[3:]

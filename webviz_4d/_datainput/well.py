@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import yaml
 import os
+import statistics
 from pandas import json_normalize
 from webviz_config.common_cache import CACHE
 from pathlib import Path
@@ -133,19 +134,25 @@ def load_all_wells(wellfolder, wellsuffix):
     return (all_wells_df, metadata, interval_df)
 
 
-def get_position_data(well_dataframe, md_start):
-    """ Return x- and y-values for a well after a given depth """
-    well_dataframe = well_dataframe[well_dataframe["MD"] > md_start]
+def get_position_data(well_dataframe, md_start, md_end):
+    """ Return x- and y-values for a well between given depths """
+    
+    well_dataframe = well_dataframe[well_dataframe["MD"] >= md_start]
+    
+    if md_end:
+        well_dataframe = well_dataframe[well_dataframe["MD"] <= md_end]
+        
     positions = well_dataframe[["X_UTME", "Y_UTMN"]].values
 
     return positions
 
 
 def get_well_polyline(
-    wellbore, short_name, well_dataframe, well_type, fluid, info, md_start, selection, colors
-):
+    wellbore, short_name, well_dataframe, well_type, fluid, info, md_start, md_end, selection, colors
+): 
     """ Extract polyline data - well trajectory, color and tooltip """
     color = "black"
+    
     if colors:
         color = colors["default"]
 
@@ -158,18 +165,18 @@ def get_well_polyline(
 
     if selection:
         if (
-            ("reservoir" in selection or "completed" in selection)
+            ("reservoir" in selection)
             and not pd.isna(fluid)
             and md_start > 0
         ):
-            positions = get_position_data(well_dataframe, md_start)
+            positions = get_position_data(well_dataframe, md_start, md_end)
             status = True
 
         elif selection == "planned" and well_type == selection:
             if colors:
                 color = colors[selection]
 
-            positions = get_position_data(well_dataframe, md_start)
+            positions = get_position_data(well_dataframe, md_start, md_end)
             status = True
 
         elif well_type == selection and not pd.isna(fluid) and md_start > 0:
@@ -181,19 +188,39 @@ def get_well_polyline(
             if colors:
                 color = colors[fluid + "_" + selection]
 
-            positions = get_position_data(well_dataframe, md_start)
+            positions = get_position_data(well_dataframe, md_start, md_end)
             status = True
 
         elif pd.isna(fluid):
-            positions = get_position_data(well_dataframe, md_start)
+            positions = get_position_data(well_dataframe, md_start, md_end)
             status = True
             
         elif selection == "active": 
-            positions =get_position_data(well_dataframe, md_start)
+            positions =get_position_data(well_dataframe, md_start, md_end)
             status = True  
+            
+        elif selection == "production_start": 
+            positions =get_position_data(well_dataframe, md_start, md_end)
+            color = colors[fluid + "_production"]
+            status = True  
+            
+        elif selection == "production_completed": 
+            positions =get_position_data(well_dataframe, md_start, md_end)
+            color = colors[fluid + "_production"]
+            status = True      
+            
+        elif selection == "injection_start": 
+            positions =get_position_data(well_dataframe, md_start, md_end)
+            color = colors[fluid + "_injection"]
+            status = True  
+            
+        elif selection == "injection_completed": 
+            positions =get_position_data(well_dataframe, md_start, md_end)
+            color = colors[fluid + "_injection"]
+            status = True              
 
     else:
-        positions = get_position_data(well_dataframe, md_start)
+        positions = get_position_data(well_dataframe, md_start, md_end)
         status = True
 
     if status:
@@ -205,19 +232,62 @@ def get_well_polyline(
         }
 
 
+def filter_well_layer(well_layer, limit):
+    filtered_data = []
+    data = well_layer["data"]
+    volumes = []
+    
+    for item in data:
+        tooltip = item["tooltip"]
+        content = tooltip.split(":")
+        wellbore_name = content[0]
+        index = content[1].find("oil")
+        volume_info = content[1][index:].split()
+        fluid = volume_info[0]
+        volume = float(volume_info[1])
+        unit = volume_info[2]
+        volumes.append(volume)
+    
+    limit = statistics.mean(volumes)
+    print(limit)
+        
+    for item in data:
+        tooltip = item["tooltip"]
+        content = tooltip.split(":")
+        wellbore_name = content[0]
+        index = content[1].find("oil")
+        volume_info = content[1][index:].split()
+        fluid = volume_info[0]
+        volume = float(volume_info[1])
+        unit = volume_info[2]   
+         
+        if volume > limit:
+            color = item["color"]
+            positions = item["positions"]
+            polyline_data = {
+                "type": "polyline",
+                "color": color,
+                "positions": positions,
+                "tooltip": tooltip,
+            }
+            filtered_data.append(polyline_data)
+      
+    label = "Producers - filtered (" + str(int(limit)) + unit + ")"
+                   
+    return {"name": label, "checked": False, "base_layer": False, "data": filtered_data}
+
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 def make_new_well_layer(
     interval,
     wells_df,
     metadata_df,
-    interval_df,
     colors=None,
     selection=None,
     label="Drilled wells",
 ):
     """Make layeredmap wells layer"""
     data = []
-    if not colors:
+    if colors is None:
         color = "black"
 
     wellbores = wells_df["WELLBORE_NAME"].values
@@ -228,6 +298,7 @@ def make_new_well_layer(
     for wellbore in unique_wellbores:
         # print('wellbore ',wellbore)
         md_start = 0
+        md_end = None
         fluid = ""
         info = ""
         short_name = wellbore
@@ -289,6 +360,7 @@ def make_new_well_layer(
                         fluid,
                         info,
                         md_start,
+                        md_end,
                         selection,
                         colors,
                     )
@@ -301,6 +373,7 @@ def make_new_well_layer(
                 fluid,
                 info,
                 md_start,
+                md_end,
                 selection,
                 colors,
             )
@@ -313,11 +386,13 @@ def make_new_well_layer(
                 fluid,
                 info,
                 md_start,
+                md_end,
                 selection,
                 colors,
             )
 
         if polyline_data:
             data.append(polyline_data)
-    # print(f"Well function {timer()-start}")
+
     return {"name": label, "checked": False, "base_layer": False, "data": data}
+    

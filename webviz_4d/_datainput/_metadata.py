@@ -223,8 +223,14 @@ def get_all_intervals(df, mode):
 
         if interval in all_intervals_list:
             incremental_list.append(interval)
+            
+    sorted_all_list = incremental_list.copy()
+    
+    for interval in all_intervals_list:
+        if interval not in sorted_all_list:
+            sorted_all_list.append(interval)      
 
-    return all_intervals_list, incremental_list
+    return sorted_all_list, incremental_list
 
 
 def get_difference_mode(surfacepath, delimiter):
@@ -266,14 +272,14 @@ def decode_filename(file_path, delimiter):
     if "results" in str(surfacepath):
         map_type = "results"
 
-        number = find_number(surfacepath, "realization")
+        number = common.find_number(surfacepath, "realization")
 
         if number:
             realization = "realization-" + number
             number = None
 
             if realization:
-                number = find_number(surfacepath, "iter")
+                number = common.find_number(surfacepath, "iter")
 
                 if number:
                     ensemble = "iter-" + number
@@ -296,8 +302,8 @@ def decode_filename(file_path, delimiter):
             date2 = str(surfacepath)[ind[1] + 11 : ind[1] + 19]
 
             if common.check_number(date1) and common.check_number(date2):
-                dates[0] = convert_date(date1)
-                dates[1] = convert_date(date2)
+                dates[0] = common.convert_date(date1)
+                dates[1] = common.convert_date(date2)
             else:
                 dates = [None, None]
 

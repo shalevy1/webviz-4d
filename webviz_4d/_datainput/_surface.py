@@ -55,6 +55,17 @@ def make_surface_layer(
 
         if upper_limit is not None and not math.isnan(upper_limit):
             max_val = upper_limit
+                  
+    #Flip color scale if min_val > max_val
+    if min_val and max_val and min_val > max_val:
+        if "r" in color:
+            color = color[:-2]
+        else:
+            color = color + "_r"
+            
+        min_val_orig = min_val
+        min_val = max_val
+        max_val = min_val_orig
 
     if min_val is not None:
         zvalues[(zvalues < min_val) & (ma.getmask(zvalues) == ma.nomask)] = min_val

@@ -155,10 +155,7 @@ class SurfaceViewer4D(WebvizPluginABC):
         #print(map2_defaults)
         #print("Map 3 defaults:")
         #print(map3_defaults)
-
-        self.map_defaults.append(map1_defaults)
-        self.map_defaults.append(map1_defaults)
-
+                
         if map1_defaults is None or map2_defaults is None or map3_defaults is None:
             self.map_defaults = create_map_defaults(
                 self.metadata, default_interval, self.observations, self.simulations
@@ -200,7 +197,6 @@ class SurfaceViewer4D(WebvizPluginABC):
                         self.selected_intervals[0],
                         self.drilled_well_df,
                         self.drilled_well_info,
-                        self.interval_df,
                     )
                 )
 
@@ -209,7 +205,6 @@ class SurfaceViewer4D(WebvizPluginABC):
                         self.selected_intervals[0],
                         self.drilled_well_df,
                         self.drilled_well_info,
-                        self.interval_df,
                         self.colors,
                         selection="reservoir_section",
                         label="Reservoir sections",
@@ -229,7 +224,6 @@ class SurfaceViewer4D(WebvizPluginABC):
                             self.selected_intervals[0],
                             planned_well_df,
                             planned_well_info,
-                            dummy_df,
                             self.colors,
                             selection="planned",
                             label=os.path.basename(folder),
@@ -252,7 +246,10 @@ class SurfaceViewer4D(WebvizPluginABC):
 
     @property
     def ensembles(self):
-        return get_col_values(self.metadata, "fmu_id.iteration")
+        try:
+            return get_col_values(self.metadata, "fmu_id.ensemble")
+        except:
+            return get_col_values(self.metadata, "fmu_id.iteration")    
 
     def realizations(self, ensemble):
         sorted_realizations = sort_realizations(
