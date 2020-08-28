@@ -383,7 +383,6 @@ def get_full_path(item):
     full_path = item
 
     directory = os.getcwd()
-    print("get_full_path:",item,directory)
 
     if path[0:3] == "../":
         path = path[3:]
