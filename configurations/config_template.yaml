@@ -14,9 +14,9 @@ shared_settings:
         statistic: [p10, p90, mean, std]
         
     scratch_ensembles:
-        sens_run: /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-*/iter-0
-        iter-0: /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-*/iter-0
-        pred: /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-*/pred
+        sens_run: /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-*/iter-0
+        iter-0: /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-*/iter-0
+        #pred: /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-*/pred
    
     
 pages:  
@@ -81,7 +81,7 @@ pages:
           
           settings:  ./settings_template.yaml          
             
-  - title: Well overview 
+  - title: Wellbore overview 
     content:
       - DataTable:
           csv_file: ../grane/well_data/wellbore_overview.csv
@@ -131,21 +131,21 @@ pages:
                  Injected_Gas_[kSm3]: '#fa0000'
                  Injected_Water_[Sm3]: '#0000fa'                                              
           
-  - title: Oil production volumes 
+  - title: Oil production volumes [Sm3]
     content:
       - DataTable:
           csv_file: ../grane/production_data/BORE_OIL_VOL.csv  
           sorting: True
           filtering: True   
           
-  - title: Gas production volumes 
+  - title: Gas production volumes [kSm3]
     content:
       - DataTable:
           csv_file: ../grane/production_data/BORE_GAS_VOL.csv  
           sorting: True
           filtering: True       
           
-  - title: Water production volumes 
+  - title: Water production volumes [Sm3]
     content:
       - DataTable:
           csv_file: ../grane/production_data/BORE_WAT_VOL.csv  
@@ -170,12 +170,12 @@ pages:
     content:
       - SurfaceWithSeismicCrossSection:
           segyfiles:
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20050701_19930101.segy
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20070701_20050701.segy
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20050701_19930101.segy
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20070701_20050701.segy
           surfacefiles:
-            - /project/grane/resmod/hstruct/2019/r002/share/results/maps/topbalder--depthsurface.gri
-            - /project/grane/resmod/hstruct/2019/r002/share/results/maps/toplowerheimdal--depthsurface.gri
-            - /project/grane/resmod/hstruct/2019/r002/share/results/maps/toplowerlista--depthsurface.gri
+            - /project/grane/resmod/hstruct/2019/r003/share/results/maps/topbalder--depthsurface.gri
+            - /project/grane/resmod/hstruct/2019/r003/share/results/maps/toplowerheimdal--depthsurface.gri
+            - /project/grane/resmod/hstruct/2019/r003/share/results/maps/toplowerlista--depthsurface.gri
 
           surfacenames:
             - Top Balder
@@ -186,12 +186,12 @@ pages:
     content:
       - SegyViewer:
           segyfiles:
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20050701_19930101.segy     
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20070701_20050701.segy      
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20090701_20070701.segy      
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20110702_20090701.segy      
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20130702_19930101.segy      
-            - /scratch/ert-grane/Petek2019/gra19_r002_One2One_320real_PredReal0/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20130702_20110702.segy      
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20050701_19930101.segy     
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20070701_20050701.segy      
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20090701_20070701.segy      
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20110702_20090701.segy      
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20130702_19930101.segy      
+            - /scratch/ert-grane/Petek2019/gra19_r003_dm/realization-0/iter-0/share/observations/seismic/seismic--4d_ai_depth--20130702_20110702.segy      
                                  
                      
   - title: Documentation
