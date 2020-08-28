@@ -171,6 +171,8 @@ def main():
             print("ERROR: Well directory", export_dir, "not found")
             sys.exit()
 
+    wellbores = sorted(wrappers.Field(field).get_wellbore_names())
+    
     # Remove existing wells (not planned wells) and all metadata
     if os.path.isdir(export_dir):
         files = glob.glob(export_dir + "*.w")
@@ -183,7 +185,6 @@ def main():
         for file_object in files:
             os.remove(file_object)
 
-    wellbores = sorted(wrappers.Field(field).get_wellbore_names())
 
     i = 1
     for wellbore in wellbores:
