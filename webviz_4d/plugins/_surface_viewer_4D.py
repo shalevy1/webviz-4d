@@ -679,6 +679,27 @@ class SurfaceViewer4D(WebvizPluginABC):
                     )
                     interval_layer = pickle.load(open(interval_file, "rb"))
                     surface_layers.append(interval_layer)
+                    
+                    #filtered_well_layer = filter_well_layer(interval_layer,84)
+                    #surface_layers.append(filtered_well_layer)
+                    
+                    prod_start_file = os.path.join(
+                        self.wellfolder,
+                        "production_start_well_layer_"
+                        + self.selected_intervals[map_idx]
+                        + ".pkl",
+                    )
+                    prod_start_layer = pickle.load(open(prod_start_file, "rb"))
+                    surface_layers.append(prod_start_layer)
+                    
+                    prod_completed_file = os.path.join(
+                        self.wellfolder,
+                        "production_completed_well_layer_"
+                        + self.selected_intervals[map_idx]
+                        + ".pkl",
+                    )
+                    prod_completed_layer = pickle.load(open(prod_completed_file, "rb"))
+                    surface_layers.append(prod_completed_layer)
 
                     interval_file = os.path.join(
                         self.wellfolder,
@@ -689,6 +710,24 @@ class SurfaceViewer4D(WebvizPluginABC):
                     interval_layer = pickle.load(open(interval_file, "rb"))
                     surface_layers.append(interval_layer)
                     
+                    inject_start_file = os.path.join(
+                        self.wellfolder,
+                        "injection_start_well_layer_"
+                        + self.selected_intervals[map_idx]
+                        + ".pkl",
+                    )
+                    inject_start_layer = pickle.load(open(inject_start_file, "rb"))
+                    surface_layers.append(inject_start_layer)
+                    
+                    inject_completed_file = os.path.join(
+                        self.wellfolder,
+                        "injection_completed_well_layer_"
+                        + self.selected_intervals[map_idx]
+                        + ".pkl",
+                    )
+                    inject_completed_layer = pickle.load(open(inject_completed_file, "rb"))
+                    surface_layers.append(inject_completed_layer)
+                    
                     search_txt = os.path.join(
                         self.wellfolder,
                         "active_well_layer_*")   
@@ -696,8 +735,11 @@ class SurfaceViewer4D(WebvizPluginABC):
                     active_file = search[0]   
                     active_layer = pickle.load(open(active_file, "rb"))
                     surface_layers.append(active_layer)
-                except:
-                    print("WARNING: Something went wrong when looking for production/injection well lists")
+                except Exception as e:
+                    if hasattr(e, 'message'):
+                        print(e.message)
+                    else:
+                        print(e)
 
             self.selected_names[map_idx] = data["name"]
             self.selected_attributes[map_idx] = data["attr"]
