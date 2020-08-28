@@ -3,7 +3,7 @@
 
 if [ "$#" -ne 4 ]; then
     echo "Field name and/or configuration file is missing"
-    echo "Example: ./update_webviz-4d_project -f 'Johan Sverdrup' -c 'configurations/js_test_eli_v2.yaml'"
+    echo "Example: ./update_webviz-4d_project -f 'Johan Sverdrup' -c 'configurations/config_template.yaml'"
     echo "Execution stopped"
     exit
 fi
@@ -42,6 +42,10 @@ echo ""
 
 echo "Create production tables" 
 python data_preparation/create_production_tables.py "$config" >> "$field_name"_update_webviz-4d.txt
+echo ""
+
+echo "Create well overview"
+python data_preparation/create_well_overview.py "$config" > "$field_name"_update_webviz-4d.txt
 echo ""
 
 echo "Create well lists"
